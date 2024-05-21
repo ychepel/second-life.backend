@@ -7,7 +7,7 @@
     <changeSet id="create_table_offer" author="rslan">
         <createTable tableName="offer">
 
-            <column name="id" type="uuid" autoIncrement="true">
+            <column name="id" type="uuid" >
                 <constraints primaryKey="true" nullable="false"/>
             </column>
 
