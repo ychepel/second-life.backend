@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+
+    <changeSet id="add_status" author="rslan">
+
+        <insert tableName="status">
+            <column name="name" value="DRAFT"/>
+        </insert>
+
+        <insert tableName="status">
+            <column name="name" value="VERIFICATION"/>
+        </insert>
+
+        <insert tableName="status">
+            <column name="name" value="BLOCKED_BY_ADMIN"/>
+        </insert>
+
+        <insert tableName="status">
+            <column name="name" value="AUCTION_STARTED"/>
+        </insert>
+
+        <insert tableName="status">
+            <column name="name" value="AUCTION_FINISHED"/>
+        </insert>
+
+        <insert tableName="status">
+            <column name="name" value="QUALIFIERS"/>
+        </insert>
+
+        <insert tableName="status">
+            <column name="name" value="CHOOSE_WINNER"/>
+        </insert>
+
+        <insert tableName="status">
+            <column name="name" value="COMPLETED"/>
+        </insert>
+
+    </changeSet>
+
+</databaseChangeLog>
