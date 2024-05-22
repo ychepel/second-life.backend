@@ -16,7 +16,7 @@ import java.util.UUID;
 @Builder
 public class Offer {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id")
     private UUID id;
 

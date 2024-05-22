@@ -21,7 +21,7 @@ public class OfferStatusHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private UUID id;
+    private Long id;
 
     @Column(name="created_at")
     @NotNull(message="Created at cannot be null" )
