@@ -1,6 +1,7 @@
 package de.ait.secondlife.services.interfaces;
 
 import de.ait.secondlife.dto.CategoryDto;
+import de.ait.secondlife.dto.IsActiveCategoryDto;
 
 import java.util.List;
 
@@ -12,5 +13,7 @@ public interface CategoryService {
 
     CategoryDto save(CategoryDto category);
 
-    void update(Long id, CategoryDto category);
+    CategoryDto update(Long id, CategoryDto category);
+    CategoryDto update(Long id, IsActiveCategoryDto category);
+
 }
