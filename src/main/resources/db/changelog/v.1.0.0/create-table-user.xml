@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <changeSet id="create_table_user" author="ychepel">
+        <createTable tableName="user">
+
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="first_name" type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="last_name" type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="email" type="varchar(100)">
+                <constraints nullable="true" unique="true"/>
+            </column>
+
+            <column name="password" type="char(60)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="is_active" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created_at" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="updated_at" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="location_id" type="bigint"/>
+
+            <column name="last_active" type="datetime"/>
+
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>
