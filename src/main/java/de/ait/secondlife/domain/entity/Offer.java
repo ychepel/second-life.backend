@@ -65,7 +65,7 @@ public class Offer {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
-    @NotNull(message="Offer category cannot be null" )
+//    @NotNull(message="Offer category cannot be null" )
     private Category category;
 
     @OneToOne(fetch = FetchType.LAZY)

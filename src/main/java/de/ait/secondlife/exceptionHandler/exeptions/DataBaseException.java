@@ -1,4 +1,4 @@
-package de.ait.secondlife.exception.exeptions;
+package de.ait.secondlife.exceptionHandler.exeptions;
 
 public class DataBaseException extends RuntimeException{
     public DataBaseException(String message) {

@@ -1,4 +1,4 @@
-package de.ait.secondlife.exception.exeptions;
+package de.ait.secondlife.exceptionHandler.exeptions;
 
 import java.util.UUID;
 

@@ -1,6 +1,7 @@
 package de.ait.secondlife.repository;
 
 import de.ait.secondlife.domain.entity.Offer;
+import de.ait.secondlife.domain.entity.Status;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,10 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface OfferRepository extends JpaRepository<Offer, UUID> {
+public interface StatusRepository extends JpaRepository<Status, Long> {
 
-
-    Page<Offer> findAllByIsActiveTrue(Pageable pageable);
-
-    Optional<Offer> findByIdAndIsActiveTrue(UUID offerId);
+    Optional<Status> findByName(String name);
 }
