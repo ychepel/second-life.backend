@@ -1,6 +1,6 @@
 package de.ait.secondlife.security.services;
 
-import de.ait.secondlife.models.AuthenticatedUser;
+import de.ait.secondlife.domain.interfaces.AuthenticatedUser;
 import de.ait.secondlife.security.dto.AuthDto;
 import de.ait.secondlife.security.dto.TokenResponseDto;
 import de.ait.secondlife.security.Role;

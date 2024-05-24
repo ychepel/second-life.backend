@@ -1,4 +1,4 @@
-package de.ait.secondlife.models;
+package de.ait.secondlife.domain.interfaces;
 
 import org.springframework.security.core.userdetails.UserDetails;
 

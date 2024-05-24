@@ -1,6 +1,6 @@
 package de.ait.secondlife.services;
 
-import de.ait.secondlife.models.Admin;
+import de.ait.secondlife.domain.entity.Admin;
 import de.ait.secondlife.repositories.AdminRepository;
 import de.ait.secondlife.services.interfaces.AdminService;
 import lombok.RequiredArgsConstructor;

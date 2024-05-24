@@ -1,5 +1,6 @@
-package de.ait.secondlife.models;
+package de.ait.secondlife.domain.entity;
 
+import de.ait.secondlife.domain.interfaces.AuthenticatedUser;
 import de.ait.secondlife.security.Role;
 import jakarta.persistence.*;
 import lombok.Data;

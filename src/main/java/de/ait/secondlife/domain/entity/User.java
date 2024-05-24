@@ -1,7 +1,12 @@
-package de.ait.secondlife.models;
+package de.ait.secondlife.domain.entity;
 
+import de.ait.secondlife.domain.interfaces.AuthenticatedUser;
 import de.ait.secondlife.security.Role;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
@@ -20,8 +25,19 @@ public class User implements AuthenticatedUser {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "First Name cannot be empty")
     private String firstName;
+
+    @NotBlank(message = "Last Name cannot be empty")
     private String lastName;
+
+    @Email(
+            message = "Email is not valid",
+            regexp = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$",
+            flags = Pattern.Flag.CASE_INSENSITIVE
+    )
+    @NotBlank(message = "Email cannot be empty")
+    @Schema(description = "Email of the user, must be unique")
     private String email;
     private String password;
     private boolean isActive;
