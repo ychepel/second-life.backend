@@ -10,13 +10,15 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/v1/user")
+@RequestMapping("/v1/users")
 @AllArgsConstructor
 @Tag(name = "User controller", description = "Handles user registration requests")
 public class UserController {
@@ -30,17 +32,18 @@ public class UserController {
     )
     @ApiResponses(value = {
             @ApiResponse(
-                    responseCode = "200",
+                    responseCode = "201",
                     description = "User created",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = UserDto.class))}
             ),
             @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content),
             @ApiResponse(responseCode = "409", description = "Email already exists", content = @Content)}
     )
-    public UserDto register(
+    public ResponseEntity<UserDto> register(
             @RequestBody
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "User DTO to register")
             NewUserDto newUserDto) {
-        return userService.register(newUserDto);
+        UserDto userDto = userService.register(newUserDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(userDto);
     }
 }

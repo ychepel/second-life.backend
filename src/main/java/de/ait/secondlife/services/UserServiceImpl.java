@@ -30,7 +30,7 @@ public class UserServiceImpl implements UserService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = repository.findByEmail(username);
         if (user == null) {
-            throw new RuntimeException("User not found");
+            throw new UsernameNotFoundException("User not found");
         }
         return user;
     }

@@ -43,7 +43,7 @@ public class SecurityConfig {
                                 "/v1/auth/user/access"
                         ).permitAll()
                         .requestMatchers(HttpMethod.GET, "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/v1/user/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/v1/users/register").permitAll()
                         .anyRequest().denyAll())
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .addFilterAfter(filter, UsernamePasswordAuthenticationFilter.class)
