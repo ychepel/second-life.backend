@@ -7,14 +7,15 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
 @Builder
-@Schema(description = "Offer update DTO")
-public class OfferUpdateDto {
+@Schema(description = "Offer response DTO")
+public class OfferResponseDto {
     @Schema(description = "Offer id "
             , example = "898449f7-e9d1-4d00-9fd6-cae203452f3a",
             accessMode = Schema.AccessMode.READ_ONLY)
@@ -28,8 +29,8 @@ public class OfferUpdateDto {
                     "blossoms, bringing a smile to everyone's face. Whiskers " +
                     "became the beloved guardian of the magical garden.\n")
     private String description;
-    @Schema(description = "Auction duration in days", example = "3")
-    private Integer auctionDurationDays;
+    @Schema(description = "Date and time of the end of the auction", example = "2024-05-30T17:11:18.149566")
+    private LocalDateTime endAt;
     @Schema(description = "Starting offer price", example = "1234.34")
     private BigDecimal startPrice;
     @Schema(description = "Bidding step", example = "12.34")
@@ -38,10 +39,13 @@ public class OfferUpdateDto {
     private BigDecimal winBid;
     @Schema(description = "Offer is free or not", example = "true")
     private Boolean isFree;
+    @Schema(description = "User id of the owner of the offer", example = "34")
+    private Long ownerId;
+    @Schema(description = "Status id", example = "26")
+    private Long statusId;
     @Schema(description = "Category id", example = "22")
     private Long categoryId;
+    @Schema(description = "Winner bid  id", example = "898449f7-e9d1-4d00-9fd6-cae203452f3a")
+    private  UUID winnerBidId;
+
 }
-
-
-
-

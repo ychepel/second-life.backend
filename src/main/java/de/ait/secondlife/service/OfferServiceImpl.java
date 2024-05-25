@@ -1,8 +1,8 @@
 package de.ait.secondlife.service;
 
 import de.ait.secondlife.domain.dto.OfferCreationDto;
-import de.ait.secondlife.domain.dto.OfferRequestDto;
-import de.ait.secondlife.domain.dto.OfferRequestWithPaginationDto;
+import de.ait.secondlife.domain.dto.OfferResponseDto;
+import de.ait.secondlife.domain.dto.OfferResponseWithPaginationDto;
 import de.ait.secondlife.domain.dto.OfferUpdateDto;
 import de.ait.secondlife.domain.entity.Offer;
 import de.ait.secondlife.exceptionHandler.exeptions.*;
@@ -12,9 +12,7 @@ import de.ait.secondlife.service.interfaces.StatusSevice;
 import de.ait.secondlife.service.mapper.OfferMappingService;
 import de.ait.secondlife.service.validator.EntityValidator;
 import jakarta.transaction.Transactional;
-import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
-import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -41,7 +39,7 @@ public class OfferServiceImpl implements OfferService {
 
 
     @Override
-    public OfferRequestWithPaginationDto findOffers(Pageable pageable) {
+    public OfferResponseWithPaginationDto findOffers(Pageable pageable) {
         if (pageable == null) throw new PageableIsNullException();
 
         Page<Offer> pageOfOffer = offerRepository.findAllByIsActiveTrue(pageable);
@@ -51,7 +49,7 @@ public class OfferServiceImpl implements OfferService {
 
 
     @Override
-    public OfferRequestDto findOfferById(UUID id) {
+    public OfferResponseDto findOfferById(UUID id) {
         if (id == null) throw new IdIsNullException();
 
         Offer offer = offerRepository.findById(id)
@@ -65,7 +63,7 @@ public class OfferServiceImpl implements OfferService {
     }
 
     @Override
-    public OfferRequestWithPaginationDto findOffersByUserId(Long id, Pageable pageable) {
+    public OfferResponseWithPaginationDto findOffersByUserId(Long id, Pageable pageable) {
         if (id == null) throw new IdIsNullException();
         Page<Offer> pageOfOffer = offerRepository.findByUserIdAndIsActiveTrue(id, pageable);
 
@@ -74,7 +72,7 @@ public class OfferServiceImpl implements OfferService {
 
 
     @Override
-    public OfferRequestDto createOffer(OfferCreationDto dto) {
+    public OfferResponseDto createOffer(OfferCreationDto dto) {
 
         if (dto == null) throw new OfferCreationDtoIsNullException();
 
@@ -184,10 +182,10 @@ public class OfferServiceImpl implements OfferService {
 
     }
 
-    private OfferRequestWithPaginationDto offersToOfferRequestWithPaginationDto(Page<Offer> pageOfOffer) {
+    private OfferResponseWithPaginationDto offersToOfferRequestWithPaginationDto(Page<Offer> pageOfOffer) {
         if (pageOfOffer.isEmpty()) throw new OffersNotFoundException();
 
-        Set<OfferRequestDto> offers;
+        Set<OfferResponseDto> offers;
         try {
             offers = pageOfOffer.stream()
                     .map(mappingService::toRequestDto)
@@ -196,7 +194,7 @@ public class OfferServiceImpl implements OfferService {
             throw new MappingException(e.getMessage());
         }
 
-        return OfferRequestWithPaginationDto.builder()
+        return OfferResponseWithPaginationDto.builder()
                 .offers(offers)
                 .pageNumber(pageOfOffer.getNumber())
                 .pageSize(pageOfOffer.getSize())

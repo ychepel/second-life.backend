@@ -1,14 +1,17 @@
 package de.ait.secondlife.controller;
 
 
-import de.ait.secondlife.domain.Response;
+import de.ait.secondlife.domain.dto.ResponseMessageDto;
 import de.ait.secondlife.domain.dto.OfferCreationDto;
-import de.ait.secondlife.domain.dto.OfferRequestDto;
-import de.ait.secondlife.domain.dto.OfferRequestWithPaginationDto;
+import de.ait.secondlife.domain.dto.OfferResponseDto;
+import de.ait.secondlife.domain.dto.OfferResponseWithPaginationDto;
 import de.ait.secondlife.domain.dto.OfferUpdateDto;
 import de.ait.secondlife.exceptionHandler.OfferExceptionHandler;
 import de.ait.secondlife.exceptionHandler.exeptions.PaginationParameterIsWrongException;
 import de.ait.secondlife.service.interfaces.OfferService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,15 +24,27 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/offer")
 @RequiredArgsConstructor
+@Tag(name = "Offer controller", description = "Controller for some operations with available offer")
 public class OfferController implements OfferExceptionHandler {
 
     private final OfferService service;
 
     @GetMapping("/all")
-    public ResponseEntity<OfferRequestWithPaginationDto> getAll(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "createdAt") String sortBy) {
+    @Operation(
+            summary = "Get all offer ",
+            description = "Receiving all offer available in the database with pagination"
+    )
+    public ResponseEntity<OfferResponseWithPaginationDto> getAll(
+            @RequestParam(defaultValue = "0")
+            @Parameter(description = "Requested page number. ", example = "0")
+            int page,
+            @RequestParam(defaultValue = "10")
+            @Parameter(description = "Number of entities per page. ", example = "0")
+            int size,
+            @RequestParam(defaultValue = "createdAt")
+            @Parameter(description = "Scoring field. ", example = "createdAt")
+            String sortBy) {
+
         Pageable pageable;
         try {
             pageable = PageRequest.of(page, size, Sort.by(sortBy).ascending());
@@ -41,51 +56,102 @@ public class OfferController implements OfferExceptionHandler {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<OfferRequestDto> getById(@PathVariable UUID id) {
+    @Operation(
+            summary = "Get  offer by id",
+            description = "Receiving  offer by id available in the database "
+    )
+    public ResponseEntity<OfferResponseDto> getById(
+            @PathVariable
+            @Parameter(description = "Offer id in UUID format.", example = "898449f7-e9d1-4d00-9fd6-cae203452f3a")
+            UUID id) {
 
         return ResponseEntity.ok(service.findOfferById(id));
     }
 
+
     @GetMapping("/user/{id}")
-    public ResponseEntity<OfferRequestWithPaginationDto> getByUserId(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "createdAt") String sortBy,
-            @PathVariable Long id) {
+    @Operation(
+            summary = "Get all offer by user id",
+            description = "Receiving  all offer by user id available in the database with pagination"
+    )
+    public ResponseEntity<OfferResponseWithPaginationDto> getByUserId(
+            @RequestParam(defaultValue = "0")
+            @Parameter(description = "Requested page number. ", example = "0")
+            int page,
+            @RequestParam(defaultValue = "10")
+            @Parameter(description = "Number of entities per page. ", example = "0")
+            int size,
+            @RequestParam(defaultValue = "createdAt")
+            @Parameter(description = "Scoring field. ", example = "createdAt")
+            String sortBy,
+            @PathVariable
+            @Parameter(description = "User id in Long format. ", example = "2321")
+            Long id) {
+
         Pageable pageable;
         try {
             pageable = PageRequest.of(page, size, Sort.by(sortBy).ascending());
         } catch (IllegalArgumentException e) {
             throw new PaginationParameterIsWrongException(page, size, sortBy);
         }
-        return ResponseEntity.ok(service.findOffersByUserId(id,pageable));
+        return ResponseEntity.ok(service.findOffersByUserId(id, pageable));
     }
 
+
     @PostMapping
-    public ResponseEntity<OfferRequestDto> create(@RequestBody OfferCreationDto dto) {
+    @Operation(
+            summary = "Create new offer",
+            description = "Creating a new offer and saving it in the database"
+    )
+    public ResponseEntity<OfferResponseDto> create(
+            @RequestBody
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Offer create DTO ")
+            OfferCreationDto dto) {
 
         return ResponseEntity.ok(service.createOffer(dto));
     }
 
+
     @PutMapping
-    public ResponseEntity<Response> update(@RequestBody OfferUpdateDto dto) {
+    @Operation(
+            summary = "Update  offer",
+            description = "Updating the existing offer  and saving it in the database"
+    )
+    public ResponseEntity<ResponseMessageDto> update(
+            @RequestBody
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Offer update DTO ")
+            OfferUpdateDto dto) {
 
         service.updateOffer(dto);
         return ResponseEntity.ok(
-                new Response(String.format("Offer with id <%s> updated successful", dto.getId())));
+                new ResponseMessageDto(String.format("Offer with id <%s> updated successful", dto.getId())));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Response> remove(@PathVariable UUID id) {
+    @Operation(
+            summary = "Deactivate offer by id",
+            description = "Deactivating  the existing offer  by id. This offer won't be available when searching the database"
+    )
+    public ResponseEntity<ResponseMessageDto> remove(
+            @PathVariable
+            @Parameter(description = "Offer id in UUID format.", example = "898449f7-e9d1-4d00-9fd6-cae203452f3a")
+            UUID id) {
         service.removeOffer(id);
         return ResponseEntity.ok(
-                new Response(String.format("Offer with id <%s> removed successful", id)));
+                new ResponseMessageDto(String.format("Offer with id <%s> removed successful", id)));
     }
 
     @PutMapping("/recover/{id}")
-    public ResponseEntity<Response> recover(@PathVariable UUID id) {
+    @Operation(
+            summary = "Activate offer by id",
+            description = "Activating  the existing offer  by id. This offer will be available when searching the database"
+    )
+    public ResponseEntity<ResponseMessageDto> recover(
+            @PathVariable
+            @Parameter(description = "Offer id in UUID format.", example = "898449f7-e9d1-4d00-9fd6-cae203452f3a")
+            UUID id) {
         service.recoverOffer(id);
         return ResponseEntity.ok(
-                new Response(String.format("Offer with id <%s> recovered successful", id)));
+                new ResponseMessageDto(String.format("Offer with id <%s> recovered successful", id)));
     }
 }

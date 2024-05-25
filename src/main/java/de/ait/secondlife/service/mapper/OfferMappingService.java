@@ -1,7 +1,7 @@
 package de.ait.secondlife.service.mapper;
 
 import de.ait.secondlife.domain.dto.OfferCreationDto;
-import de.ait.secondlife.domain.dto.OfferRequestDto;
+import de.ait.secondlife.domain.dto.OfferResponseDto;
 import de.ait.secondlife.domain.entity.Offer;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -14,7 +14,7 @@ public interface OfferMappingService {
     @Mapping(source = "status.id", target = "statusId")
     @Mapping(source = "winnerBid.id", target = "winnerBidId")
     @Mapping(target = "endAt", expression = "java(offer.getCreatedAt().plusDays(offer.getAuctionDurationDays()))")
-    OfferRequestDto toRequestDto(Offer offer);
+    OfferResponseDto toRequestDto(Offer offer);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
