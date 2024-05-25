@@ -10,8 +10,11 @@ import de.ait.secondlife.repository.OfferRepository;
 import de.ait.secondlife.service.interfaces.OfferService;
 import de.ait.secondlife.service.interfaces.StatusSevice;
 import de.ait.secondlife.service.mapper.OfferMappingService;
+import de.ait.secondlife.service.validator.EntityValidator;
 import jakarta.transaction.Transactional;
+import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -20,7 +23,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -35,6 +37,8 @@ public class OfferServiceImpl implements OfferService {
     private final OfferRepository offerRepository;
     private final OfferMappingService mappingService;
     private final StatusSevice statusSevice;
+    private final EntityValidator validator;
+
 
     @Override
     public OfferRequestWithPaginationDto findOffers(Pageable pageable) {
@@ -56,7 +60,7 @@ public class OfferServiceImpl implements OfferService {
         try {
             return mappingService.toRequestDto(offer);
         } catch (Exception e) {
-            throw new MappingException(offer);
+            throw new MappingException(offer, e.getMessage());
         }
     }
 
@@ -79,13 +83,13 @@ public class OfferServiceImpl implements OfferService {
             try {
                 newOffer = mappingService.toOffer(dto);
             } catch (Exception e) {
-                throw new MappingException(dto);
+                throw new MappingException(dto, e.getMessage());
             }
             newOffer.setId(null);
             newOffer.setStatus(statusSevice.getStatusByName(DRAFT_STATUS));
             newOffer.setAuctionDurationDays(newOffer.getAuctionDurationDays() <= 0 ? 3 : newOffer.getAuctionDurationDays());
 
-            if (dto.getIsFree() == null){
+            if (dto.getIsFree() == null) {
                 newOffer.setIsFree(dto.getStartPrice() == null || dto.getStartPrice().compareTo(BigDecimal.ZERO) <= 0);
             }
 
@@ -104,23 +108,21 @@ public class OfferServiceImpl implements OfferService {
                 }
             }
 
+            validator.validateEntity(newOffer);
 
             newOffer = offerRepository.save(newOffer);
             try {
                 return mappingService.toRequestDto(newOffer);
             } catch (Exception e) {
-                throw new MappingException(newOffer);
+                throw new MappingException(newOffer, e.getMessage());
             }
 
         } catch (ConstraintViolationException | DataIntegrityViolationException e) {
             throw new CreateOfferConstraintViolationException("Constraint violation: " + e.getMessage());
-        }
-        catch (WrongAuctionParameterException e) {
-            throw new WrongAuctionParameterException (e.getMessage());
-        }
-
-        catch (Exception e) {
-            throw new DataBaseException("Error when accessing the database : " + e.getMessage());
+        } catch (WrongAuctionParameterException | ValidationException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new DataBaseException("Error when accessing the database : " + e.getClass() + "  " + e.getMessage());
         }
 
     }
@@ -156,7 +158,10 @@ public class OfferServiceImpl implements OfferService {
                     offer.getWinBid() : dto.getWinBid());
         }
 
+        validator.validateEntity(offer);
     }
+
+
 
     @Transactional
     @Override
@@ -188,7 +193,7 @@ public class OfferServiceImpl implements OfferService {
                     .map(mappingService::toRequestDto)
                     .collect(Collectors.toSet());
         } catch (Exception e) {
-            throw new MappingException();
+            throw new MappingException(e.getMessage());
         }
 
         return OfferRequestWithPaginationDto.builder()
@@ -201,5 +206,6 @@ public class OfferServiceImpl implements OfferService {
                 .isLastPage(pageOfOffer.isLast())
                 .build();
     }
+
 
 }

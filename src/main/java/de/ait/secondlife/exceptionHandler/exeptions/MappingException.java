@@ -5,18 +5,18 @@ import de.ait.secondlife.domain.entity.Offer;
 
 public class MappingException extends RuntimeException {
 
-    public MappingException(OfferCreationDto dto) {
+    public MappingException(OfferCreationDto dto, String message) {
 
-        super(String.format("Mapping  <%s>  is wrong", dto));
+        super(String.format("Mapping  <%s>  is wrong. %s", dto, message));
     }
 
-    public MappingException(Offer offer) {
+    public MappingException(Offer offer, String message) {
 
-        super(String.format("Mapping  <%s>  is wrong", offer));
+        super(String.format("Mapping  <%s>  is wrong. %s", offer, message));
     }
 
-    public MappingException() {
+    public MappingException(String message) {
 
-        super(String.format("Mapping  is wrong"));
+        super(String.format("Mapping  is wrong. %s", message));
     }
 }

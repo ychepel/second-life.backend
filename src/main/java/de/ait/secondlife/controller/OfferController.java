@@ -6,6 +6,7 @@ import de.ait.secondlife.domain.dto.OfferCreationDto;
 import de.ait.secondlife.domain.dto.OfferRequestDto;
 import de.ait.secondlife.domain.dto.OfferRequestWithPaginationDto;
 import de.ait.secondlife.domain.dto.OfferUpdateDto;
+import de.ait.secondlife.exceptionHandler.OfferExceptionHandler;
 import de.ait.secondlife.exceptionHandler.exeptions.PaginationParameterIsWrongException;
 import de.ait.secondlife.service.interfaces.OfferService;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +21,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/offer")
 @RequiredArgsConstructor
-public class OfferController {
+public class OfferController implements OfferExceptionHandler {
 
     private final OfferService service;
 
