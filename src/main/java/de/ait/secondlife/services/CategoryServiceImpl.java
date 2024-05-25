@@ -19,8 +19,6 @@ public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryMappingService mappingService;
 
-
-
     @Override
     public CategoryDto getById(Long id) {
 
@@ -68,14 +66,12 @@ public class CategoryServiceImpl implements CategoryService {
         existingCategory.setName(dto.getName());
         existingCategory.setDescription(dto.getDescription());
 
-
         try {
             return mappingService.mapEntityToDto(repository.save(existingCategory));
         }catch (Exception e){
             throw new RuntimeException("Cannot save category to db");
         }
     }
-
 
     @Override
     public CategoryDto update(Long id, IsActiveCategoryDto dto) {
@@ -84,15 +80,10 @@ public class CategoryServiceImpl implements CategoryService {
 
         existingCategory.setActive(dto.isActive());
 
-
         try {
             return mappingService.mapEntityToDto(repository.save(existingCategory));
         }catch (Exception e){
             throw new RuntimeException("Cannot save category to db ", e);
         }
     }
-
-
-
-
 }

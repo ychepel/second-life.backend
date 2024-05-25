@@ -7,10 +7,7 @@ import org.mapstruct.Mapper;
 @Mapper
 public interface CategoryMappingService {
 
-
     CategoryDto mapEntityToDto(Category entity);
 
-
-    //    @Mapping(target = "id", ignore = true)
     Category mapDtoToEntity(CategoryDto dto);
 }

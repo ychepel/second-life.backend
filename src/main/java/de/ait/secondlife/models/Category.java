@@ -1,5 +1,6 @@
 package de.ait.secondlife.models;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -28,7 +29,7 @@ public class Category {
     private String description;
 
     @Column(name = "is_active",nullable = false)
-    private boolean isActive;
+    private boolean active;
 
 
 }
