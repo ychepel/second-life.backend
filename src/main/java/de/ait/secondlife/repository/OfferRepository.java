@@ -15,4 +15,6 @@ public interface OfferRepository extends JpaRepository<Offer, UUID> {
     Page<Offer> findAllByIsActiveTrue(Pageable pageable);
 
     Optional<Offer> findByIdAndIsActiveTrue(UUID offerId);
+
+    Page<Offer> findByUserIdAndIsActiveTrue(Long id, Pageable pageable);
 }

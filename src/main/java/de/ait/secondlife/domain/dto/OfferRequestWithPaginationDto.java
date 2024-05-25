@@ -6,13 +6,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Set;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
 @Builder
 public class OfferRequestWithPaginationDto {
-    private List<OfferRequestDto> offers;
+    private Set<OfferRequestDto> offers;
     private int pageNumber;
     private int pageSize;
     public int totalPages;

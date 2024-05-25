@@ -17,6 +17,8 @@ OfferRequestWithPaginationDto findOffers(Pageable pageable);
 
 OfferRequestDto findOfferById(UUID id);
 
+OfferRequestWithPaginationDto findOffersByUserId(Long id,Pageable pageable);
+
 void updateOffer(OfferUpdateDto dto);
 
 void removeOffer(UUID id);

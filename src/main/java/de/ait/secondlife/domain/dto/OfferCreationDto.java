@@ -1,7 +1,7 @@
 package de.ait.secondlife.domain.dto;
 
 import de.ait.secondlife.domain.entity.Bid;
-import de.ait.secondlife.domain.entity.Category;
+
 import de.ait.secondlife.domain.entity.Status;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;

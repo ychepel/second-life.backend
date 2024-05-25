@@ -18,7 +18,7 @@ public class OfferRequestDto {
     private UUID id;
     private String title;
     private String description;
-    private LocalDateTime endsAt;
+    private LocalDateTime endAt;
     private BigDecimal startPrice;
     private BigDecimal step;
     private BigDecimal winBid;

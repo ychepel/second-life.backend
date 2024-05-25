@@ -7,21 +7,19 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 
-
 @Mapper(componentModel = "spring")
 public interface OfferMappingService {
 
     @Mapping(source = "userId", target = "ownerId")
     @Mapping(source = "status.id", target = "statusId")
-    @Mapping(source = "category.id", target = "categoryId")
     @Mapping(source = "winnerBid.id", target = "winnerBidId")
+    @Mapping(target = "endAt", expression = "java(offer.getCreatedAt().plusDays(offer.getAuctionDurationDays()))")
     OfferRequestDto toRequestDto(Offer offer);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
+    @Mapping(target = "isActive", constant = "true")
     @Mapping(target = "status", ignore = true)
-    @Mapping(target = "category", ignore = true)
-    @Mapping(target = "winnerBid", ignore = true)
     Offer toOffer(OfferCreationDto dto);
 
 }
