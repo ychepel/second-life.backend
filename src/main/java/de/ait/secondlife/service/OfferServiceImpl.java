@@ -52,7 +52,7 @@ public class OfferServiceImpl implements OfferService {
     public OfferResponseDto findOfferById(UUID id) {
         if (id == null) throw new IdIsNullException();
 
-        Offer offer = offerRepository.findById(id)
+        Offer offer = offerRepository.findByIdAndIsActiveTrue(id)
                 .orElseThrow(() -> new OfferNotFoundException(id));
 
         try {
