@@ -34,12 +34,13 @@ class AuthIntegrationTest {
     public void createUser() throws Exception {
         mockMvc.perform(post("/v1/users/register")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\n" +
-                                "  \"firstName\": \"TestUserFirstName\",\n" +
-                                "  \"lastName\": \"TestUserLastName\",\n" +
-                                "  \"email\": \"test.user@test.com\",\n" +
-                                "  \"password\": \"qwerty-123\"\n" +
-                                "}"))
+                        .content("""
+                                {
+                                  "firstName": "TestUserFirstName",
+                                  "lastName": "TestUserLastName",
+                                  "email": "test.user@test.com",
+                                  "password": "qwerty!123"
+                                }"""))
                 .andExpect(status().isCreated());
     }
 
@@ -47,10 +48,11 @@ class AuthIntegrationTest {
     public void return_user_tokens_after_user_login() throws Exception {
         MvcResult result = mockMvc.perform(post("/v1/auth/user/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\n" +
-                                "  \"email\": \"test.user@test.com\",\n" +
-                                "  \"password\": \"qwerty-123\"\n" +
-                                "}"))
+                        .content("""
+                                {
+                                  "email": "test.user@test.com",
+                                  "password": "qwerty!123"
+                                }"""))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -65,10 +67,11 @@ class AuthIntegrationTest {
     public void return_admin_tokens_after_user_login() throws Exception {
         MvcResult result = mockMvc.perform(post("/v1/auth/admin/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\n" +
-                                "  \"email\": \"admin@email.com\",\n" +
-                                "  \"password\": \"security\"\n" +
-                                "}"))
+                        .content("""
+                                {
+                                  "email": "admin@email.com",
+                                  "password": "Security!234"
+                                }"""))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -83,9 +86,10 @@ class AuthIntegrationTest {
     public void return_400_for_missing_user_email() throws Exception {
         mockMvc.perform(post("/v1/auth/user/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\n" +
-                                "  \"password\": \"qwerty-123\"\n" +
-                                "}"))
+                        .content("""
+                                {
+                                  "password": "qwerty!123"
+                                }"""))
                 .andExpect(status().isBadRequest());
     }
 
@@ -93,10 +97,11 @@ class AuthIntegrationTest {
     public void return_400_for_non_existent_user_email() throws Exception {
         mockMvc.perform(post("/v1/auth/user/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\n" +
-                                "  \"email\": \"usertest@test.com\",\n" +
-                                "  \"password\": \"qwerty-123\"\n" +
-                                "}"))
+                        .content("""
+                                {
+                                  "email": "usertest@test.com",
+                                  "password": "qwerty!123"
+                                }"""))
                 .andExpect(status().isBadRequest());
     }
 
@@ -104,10 +109,11 @@ class AuthIntegrationTest {
     public void return_401_for_incorrect_user_password() throws Exception {
         mockMvc.perform(post("/v1/auth/user/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\n" +
-                                "  \"email\": \"test.user@test.com\",\n" +
-                                "  \"password\": \"123\"\n" +
-                                "}"))
+                        .content("""
+                                {
+                                  "email": "test.user@test.com",
+                                  "password": "123"
+                                }"""))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -115,10 +121,11 @@ class AuthIntegrationTest {
     public void return_new_access_token_for_user() throws Exception {
         MvcResult loginResult = mockMvc.perform(post("/v1/auth/user/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\n" +
-                                "  \"email\": \"test.user@test.com\",\n" +
-                                "  \"password\": \"qwerty-123\"\n" +
-                                "}"))
+                        .content("""
+                                {
+                                  "email": "test.user@test.com",
+                                  "password": "qwerty!123"
+                                }"""))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -144,9 +151,10 @@ class AuthIntegrationTest {
     public void return_400_for_refreshing_with_invalid_user_refresh_token() throws Exception {
         mockMvc.perform(post("/v1/auth/user/access")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\n" +
-                                "  \"refreshToken\": \"invalidUserRefreshToken\"\n" +
-                                "}"))
+                        .content("""
+                                {
+                                  "refreshToken": "invalidUserRefreshToken"
+                                }"""))
                 .andExpect(status().isBadRequest());
     }
 
@@ -154,9 +162,10 @@ class AuthIntegrationTest {
     public void return_400_for_refreshing_with_invalid_admin_refresh_token() throws Exception {
         mockMvc.perform(post("/v1/auth/user/access")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\n" +
-                                "  \"refreshToken\": \"invalidAdminRefreshToken\"\n" +
-                                "}"))
+                        .content("""
+                                {
+                                  "refreshToken": "invalidAdminRefreshToken"
+                                }"""))
                 .andExpect(status().isBadRequest());
     }
 
@@ -164,10 +173,11 @@ class AuthIntegrationTest {
     public void remove_access_token_from_cookie_after_user_logout() throws Exception {
         MvcResult loginResult = mockMvc.perform(post("/v1/auth/user/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\n" +
-                                "  \"email\": \"test.user@test.com\",\n" +
-                                "  \"password\": \"qwerty-123\"\n" +
-                                "}"))
+                        .content("""
+                                {
+                                  "email": "test.user@test.com",
+                                  "password": "qwerty!123"
+                                }"""))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -184,10 +194,11 @@ class AuthIntegrationTest {
     public void return_400_for_refreshing_tokens_after_user_logout() throws Exception {
         MvcResult loginResult = mockMvc.perform(post("/v1/auth/user/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\n" +
-                                "  \"email\": \"test.user@test.com\",\n" +
-                                "  \"password\": \"qwerty-123\"\n" +
-                                "}"))
+                        .content("""
+                                {
+                                  "email": "test.user@test.com",
+                                  "password": "qwerty!123"
+                                }"""))
                 .andExpect(status().isOk())
                 .andReturn();
 

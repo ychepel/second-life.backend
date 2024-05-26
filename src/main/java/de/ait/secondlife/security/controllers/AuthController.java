@@ -1,6 +1,5 @@
 package de.ait.secondlife.security.controllers;
 
-import de.ait.secondlife.domain.dto.UserDto;
 import de.ait.secondlife.security.Role;
 import de.ait.secondlife.security.dto.AuthDto;
 import de.ait.secondlife.security.dto.RefreshRequestDto;
@@ -80,6 +79,10 @@ public class AuthController {
 
     @GetMapping("/{roleName}/logout")
     @Operation(summary = "Logout", description = "Logout User/Admin from application")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Logout successfully", content = @Content),
+            @ApiResponse(responseCode = "403", description = "No valid Access token found", content = @Content)}
+    )
     public void logout(
             @Parameter(description = "Role name", schema = @Schema(implementation = Role.class))
             @PathVariable(name = "roleName") Role role,

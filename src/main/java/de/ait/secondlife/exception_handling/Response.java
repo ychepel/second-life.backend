@@ -7,7 +7,7 @@ import lombok.Getter;
 @EqualsAndHashCode
 public class Response {
 
-    private String message;
+    private final String message;
     private String additionalMessage;
 
     public Response(String message) {

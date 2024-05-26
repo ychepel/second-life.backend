@@ -11,7 +11,7 @@
             <column name="first_name" value="Barak"/>
             <column name="last_name" value="Obama"/>
             <column name="email" value="barak.obama@email.com"/>
-            <column name="password" value="$2a$10$wsJU.9fqOk8cH2DNo.SaC.SukDaPsQsiRQP/kdCHGIIgKP.s.Xp4y"/> <!--raw password = "security"-->
+            <column name="password" value="$2a$10$SO45MDLKTVnWamyqgS4pyuNrA9p95/hTMjAtDKk28LVOmj1ctJIP."/> <!--raw password = "Security!234"-->
             <column name="is_active" value="true"/>
             <column name="created_at" value="2024-04-05 14:15:00"/>
             <column name="updated_at" value="2024-04-05 14:15:00"/>
@@ -21,7 +21,7 @@
             <column name="first_name" value="John"/>
             <column name="last_name" value="Smith"/>
             <column name="email" value="john.smith@email.com"/>
-            <column name="password" value="$2a$10$wsJU.9fqOk8cH2DNo.SaC.SukDaPsQsiRQP/kdCHGIIgKP.s.Xp4y"/> <!--raw password = "security"-->
+            <column name="password" value="$2a$10$SO45MDLKTVnWamyqgS4pyuNrA9p95/hTMjAtDKk28LVOmj1ctJIP."/> <!--raw password = "Security!234"-->
             <column name="is_active" value="true"/>
             <column name="created_at" value="2024-05-22 14:15:00"/>
             <column name="updated_at" value="2024-05-22 14:15:00"/>

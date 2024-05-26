@@ -33,12 +33,13 @@ class UserIntegrationTest {
         public void return_created_user() throws Exception {
             mockMvc.perform(post("/v1/users/register")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content("{\n" +
-                                    "  \"firstName\": \"TestFirstName\",\n" +
-                                    "  \"lastName\": \"TestLastName\",\n" +
-                                    "  \"email\": \"test.user@test.com\",\n" +
-                                    "  \"password\": \"qwerty-123\"\n" +
-                                    "}"))
+                            .content("""
+                                    {
+                                      "firstName": "TestFirstName",
+                                      "lastName": "TestLastName",
+                                      "email": "test.user@test.com",
+                                      "password": "qwerty!123"
+                                    }"""))
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.firstName", is("TestFirstName")));
         }
@@ -47,52 +48,70 @@ class UserIntegrationTest {
         public void return_400_for_invalid_email_format() throws Exception {
             mockMvc.perform(post("/v1/users/register")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content("{\n" +
-                                    "  \"firstName\": \"TestFirstName\",\n" +
-                                    "  \"lastName\": \"TestLastName\",\n" +
-                                    "  \"email\": \"test.user\",\n" +
-                                    "  \"password\": \"qwerty-123\"\n" +
-                                    "}"))
+                            .content("""
+                                    {
+                                      "firstName": "TestFirstName",
+                                      "lastName": "TestLastName",
+                                      "email": "test.user",
+                                      "password": "qwerty!123"
+                                    }"""))
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.additionalMessage", is("Email is not valid")));
+                    .andExpect(jsonPath("$.errors[0].message", is("Email is not valid")));
         }
 
         @Test
         public void return_400_for_missed_lastname() throws Exception {
             mockMvc.perform(post("/v1/users/register")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content("{\n" +
-                                    "  \"firstName\": \"TestFirstName\",\n" +
-                                    "  \"email\": \"test.user@test.com\",\n" +
-                                    "  \"password\": \"qwerty-123\"\n" +
-                                    "}"))
+                            .content("""
+                                    {
+                                      "firstName": "TestFirstName",
+                                      "email": "test.user@test.com",
+                                      "password": "qwerty!123"
+                                    }"""))
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.additionalMessage", is("Last Name cannot be empty")));
+                    .andExpect(jsonPath("$.errors[0].message", is("Last Name cannot be empty")));
+        }
+
+        @Test
+        public void return_400_with_3_validation_errors() throws Exception {
+            mockMvc.perform(post("/v1/users/register")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                    {
+                                      "firstName": null,
+                                      "lastName": "CorrectTestLastName",
+                                      "email": "test@user@@@test.com",
+                                      "password": "qwerty"
+                                    }"""))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errors", org.hamcrest.Matchers.hasSize(3)));
         }
 
         @Test
         public void return_409_for_existed_email() throws Exception {
             mockMvc.perform(post("/v1/users/register")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content("{\n" +
-                                    "  \"firstName\": \"TestFirstName1\",\n" +
-                                    "  \"lastName\": \"TestLastName1\",\n" +
-                                    "  \"email\": \"test.user@test.com\",\n" +
-                                    "  \"password\": \"qwerty-123\"\n" +
-                                    "}"))
+                            .content("""
+                                    {
+                                      "firstName": "TestFirstName1",
+                                      "lastName": "TestLastName1",
+                                      "email": "test.user@test.com",
+                                      "password": "qwerty!123"
+                                    }"""))
                     .andExpect(status().isCreated());
 
             mockMvc.perform(post("/v1/users/register")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content("{\n" +
-                                    "  \"firstName\": \"TestFirstName2\",\n" +
-                                    "  \"lastName\": \"TestLastName2\",\n" +
-                                    "  \"email\": \"test.user@test.com\",\n" +
-                                    "  \"password\": \"qwerty-123\"\n" +
-                                    "}"))
+                            .content("""
+                                    {
+                                      "firstName": "TestFirstName2",
+                                      "lastName": "TestLastName2",
+                                      "email": "test.user@test.com",
+                                      "password": "qwerty!123"
+                                    }"""))
                     .andExpect(status().isConflict());
         }
 
     }
-
 }

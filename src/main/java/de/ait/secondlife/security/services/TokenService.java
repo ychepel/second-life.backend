@@ -25,8 +25,8 @@ public class TokenService {
     private static final String USER_ROLE_VARIABLE_NAME = "roles";
     private static final String USER_EMAIL_VARIABLE_NAME = "email";
 
-    private SecretKey accessKey;
-    private SecretKey refreshKey;
+    private final SecretKey accessKey;
+    private final SecretKey refreshKey;
 
     public TokenService(@Value("${key.access}") String accessKey, @Value("${key.refresh}") String refreshKey) {
         this.accessKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(accessKey));

@@ -9,8 +9,8 @@ import java.util.Set;
 public class AuthInfo implements Authentication {
 
     private boolean authenticated;
-    private String userEmail;
-    private Set<Role> roles;
+    private final String userEmail;
+    private final Set<Role> roles;
 
     public AuthInfo(String username, Set<Role> roles) {
         this.userEmail = username;

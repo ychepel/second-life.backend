@@ -57,4 +57,10 @@ public class UserServiceImpl implements UserService {
 
         return userMappingService.toDto(user);
     }
+
+    @Override
+    public void updateLastActive(User user) {
+        user.setLastActive(LocalDateTime.now());
+        repository.save(user);
+    }
 }

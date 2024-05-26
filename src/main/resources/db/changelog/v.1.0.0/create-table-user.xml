@@ -21,7 +21,7 @@
             </column>
 
             <column name="email" type="varchar(100)">
-                <constraints nullable="true" unique="true"/>
+                <constraints nullable="false" unique="true"/>
             </column>
 
             <column name="password" type="char(60)">

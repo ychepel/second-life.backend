@@ -1,5 +1,6 @@
 package de.ait.secondlife.security.services;
 
+import de.ait.secondlife.domain.entity.User;
 import de.ait.secondlife.domain.interfaces.AuthenticatedUser;
 import de.ait.secondlife.security.dto.AuthDto;
 import de.ait.secondlife.security.dto.TokenResponseDto;
@@ -33,7 +34,7 @@ public class AuthService {
     private final TokenFilter tokenFilter;
     private final BCryptPasswordEncoder encoder;
 
-    private Map<String, String> refreshStorage = new HashMap<>();
+    private final Map<String, String> refreshStorage = new HashMap<>();
 
     public TokenResponseDto login(Role role, AuthDto authDto) throws LoginException {
         String userEmail = authDto.getEmail();
@@ -43,6 +44,11 @@ public class AuthService {
             String accessToken = tokenService.generateAccessToken(foundUser);
             String refreshToken = tokenService.generateRefreshToken(foundUser);
             refreshStorage.put(getTokenStorageKey(role, userEmail), refreshToken);
+
+            if (role == Role.ROLE_USER) {
+                userService.updateLastActive((User) foundUser);
+            }
+
             return new TokenResponseDto(accessToken, refreshToken);
         } else {
             throw new CredentialException("Password is incorrect");

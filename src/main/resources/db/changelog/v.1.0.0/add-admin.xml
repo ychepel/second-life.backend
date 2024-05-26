@@ -8,7 +8,7 @@
 
         <insert tableName="admin">
             <column name="email" value="admin@email.com"/>
-            <column name="password" value="$2a$10$wsJU.9fqOk8cH2DNo.SaC.SukDaPsQsiRQP/kdCHGIIgKP.s.Xp4y"/> <!--raw password = "security"-->
+            <column name="password" value="$2a$10$SO45MDLKTVnWamyqgS4pyuNrA9p95/hTMjAtDKk28LVOmj1ctJIP."/> <!--raw password = "Security!234"-->
         </insert>
 
     </changeSet>
