@@ -15,8 +15,6 @@
     <description>cohort 38 final project, backend</description>
     <properties>
         <java.version>17</java.version>
-        <org.mapstruct.version>1.5.5.Final</org.mapstruct.version>
-        <lombok.version>1.18.32</lombok.version>
     </properties>
     <dependencies>
         <dependency>

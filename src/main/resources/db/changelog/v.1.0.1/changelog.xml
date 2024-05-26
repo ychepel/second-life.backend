@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <changeSet id="add_tag_1.0.1" author="rslan">
+        <tagDatabase tag="v.1.0.1"/>
+    </changeSet>
+
+    <include file="create-table-offer.xml" relativeToChangelogFile="true"/>
+    <include file="create-table-bid.xml" relativeToChangelogFile="true"/>
+    <include file="create-table-status.xml" relativeToChangelogFile="true"/>
+    <include file="create-table-offer-status-history.xml" relativeToChangelogFile="true"/>
+    <include file="create-table-rejection-reasons.xml" relativeToChangelogFile="true"/>
+    <include file="create-foreign-key-offer-to-status.xml" relativeToChangelogFile="true"/>
+    <include file="create-foreign-key-offer-status-history-to-status.xml" relativeToChangelogFile="true"/>
+    <include file="create-foreign-key-offer-status-history-to-rejection-reasons.xml" relativeToChangelogFile="true"/>
+    <include file="create-foreign-key-bid-to-offer.xml" relativeToChangelogFile="true"/>
+    <include file="create-foreign-key-offer-to-bid.xml" relativeToChangelogFile="true"/>
+    <include file="add-status.xml" relativeToChangelogFile="true"/>
+
+</databaseChangeLog>
