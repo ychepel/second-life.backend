@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class AspectLogging {
 
-    @Pointcut("execution(* de.ait.secondlife.exceptionHandler.OfferExceptionHandler.*(..))")
+    @Pointcut("execution(* de.ait.secondlife.exception_handling.OfferExceptionHandler.*(..))")
     public void allMethodsOfOfferExceptionHandler() {}
 
     @After("allMethodsOfOfferExceptionHandler()")
