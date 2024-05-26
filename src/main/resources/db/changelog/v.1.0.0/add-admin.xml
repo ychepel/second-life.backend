@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+
+    <changeSet id="add_admin" author="ychepel">
+
+        <insert tableName="admin">
+            <column name="email" value="admin@email.com"/>
+            <column name="password" value="$2a$10$SO45MDLKTVnWamyqgS4pyuNrA9p95/hTMjAtDKk28LVOmj1ctJIP."/> <!--raw password = "Security!234"-->
+        </insert>
+
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <changeSet id="add_users" author="ychepel">
+
+        <insert tableName="user">
+            <column name="first_name" value="Barak"/>
+            <column name="last_name" value="Obama"/>
+            <column name="email" value="barak.obama@email.com"/>
+            <column name="password" value="$2a$10$SO45MDLKTVnWamyqgS4pyuNrA9p95/hTMjAtDKk28LVOmj1ctJIP."/> <!--raw password = "Security!234"-->
+            <column name="is_active" value="true"/>
+            <column name="created_at" value="2024-04-05 14:15:00"/>
+            <column name="updated_at" value="2024-04-05 14:15:00"/>
+        </insert>
+
+        <insert tableName="user">
+            <column name="first_name" value="John"/>
+            <column name="last_name" value="Smith"/>
+            <column name="email" value="john.smith@email.com"/>
+            <column name="password" value="$2a$10$SO45MDLKTVnWamyqgS4pyuNrA9p95/hTMjAtDKk28LVOmj1ctJIP."/> <!--raw password = "Security!234"-->
+            <column name="is_active" value="true"/>
+            <column name="created_at" value="2024-05-22 14:15:00"/>
+            <column name="updated_at" value="2024-05-22 14:15:00"/>
+        </insert>
+
+    </changeSet>
+</databaseChangeLog>
