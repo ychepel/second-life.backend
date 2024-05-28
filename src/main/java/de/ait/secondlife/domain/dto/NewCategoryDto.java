@@ -1,6 +1,7 @@
 package de.ait.secondlife.domain.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -12,7 +13,7 @@ import lombok.ToString;
 public class NewCategoryDto {
 
     @Schema(description = "category name", example = "Electronics and gadgets")
-    @NotNull
+    @NotBlank
     private String name;
 
     @Schema(description = "detailed description of the category", example = "Smartphones,Laptops,Televisions,Peripherals")

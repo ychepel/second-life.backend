@@ -14,7 +14,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/v1/categories")
+@RequestMapping("v1/categories")
 @Tag(name = "Category controller")
 public class CategoryController {
 
@@ -31,7 +31,6 @@ public class CategoryController {
     public ResponseEntity<List<CategoryDto>> getAll(){
         return ResponseEntity.ok(service.getAll());
     }
-
 
     @Operation(summary = "Add category")
     @PostMapping
@@ -52,9 +51,8 @@ public class CategoryController {
         return ResponseEntity.ok(hiddenCategory);
     }
 
-
     @Operation(summary = "Activating category with id")
-    @PatchMapping("/{category-id}/setActive")
+    @PatchMapping("/{category-id}/set-active")
     public ResponseEntity<CategoryDto> setActive(@PathVariable("category-id")Long categoryId){
         CategoryDto activeDto = service.setActive(categoryId);
         return ResponseEntity.ok(activeDto);

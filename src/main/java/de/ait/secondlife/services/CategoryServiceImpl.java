@@ -85,6 +85,17 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryDto hide(Long categoryId) {
-        return null;
+        Category existingCategory = repository.findById(categoryId).orElseThrow(() -> new RuntimeException("Category not found with id: " + categoryId));
+
+
+        //TODO check if the list of the offers related to this category is empty
+
+        existingCategory.setActive(false);
+
+        try {
+            return mappingService.mapEntityToDto(repository.save(existingCategory));
+        }catch (Exception e){
+            throw new RuntimeException("Cannot save category to db ", e);
+        }
     }
 }
