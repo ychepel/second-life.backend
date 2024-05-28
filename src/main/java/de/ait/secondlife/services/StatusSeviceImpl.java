@@ -1,19 +1,17 @@
 package de.ait.secondlife.services;
 
 import de.ait.secondlife.domain.entity.Status;
-import de.ait.secondlife.exception_handling.exeptions.IdIsNullException;
-import de.ait.secondlife.exception_handling.exeptions.NameOfStatusIsNullException;
-import de.ait.secondlife.exception_handling.exeptions.StatusNotFoundException;
+import de.ait.secondlife.exception_handling.exceptions.badRequestException.isNullExceptions.IdIsNullException;
+import de.ait.secondlife.exception_handling.exceptions.badRequestException.isNullExceptions.NameOfStatusIsNullException;
+import de.ait.secondlife.exception_handling.exceptions.notFoundException.StatusNotFoundException;
 import de.ait.secondlife.repositories.StatusRepository;
-import de.ait.secondlife.services.interfaces.StatusSevice;
+import de.ait.secondlife.services.interfaces.StatusService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
-public class StatusSeviceImpl implements StatusSevice {
+public class StatusSeviceImpl implements StatusService {
 
 
     private final StatusRepository statusRepository;

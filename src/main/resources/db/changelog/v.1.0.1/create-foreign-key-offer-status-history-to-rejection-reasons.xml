@@ -10,7 +10,8 @@
                                  baseColumnNames="rejection_id"
                                  constraintName="fk_offer_status_history_to_rejection_reasons"
                                  referencedTableName="rejection_reasons"
-                                 referencedColumnNames="id"/>
+                                 referencedColumnNames="id"
+                                 onDelete="SET NULL"/>
     </changeSet>
 
 </databaseChangeLog>

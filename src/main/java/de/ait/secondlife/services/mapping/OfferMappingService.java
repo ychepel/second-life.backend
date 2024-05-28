@@ -14,6 +14,7 @@ public interface OfferMappingService {
     @Mapping(source = "userId", target = "ownerId")
     @Mapping(source = "status.id", target = "statusId")
     @Mapping(source = "winnerBid.id", target = "winnerBidId")
+    //TODO change the logic after creating the order status processing
     @Mapping(target = "endAt", expression = "java(offer.getCreatedAt().plusDays(offer.getAuctionDurationDays()))")
     OfferResponseDto toRequestDto(Offer offer);
 

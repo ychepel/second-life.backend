@@ -1,6 +1,8 @@
-package de.ait.secondlife.exception_handling.exeptions;
+package de.ait.secondlife.exception_handling.exceptions.badRequestException;
 
-public class PaginationParameterIsWrongException extends RuntimeException {
+
+
+public class PaginationParameterIsWrongException extends BadRequestException {
 
     public PaginationParameterIsWrongException(int page,int size, String sortBy) {
 

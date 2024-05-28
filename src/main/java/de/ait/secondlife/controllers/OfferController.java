@@ -1,21 +1,22 @@
 package de.ait.secondlife.controllers;
 
-
 import de.ait.secondlife.domain.dto.ResponseMessageDto;
 import de.ait.secondlife.domain.dto.OfferCreationDto;
 import de.ait.secondlife.domain.dto.OfferResponseDto;
 import de.ait.secondlife.domain.dto.OfferResponseWithPaginationDto;
 import de.ait.secondlife.domain.dto.OfferUpdateDto;
 import de.ait.secondlife.exception_handling.OfferExceptionHandler;
-import de.ait.secondlife.exception_handling.exeptions.PaginationParameterIsWrongException;
+import de.ait.secondlife.exception_handling.exceptions.badRequestException.PaginationParameterIsWrongException;
 import de.ait.secondlife.services.interfaces.OfferService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,7 +28,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/v1/offer")
+@RequestMapping("/v1/offers")
 @RequiredArgsConstructor
 @Tag(name = "Offer controller", description = "Controller for some operations with available offer")
 @ApiResponses(value = {
@@ -48,10 +49,14 @@ public class OfferController implements OfferExceptionHandler {
 
     private final OfferService service;
 
+    private final String PAGE_VALUE = "0";
+    private final String SIZE_VALUE = "10";
+    private final String SORT_BY = "createdAt";
+
     @GetMapping("/all")
     @Operation(
-            summary = "Get all offer ",
-            description = "Receiving all offer available in the database with pagination"
+            summary = "Get all offers ",
+            description = "Receiving all offers available in the database with pagination"
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -59,30 +64,32 @@ public class OfferController implements OfferExceptionHandler {
                             schema = @Schema(implementation = OfferResponseWithPaginationDto.class))),
     })
     public ResponseEntity<OfferResponseWithPaginationDto> getAll(
-            @RequestParam(defaultValue = "0")
+            @RequestParam(defaultValue = PAGE_VALUE)
             @Parameter(description = "Requested page number. ", example = "0")
             int page,
-            @RequestParam(defaultValue = "10")
-            @Parameter(description = "Number of entities per page. ", example = "0")
+            @RequestParam(defaultValue = SIZE_VALUE)
+            @Parameter(description = "Number of entities per page.", example = "10")
             int size,
-            @RequestParam(defaultValue = "createdAt")
-            @Parameter(description = "Scoring field. ", example = "createdAt")
+            @RequestParam(defaultValue = SORT_BY)
+            @Parameter(description = "Sorting field.", examples = {
+                    @ExampleObject(name = "Sort by created time", value = "createdAt"),
+                    @ExampleObject(name = "Sort by title", value = "title"),
+                    @ExampleObject(name = "Sort by start price", value = "startPrice")
+            })
             String sortBy) {
-
         Pageable pageable;
         try {
             pageable = PageRequest.of(page, size, Sort.by(sortBy).ascending());
         } catch (IllegalArgumentException e) {
             throw new PaginationParameterIsWrongException(page, size, sortBy);
         }
-
         return ResponseEntity.ok(service.findOffers(pageable));
     }
 
     @GetMapping("/{id}")
     @Operation(
-            summary = "Get  offer by id",
-            description = "Receiving  offer by id available in the database "
+            summary = "Get offer by id",
+            description = "Receiving offer by id available in the database "
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -93,15 +100,13 @@ public class OfferController implements OfferExceptionHandler {
             @PathVariable
             @Parameter(description = "Offer id in UUID format.", example = "898449f7-e9d1-4d00-9fd6-cae203452f3a")
             UUID id) {
-
         return ResponseEntity.ok(service.findOfferById(id));
     }
 
-
     @GetMapping("/user/{id}")
     @Operation(
-            summary = "Get all offer by user id",
-            description = "Receiving  all offer by user id available in the database with pagination"
+            summary = "Get all offers by user id",
+            description = "Receiving all offers by user id available in the database with pagination"
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -116,12 +121,11 @@ public class OfferController implements OfferExceptionHandler {
             @Parameter(description = "Number of entities per page. ", example = "0")
             int size,
             @RequestParam(defaultValue = "createdAt")
-            @Parameter(description = "Scoring field. ", example = "createdAt")
+            @Parameter(description = "Sorting field. ", example = "createdAt")
             String sortBy,
             @PathVariable
             @Parameter(description = "User id in Long format. ", example = "2321")
             Long id) {
-
         Pageable pageable;
         try {
             pageable = PageRequest.of(page, size, Sort.by(sortBy).ascending());
@@ -130,7 +134,6 @@ public class OfferController implements OfferExceptionHandler {
         }
         return ResponseEntity.ok(service.findOffersByUserId(id, pageable));
     }
-
 
     @PostMapping
     @Operation(
@@ -143,18 +146,17 @@ public class OfferController implements OfferExceptionHandler {
                             schema = @Schema(implementation = OfferResponseDto.class))),
     })
     public ResponseEntity<OfferResponseDto> create(
+            @Valid
             @RequestBody
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Offer create DTO ")
             OfferCreationDto dto) {
-
         return ResponseEntity.status(HttpStatus.CREATED).body(service.createOffer(dto));
     }
 
-
     @PutMapping
     @Operation(
-            summary = "Update  offer",
-            description = "Updating the existing offer  and saving it in the database"
+            summary = "Update offer",
+            description = "Updating the existing offer and saving it in the database"
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -162,10 +164,10 @@ public class OfferController implements OfferExceptionHandler {
                             schema = @Schema(implementation = ResponseMessageDto.class))),
     })
     public ResponseEntity<ResponseMessageDto> update(
+            @Valid
             @RequestBody
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Offer update DTO ")
             OfferUpdateDto dto) {
-
         service.updateOffer(dto);
         return ResponseEntity.ok(
                 new ResponseMessageDto(String.format("Offer with id <%s> updated successful", dto.getId())));
@@ -174,7 +176,7 @@ public class OfferController implements OfferExceptionHandler {
     @DeleteMapping("/{id}")
     @Operation(
             summary = "Deactivate offer by id",
-            description = "Deactivating  the existing offer  by id. This offer won't be available when searching the database"
+            description = "Deactivating the existing offer by id. This offer won't be available when searching the database"
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -193,7 +195,7 @@ public class OfferController implements OfferExceptionHandler {
     @PutMapping("/recover/{id}")
     @Operation(
             summary = "Activate offer by id",
-            description = "Activating  the existing offer  by id. This offer will be available when searching the database"
+            description = "Activating the existing offer by id. This offer will be available when searching the database"
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",

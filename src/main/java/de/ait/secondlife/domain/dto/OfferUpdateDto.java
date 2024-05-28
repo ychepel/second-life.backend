@@ -1,26 +1,30 @@
 package de.ait.secondlife.domain.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.math.BigDecimal;
 import java.util.UUID;
 
-@NoArgsConstructor
-@AllArgsConstructor
 @Data
 @Builder
 @Schema(description = "Offer update DTO")
 public class OfferUpdateDto {
+
     @Schema(description = "Offer id "
             , example = "898449f7-e9d1-4d00-9fd6-cae203452f3a",
             accessMode = Schema.AccessMode.READ_ONLY)
+    @NotBlank(message = "Offer id cannot be empty")
     private UUID id;
+
     @Schema(description = "Title of a offer", example = "Upholstered chair")
+    @NotBlank(message = "Offer title cannot be empty")
+    @Size(min = 5, max = 64, message = "Title must be between 5 and 64 characters")
     private String title;
+
     @Schema(description = "Description of a offer",
             example = "In a small village, a curious cat named Whiskers explored every nook " +
                     "and cranny. One day, Whiskers discovered a hidden garden filled with vibrant " +
@@ -28,16 +32,24 @@ public class OfferUpdateDto {
                     "blossoms, bringing a smile to everyone's face. Whiskers " +
                     "became the beloved guardian of the magical garden.\n")
     private String description;
+
     @Schema(description = "Auction duration in days", example = "3")
     private Integer auctionDurationDays;
+
     @Schema(description = "Starting offer price", example = "1234.34")
     private BigDecimal startPrice;
+
     @Schema(description = "Bidding step", example = "12.34")
     private BigDecimal step;
+
     @Schema(description = "Possible buyout price without bidding", example = "1222.34")
     private BigDecimal winBid;
+
     @Schema(description = "Offer is free or not", example = "true")
+    @NotNull(message = "Is free cannot be null")
     private Boolean isFree;
+
+    @NotNull(message = "Category Id cannot be null")
     @Schema(description = "Category id", example = "22")
     private Long categoryId;
 }

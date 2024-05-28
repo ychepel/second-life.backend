@@ -10,17 +10,17 @@ import java.util.UUID;
 
 public interface OfferService {
 
-OfferResponseDto createOffer(OfferCreationDto dto);
+    OfferResponseDto createOffer(OfferCreationDto dto);
 
-OfferResponseWithPaginationDto findOffers(Pageable pageable);
+    OfferResponseWithPaginationDto findOffers(Pageable pageable);
 
-OfferResponseDto findOfferById(UUID id);
+    OfferResponseDto findOfferById(UUID id);
 
-OfferResponseWithPaginationDto findOffersByUserId(Long id, Pageable pageable);
+    OfferResponseWithPaginationDto findOffersByUserId(Long id, Pageable pageable);
 
-void updateOffer(OfferUpdateDto dto);
+    void updateOffer(OfferUpdateDto dto);
 
-void removeOffer(UUID id);
+    void removeOffer(UUID id);
 
-void recoverOffer(UUID id);
+    void recoverOffer(UUID id);
 }

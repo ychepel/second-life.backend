@@ -10,7 +10,8 @@
                                  baseColumnNames="offer_id"
                                  constraintName="fk_bid_to_offer"
                                  referencedTableName="offer"
-                                 referencedColumnNames="id"/>
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE"/>
     </changeSet>
 
 </databaseChangeLog>

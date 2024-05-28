@@ -1,17 +1,16 @@
 package de.ait.secondlife.services;
 
-import de.ait.secondlife.constans.StatusConstans;
+
+import de.ait.secondlife.constans.OfferStatus;
 import de.ait.secondlife.domain.dto.OfferResponseDto;
 import de.ait.secondlife.domain.dto.OfferResponseWithPaginationDto;
-
 import de.ait.secondlife.domain.entity.Offer;
 import de.ait.secondlife.domain.entity.Status;
-import de.ait.secondlife.exception_handling.exeptions.IdIsNullException;
-import de.ait.secondlife.exception_handling.exeptions.OfferNotFoundException;
-import de.ait.secondlife.exception_handling.exeptions.PageableIsNullException;
+import de.ait.secondlife.exception_handling.exceptions.badRequestException.isNullExceptions.IdIsNullException;
+import de.ait.secondlife.exception_handling.exceptions.notFoundException.OfferNotFoundException;
+import de.ait.secondlife.exception_handling.exceptions.badRequestException.isNullExceptions.PageableIsNullException;
 import de.ait.secondlife.repositories.OfferRepository;
 import de.ait.secondlife.services.mapping.OfferMappingService;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,22 +24,18 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-
-
 @ExtendWith(MockitoExtension.class)
-class OfferServiceImplTest implements StatusConstans {
+class OfferServiceImplTest {
 
     @InjectMocks
     private OfferServiceImpl offerService;
@@ -50,14 +45,12 @@ class OfferServiceImplTest implements StatusConstans {
     @Mock
     private OfferMappingService mappingService;
 
-
     private final LocalDateTime now = LocalDateTime.now();
 
     private final Status statusDraft = Status.builder()
             .id(12L)
-            .name(DRAFT_STATUS)
+            .name(OfferStatus.DRAFT.name())
             .build();
-
 
     @Test
     void findOffers_ShouldReturnOfferResponseWithPaginationDto_WhenOfferExist() {
@@ -111,14 +104,12 @@ class OfferServiceImplTest implements StatusConstans {
                 });
 
         OfferResponseWithPaginationDto result = offerService.findOffers(pageable);
-
         assertNotNull(result);
         assertEquals(9, result.getTotalElements());
         assertEquals(1, result.getTotalPages());
         assertEquals(1, result.getTotalPages());
         assertEquals(9, result.getOffers().size());
         verify(offerRepository, times(1)).findAllByIsActiveTrue(pageable);
-
     }
 
     @Test
@@ -126,13 +117,10 @@ class OfferServiceImplTest implements StatusConstans {
         assertThrows(PageableIsNullException.class, () -> offerService.findOffers(null));
     }
 
-
-
     @ParameterizedTest
     @MethodSource("offerListIndex")
     void findOfferById_ShouldReturnOfferResponseDto_WhenOfferExist(Integer index) {
         List<Offer> offerList = new ArrayList<>();
-
         Random random = new Random();
         for (int i = 0; i < 9; i++) {
             Offer offer = Offer.builder()
@@ -152,10 +140,8 @@ class OfferServiceImplTest implements StatusConstans {
                     .build();
             offerList.add(offer);
         }
-
         Mockito.when(offerRepository.findByIdAndIsActiveTrue(offerList.get(index).getId()))
                 .thenReturn(Optional.ofNullable(offerList.get(index)));
-
         List<OfferResponseDto> dtoList = offerList.stream()
                 .map(x -> OfferResponseDto.builder()
                         .id(x.getId())
@@ -183,7 +169,6 @@ class OfferServiceImplTest implements StatusConstans {
         Assertions.assertEquals(dtoList.get(index), offerService.findOfferById(offerList.get(index).getId()));
     }
 
-
     private static Stream<Integer> offerListIndex(){
         return Stream.of(1,3,6,7 );
     }
@@ -199,7 +184,6 @@ class OfferServiceImplTest implements StatusConstans {
                 .thenReturn(Optional.empty());
         assertThrows(OfferNotFoundException.class, () -> offerService.findOfferById(UUID.fromString("96418e14-c685-42a0-b8e9-f0f86e2c974e")));
     }
-
 
     @Test
     void findOffersByUserId() {

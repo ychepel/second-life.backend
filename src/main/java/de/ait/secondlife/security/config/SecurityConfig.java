@@ -8,6 +8,7 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -43,6 +44,11 @@ public class SecurityConfig {
 //                        ).permitAll()
 //                        .requestMatchers(HttpMethod.GET, "/swagger-ui/**", "/v3/api-docs/**").permitAll()
 //                        .requestMatchers(HttpMethod.POST, "/v1/users/register").permitAll()
+//                        .requestMatchers(HttpMethod.GET, "/v1/offer/**").permitAll()
+//                        .requestMatchers(HttpMethod.GET, "/v1/offer/user/**").authenticated()
+//                        .requestMatchers(HttpMethod.POST, "/v1/offer/**").authenticated()
+//                        .requestMatchers(HttpMethod.PUT, "/v1/offer/**").authenticated()
+//                        .requestMatchers(HttpMethod.DELETE, "/v1/offer/**").authenticated()
                         .anyRequest().permitAll())
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .addFilterAfter(filter, UsernamePasswordAuthenticationFilter.class)
