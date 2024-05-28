@@ -8,6 +8,7 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -33,17 +34,23 @@ public class SecurityConfig {
                 .sessionManagement(x -> x
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(x -> x
-//                        .requestMatchers(HttpMethod.GET, "/v1/auth/admin/logout").hasRole("ADMIN")
-//                        .requestMatchers(HttpMethod.GET, "/v1/auth/user/logout").hasRole("USER")
-//                        .requestMatchers(HttpMethod.POST,
-//                                "/v1/auth/admin/login",
-//                                "/v1/auth/admin/access",
-//                                "/v1/auth/user/login",
-//                                "/v1/auth/user/access"
-//                        ).permitAll()
-//                        .requestMatchers(HttpMethod.GET, "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-//                        .requestMatchers(HttpMethod.POST, "/v1/users/register").permitAll()
-                        .anyRequest().permitAll())
+                        .requestMatchers(HttpMethod.GET, "/v1/auth/admin/logout").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/v1/auth/user/logout").hasRole("USER")
+                        .requestMatchers(HttpMethod.POST,
+                                "/v1/auth/admin/login",
+                                "/v1/auth/admin/access",
+                                "/v1/auth/user/login",
+                                "/v1/auth/user/access"
+                        ).permitAll()
+                        .requestMatchers(HttpMethod.GET, "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/v1/users/register").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/v1/categories").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/v1/categories/{category-id}").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/v1/categories").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/v1/categories/{category-id}").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/v1/categories/{category-id}").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/v1/categories/{category-id}/set-active").hasRole("ADMIN")
+                        .anyRequest().denyAll())
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .addFilterAfter(filter, UsernamePasswordAuthenticationFilter.class)
                 .build();

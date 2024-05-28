@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="add_categories" author="Kirill">
+
+        <insert tableName="category">
+            <column name="name" value="Electronics and Gadgets"/>
+            <column name="description" value="Smartphones,Laptops,Televisions,Peripherals"/>
+        </insert>
+        <insert tableName="category">
+            <column name="name" value="Furniture and Home Decor"/>
+            <column name="description" value="Sofas,Tables and Chairs,Cabinets and Shelves,Decor and Accessories"/>
+        </insert>
+        <insert tableName="category">
+            <column name="name" value="Clothing and Accessories"/>
+            <column name="description" value="Men's Clothing,Women's Clothing,Footwear,Bags and Backpacks"/>
+        </insert>
+        <insert tableName="category">
+            <column name="name" value="Vehicles"/>
+            <column name="description" value="Cars,Motorcycles and Scooters,Bicycles,Auto Parts"/>
+        </insert>
+        <insert tableName="category">
+            <column name="name" value="Kids' Items"/>
+            <column name="description" value="Toys,Children's Clothing,Strollers,Educational Materials"/>
+        </insert>
+        <insert tableName="category">
+            <column name="name" value="Sports and Leisure"/>
+            <column name="description" value="Sports Equipment,Camping Gear,Bicycles,Fishing Gear"/>
+        </insert>
+        <insert tableName="category">
+            <column name="name" value="Home Appliances"/>
+            <column name="description" value="Kitchen Appliances,Washing Machines,Vacuum Cleaners,Air Conditioners"/>
+        </insert>
+        <insert tableName="category">
+            <column name="name" value="Hobbies and Interests"/>
+            <column name="description" value="Musical Instruments,Books and Magazines,Collectibles,Board Games"/>
+        </insert>
+        <insert tableName="category">
+            <column name="name" value="Garden and Outdoor"/>
+            <column name="description" value="Garden Tools,Plants and Seeds,Garden Furniture,Watering Equipment"/>
+        </insert>
+        <insert tableName="category">
+            <column name="name" value="Pets and Supplies"/>
+            <column name="description" value="Pets,Pet Food and Accessories,Cages and Aquariums,Pet Services"/>
+        </insert>
+
+    </changeSet>
+</databaseChangeLog>
