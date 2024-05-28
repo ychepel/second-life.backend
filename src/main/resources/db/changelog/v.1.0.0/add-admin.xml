@@ -4,7 +4,13 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
 
-    <include file="v.1.0.0/changelog.xml" relativeToChangelogFile="true"/>
-    <include file="v.1.0.1/changelog.xml" relativeToChangelogFile="true"/>
+    <changeSet id="add_admin" author="ychepel">
+
+        <insert tableName="admin">
+            <column name="email" value="admin@email.com"/>
+            <column name="password" value="$2a$10$SO45MDLKTVnWamyqgS4pyuNrA9p95/hTMjAtDKk28LVOmj1ctJIP."/> <!--raw password = "Security!234"-->
+        </insert>
+
+    </changeSet>
 
 </databaseChangeLog>

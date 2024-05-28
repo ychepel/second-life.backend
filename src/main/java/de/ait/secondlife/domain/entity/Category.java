@@ -1,4 +1,4 @@
-package de.ait.secondlife.models;
+package de.ait.secondlife.domain.entity;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;

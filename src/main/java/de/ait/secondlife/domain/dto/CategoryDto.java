@@ -1,4 +1,4 @@
-package de.ait.secondlife.dto;
+package de.ait.secondlife.domain.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Size;
@@ -18,7 +18,7 @@ public class CategoryDto {
     private String name;
 
     @Schema(description = "detailed description of the category", example = "Smartphones,Laptops,Televisions,Peripherals")
-    @Size(min = 5, max = 1000)
+    @Size(max = 1000)
     private String description;
 
     @Schema(description = "active or not flag", example = "true")

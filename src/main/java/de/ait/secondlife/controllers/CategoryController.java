@@ -1,7 +1,7 @@
 package de.ait.secondlife.controllers;
 
-import de.ait.secondlife.dto.CategoryDto;
-import de.ait.secondlife.dto.IsActiveCategoryDto;
+import de.ait.secondlife.domain.dto.CategoryDto;
+import de.ait.secondlife.domain.dto.NewCategoryDto;
 import de.ait.secondlife.services.interfaces.CategoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -35,7 +35,7 @@ public class CategoryController {
 
     @Operation(summary = "Add category")
     @PostMapping
-    public ResponseEntity<CategoryDto> add(@RequestBody CategoryDto dto){
+    public ResponseEntity<CategoryDto> add(@RequestBody NewCategoryDto dto){
         return ResponseEntity.status(HttpStatus.CREATED).body(service.save(dto));
     }
 
@@ -45,10 +45,18 @@ public class CategoryController {
         return ResponseEntity.ok(service.update(categoryId,dto));
     }
 
-    @Operation(summary = "Activating/Deactivating category with id", description = "To use PATCH method need send category id and true/false value in the request body of the active property")
+    @Operation(summary = "Hiding category from the list of the categories", description = "Allowed only if the list of the offers related to this category is empty")
+    @DeleteMapping("/{category-id}")
+    public ResponseEntity<CategoryDto> hideCategory(@PathVariable("category-id")Long categoryId){
+        CategoryDto hiddenCategory = service.hide(categoryId);
+        return ResponseEntity.ok(hiddenCategory);
+    }
+
+
+    @Operation(summary = "Activating category with id")
     @PatchMapping("/{category-id}/setActive")
-    public ResponseEntity<CategoryDto> update(@PathVariable("category-id")Long categoryId,@RequestBody IsActiveCategoryDto dto){
-        CategoryDto updatedDto = service.update(categoryId,dto);
-        return ResponseEntity.ok(updatedDto);
+    public ResponseEntity<CategoryDto> setActive(@PathVariable("category-id")Long categoryId){
+        CategoryDto activeDto = service.setActive(categoryId);
+        return ResponseEntity.ok(activeDto);
     }
 }

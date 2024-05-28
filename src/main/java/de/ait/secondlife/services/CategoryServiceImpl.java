@@ -1,11 +1,11 @@
 package de.ait.secondlife.services;
 
-import de.ait.secondlife.dto.CategoryDto;
-import de.ait.secondlife.dto.IsActiveCategoryDto;
-import de.ait.secondlife.models.Category;
+import de.ait.secondlife.domain.dto.CategoryDto;
+import de.ait.secondlife.domain.dto.NewCategoryDto;
+import de.ait.secondlife.domain.entity.Category;
 import de.ait.secondlife.repositories.CategoriesRepository;
 import de.ait.secondlife.services.interfaces.CategoryService;
-import de.ait.secondlife.services.mapping.CategoryMappingService;
+import de.ait.secondlife.services.mapping.NewCategoryMappingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +17,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     private final CategoriesRepository repository;
 
-    private final CategoryMappingService mappingService;
+    private final NewCategoryMappingService mappingService;
 
     @Override
     public CategoryDto getById(Long id) {
@@ -26,11 +26,7 @@ public class CategoryServiceImpl implements CategoryService {
             throw new RuntimeException("Category ID is incorrect");
         }
 
-        Category category = repository.findById(id).orElse(null);
-
-        if (category == null) {
-            throw new RuntimeException("Category not found");
-        }
+        Category category = repository.findById(id).orElseThrow(() -> new RuntimeException("Category not found"));
 
         return mappingService.mapEntityToDto(category);
     }
@@ -45,7 +41,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public CategoryDto save(CategoryDto categoryDto) {
+    public CategoryDto save(NewCategoryDto categoryDto) {
 
         Category entity = mappingService.mapDtoToEntity(categoryDto);
 
@@ -74,16 +70,21 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public CategoryDto update(Long id, IsActiveCategoryDto dto) {
+    public CategoryDto setActive(Long categoryId) {
 
-        Category existingCategory = repository.findById(id).orElseThrow(() -> new RuntimeException("Category not found with id: " + id));
+        Category existingCategory = repository.findById(categoryId).orElseThrow(() -> new RuntimeException("Category not found with id: " + categoryId));
 
-        existingCategory.setActive(dto.isActive());
+        existingCategory.setActive(true);
 
         try {
             return mappingService.mapEntityToDto(repository.save(existingCategory));
         }catch (Exception e){
             throw new RuntimeException("Cannot save category to db ", e);
         }
+    }
+
+    @Override
+    public CategoryDto hide(Long categoryId) {
+        return null;
     }
 }
