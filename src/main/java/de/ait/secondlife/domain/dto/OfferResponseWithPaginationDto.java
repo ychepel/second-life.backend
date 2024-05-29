@@ -26,7 +26,7 @@ public class OfferResponseWithPaginationDto {
     @Schema(description = "Total number of elements", example = "345")
     private long totalElements;
 
-    @Schema(description = "Is fist page?", example = "true")
+    @Schema(description = "Is first page?", example = "true")
     private Boolean isFirstPage;
 
     @Schema(description = "Is last page?", example = "true")

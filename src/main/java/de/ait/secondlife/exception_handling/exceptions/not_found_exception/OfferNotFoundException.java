@@ -1,4 +1,4 @@
-package de.ait.secondlife.exception_handling.exceptions.notFoundException;
+package de.ait.secondlife.exception_handling.exceptions.not_found_exception;
 
 import java.util.UUID;
 

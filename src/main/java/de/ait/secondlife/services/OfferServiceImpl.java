@@ -1,15 +1,15 @@
 package de.ait.secondlife.services;
 
-import de.ait.secondlife.constans.OfferStatus;
+import de.ait.secondlife.domain.constants.OfferStatus;
 import de.ait.secondlife.domain.dto.OfferCreationDto;
 import de.ait.secondlife.domain.dto.OfferResponseDto;
 import de.ait.secondlife.domain.dto.OfferResponseWithPaginationDto;
 import de.ait.secondlife.domain.dto.OfferUpdateDto;
 import de.ait.secondlife.domain.entity.Offer;
-import de.ait.secondlife.exception_handling.exceptions.badRequestException.CreateOfferConstraintViolationException;
-import de.ait.secondlife.exception_handling.exceptions.badRequestException.isNullExceptions.IdIsNullException;
-import de.ait.secondlife.exception_handling.exceptions.notFoundException.OfferNotFoundException;
-import de.ait.secondlife.exception_handling.exceptions.badRequestException.WrongAuctionParameterException;
+import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.CreateOfferConstraintViolationException;
+import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.is_null_exceptions.IdIsNullException;
+import de.ait.secondlife.exception_handling.exceptions.not_found_exception.OfferNotFoundException;
+import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.WrongAuctionParameterException;
 import de.ait.secondlife.repositories.OfferRepository;
 import de.ait.secondlife.services.interfaces.OfferService;
 import de.ait.secondlife.services.interfaces.StatusService;
@@ -64,9 +64,7 @@ public class OfferServiceImpl implements OfferService {
             newOffer.setId(null);
             newOffer.setStatus(statusSevice.getStatusByName(OfferStatus.DRAFT.name()));
             newOffer.setAuctionDurationDays(newOffer.getAuctionDurationDays() <= 0 ? 3 : newOffer.getAuctionDurationDays());
-            if (dto.getIsFree() == null) {
-                newOffer.setIsFree(dto.getStartPrice() == null || dto.getStartPrice().compareTo(BigDecimal.ZERO) == 0);
-            }
+
             if (Boolean.TRUE.equals(newOffer.getIsFree())) {
                 checkOfferIfIsFree(dto.getStartPrice(), dto.getStep(), dto.getWinBid());
             } else {

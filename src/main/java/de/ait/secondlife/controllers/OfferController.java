@@ -5,8 +5,8 @@ import de.ait.secondlife.domain.dto.OfferCreationDto;
 import de.ait.secondlife.domain.dto.OfferResponseDto;
 import de.ait.secondlife.domain.dto.OfferResponseWithPaginationDto;
 import de.ait.secondlife.domain.dto.OfferUpdateDto;
-import de.ait.secondlife.exception_handling.OfferExceptionHandler;
-import de.ait.secondlife.exception_handling.exceptions.badRequestException.PaginationParameterIsWrongException;
+
+import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.PaginationParameterIsWrongException;
 import de.ait.secondlife.services.interfaces.OfferService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -45,7 +45,7 @@ import java.util.UUID;
                 schema = @Schema(implementation = ResponseMessageDto.class)
         ))
 })
-public class OfferController implements OfferExceptionHandler {
+public class OfferController  {
 
     private final OfferService service;
 

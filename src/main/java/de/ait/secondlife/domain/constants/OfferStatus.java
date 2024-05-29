@@ -1,4 +1,4 @@
-package de.ait.secondlife.constans;
+package de.ait.secondlife.domain.constants;
 
 public enum OfferStatus {
     DRAFT,

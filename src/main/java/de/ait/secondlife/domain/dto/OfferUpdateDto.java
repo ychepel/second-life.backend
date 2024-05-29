@@ -21,7 +21,6 @@ public class OfferUpdateDto {
     private UUID id;
 
     @Schema(description = "Title of a offer", example = "Upholstered chair")
-    @NotBlank(message = "Offer title cannot be empty")
     @Size(min = 5, max = 64, message = "Title must be between 5 and 64 characters")
     private String title;
 
@@ -46,10 +45,8 @@ public class OfferUpdateDto {
     private BigDecimal winBid;
 
     @Schema(description = "Offer is free or not", example = "true")
-    @NotNull(message = "Is free cannot be null")
     private Boolean isFree;
 
-    @NotNull(message = "Category Id cannot be null")
     @Schema(description = "Category id", example = "22")
     private Long categoryId;
 }

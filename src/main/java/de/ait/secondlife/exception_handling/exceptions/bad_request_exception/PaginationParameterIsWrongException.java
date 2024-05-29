@@ -1,4 +1,4 @@
-package de.ait.secondlife.exception_handling.exceptions.badRequestException;
+package de.ait.secondlife.exception_handling.exceptions.bad_request_exception;
 
 
 

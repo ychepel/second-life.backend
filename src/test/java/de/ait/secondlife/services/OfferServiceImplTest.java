@@ -1,14 +1,14 @@
 package de.ait.secondlife.services;
 
 
-import de.ait.secondlife.constans.OfferStatus;
+import de.ait.secondlife.domain.constants.OfferStatus;
 import de.ait.secondlife.domain.dto.OfferResponseDto;
 import de.ait.secondlife.domain.dto.OfferResponseWithPaginationDto;
 import de.ait.secondlife.domain.entity.Offer;
 import de.ait.secondlife.domain.entity.Status;
-import de.ait.secondlife.exception_handling.exceptions.badRequestException.isNullExceptions.IdIsNullException;
-import de.ait.secondlife.exception_handling.exceptions.notFoundException.OfferNotFoundException;
-import de.ait.secondlife.exception_handling.exceptions.badRequestException.isNullExceptions.PageableIsNullException;
+import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.is_null_exceptions.IdIsNullException;
+import de.ait.secondlife.exception_handling.exceptions.not_found_exception.OfferNotFoundException;
+import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.is_null_exceptions.PageableIsNullException;
 import de.ait.secondlife.repositories.OfferRepository;
 import de.ait.secondlife.services.mapping.OfferMappingService;
 import org.junit.jupiter.api.Assertions;

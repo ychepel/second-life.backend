@@ -12,11 +12,20 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class AspectLogging {
 
-    @Pointcut("execution(* de.ait.secondlife.exception_handling.OfferExceptionHandler.*(..))")
-    public void allMethodsOfOfferExceptionHandler() {}
+    @Pointcut("execution(* de.ait.secondlife.exception_handling.exceptions.bad_request_exception..*(..))")
+    public void allInBadRequestExceptionPackage() {}
 
-    @After("allMethodsOfOfferExceptionHandler()")
-    public void logAfterMethodsOfOfferExceptionHandler(JoinPoint joinPoint) {
+    @After("allInBadRequestExceptionPackage()")
+    public void logAllInBadRequestExceptionPackage(JoinPoint joinPoint) {
+        RuntimeException e = (RuntimeException) joinPoint.getArgs()[0];
+        log.error(String.format("[%s] : %s", e.getClass(),e.getMessage()));
+    }
+
+    @Pointcut("execution(* de.ait.secondlife.exception_handling.exceptions.not_found_exception..*(..))")
+    public void allInNotFoundExceptionPackage() {}
+
+    @After("allInNotFoundExceptionPackage()")
+    public void logAllInNotFoundExceptionPackage(JoinPoint joinPoint) {
         RuntimeException e = (RuntimeException) joinPoint.getArgs()[0];
         log.error(String.format("[%s] : %s", e.getClass(),e.getMessage()));
     }

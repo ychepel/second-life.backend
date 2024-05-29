@@ -1,7 +1,10 @@
 package de.ait.secondlife.exception_handling;
 
+import de.ait.secondlife.domain.dto.ResponseMessageDto;
 import de.ait.secondlife.exception_handling.exceptions.DuplicateUserEmailException;
 import de.ait.secondlife.exception_handling.exceptions.UserSavingException;
+import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.BadRequestException;
+import de.ait.secondlife.exception_handling.exceptions.not_found_exception.ParameterNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -39,6 +42,15 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Response> handleException(LoginException e) {
         Response response = new Response(e.getMessage());
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ResponseMessageDto> handleException(BadRequestException e) {
+        return new ResponseEntity<>(new ResponseMessageDto(e.getMessage()), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ParameterNotFoundException.class)
+    public ResponseEntity<ResponseMessageDto> handleException(ParameterNotFoundException e) {
+        return new ResponseEntity<>(new ResponseMessageDto(e.getMessage()), HttpStatus.NOT_FOUND);
     }
 
     private String parseExceptionMessage(String errorMessage) {
