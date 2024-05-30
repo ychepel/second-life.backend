@@ -11,5 +11,6 @@
 
     <include file="add-new-status.xml" relativeToChangelogFile="true"/>
     <include file="change-status-qualifiers-to-qualification.xml" relativeToChangelogFile="true"/>
+    <include file="create-foreign-key-offer-to-user.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

@@ -2,8 +2,6 @@ package de.ait.secondlife.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import jakarta.validation.constraints.*;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -47,9 +45,9 @@ public class Offer {
     @Column(name = "is_active")
     private Boolean isActive;
 
-    //TODO -add offer to user dependence
-    @Column(name = "user_id")
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "status_id")
