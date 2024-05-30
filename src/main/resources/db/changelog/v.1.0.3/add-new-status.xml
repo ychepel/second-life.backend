@@ -4,8 +4,12 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
 
-    <include file="v.1.0.0/changelog.xml" relativeToChangelogFile="true"/>
-    <include file="v.1.0.1/changelog.xml" relativeToChangelogFile="true"/>
-    <include file="v.1.0.2/changelog.xml" relativeToChangelogFile="true"/>
-    <include file="v.1.0.3/changelog.xml" relativeToChangelogFile="true"/>
+    <changeSet id="add_new_status" author="rslan">
+
+        <insert tableName="status">
+            <column name="name" value="CANCELED"/>
+        </insert>
+
+    </changeSet>
+
 </databaseChangeLog>
