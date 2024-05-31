@@ -38,13 +38,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class OfferServiceImpl implements OfferService {
 
-    private static final Logger log = LoggerFactory.getLogger(OfferServiceImpl.class);
     private final OfferRepository offerRepository;
     private final OfferMappingService mappingService;
     private final StatusService statusSevice;
-
     private final CategoryService categoryService;
-    private final CategoriesRepository categoriesRepository;
 
     @Override
     public OfferResponseWithPaginationDto findOffers(Pageable pageable) {
@@ -67,13 +64,12 @@ public class OfferServiceImpl implements OfferService {
         return offersToOfferRequestWithPaginationDto(pageOfOffer);
     }
 
-
     @Override
     public OfferResponseDto createOffer(OfferCreationDto dto) {
 
         try {
             Offer newOffer = mappingService.toOffer(dto);
-            newOffer.setCategory(getCategoryById(dto.getCategoryId()));
+            newOffer.setCategory(categoryService.getCategoryById(dto.getCategoryId()));
             newOffer.setId(null);
             newOffer.setStatus(statusSevice.getStatusByName(OfferStatus.DRAFT.name()));
             newOffer.setAuctionDurationDays(newOffer.getAuctionDurationDays() <= 0 ? 3 : newOffer.getAuctionDurationDays());
@@ -120,9 +116,9 @@ public class OfferServiceImpl implements OfferService {
             offer.setWinBid(dto.getWinBid() == null || dto.getWinBid().compareTo(BigDecimal.ZERO) == 0 ?
                     offer.getWinBid() : dto.getWinBid());
         }
-        offer.setCategory(dto.getCategoryId()==null?
-                offer.getCategory():
-                getCategoryById(dto.getCategoryId()));
+        offer.setCategory(dto.getCategoryId() == null ?
+                offer.getCategory() :
+                categoryService.getCategoryById(dto.getCategoryId()));
     }
 
     @Transactional
@@ -167,11 +163,5 @@ public class OfferServiceImpl implements OfferService {
         if (winBin != null && winBin.compareTo(BigDecimal.ZERO) > 0) {
             throw new WrongAuctionParameterException("winBid");
         }
-    }
-
-    private Category getCategoryById(Long id){
-        if(!categoryService.checkIfCategoryExists(id))
-            throw new CategoryNotFoundException(id);
-        return categoryService.getCategoryById(id);
     }
 }

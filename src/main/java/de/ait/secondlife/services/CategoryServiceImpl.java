@@ -102,12 +102,6 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public boolean checkIfCategoryExists(Long id) {
-        if (id == null) throw new IdIsNullException();
-        return repository.existsById(id);
-    }
-
-    @Override
     public Category getCategoryById(Long id) {
         if (id == null) throw new IdIsNullException();
         return repository.findById(id)
