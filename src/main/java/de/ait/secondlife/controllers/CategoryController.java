@@ -2,8 +2,6 @@ package de.ait.secondlife.controllers;
 
 import de.ait.secondlife.domain.dto.CategoryDto;
 import de.ait.secondlife.domain.dto.NewCategoryDto;
-import de.ait.secondlife.domain.dto.OfferResponseDto;
-import de.ait.secondlife.domain.dto.UserDto;
 import de.ait.secondlife.exception_handling.dto.ValidationErrorsDto;
 import de.ait.secondlife.services.interfaces.CategoryService;
 import io.swagger.v3.oas.annotations.Operation;
