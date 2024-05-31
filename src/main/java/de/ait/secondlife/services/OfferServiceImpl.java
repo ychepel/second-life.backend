@@ -101,7 +101,8 @@ public class OfferServiceImpl implements OfferService {
         User user = getUserFromAuthContext();
         Offer offer = offerRepository.findById(dto.getId())
                 .orElseThrow(() -> new OfferNotFoundException(dto.getId()));
-        if(!user.equals(offer.getUser())) throw  new NoRightToChangeException(user.getId());
+        if(!user.equals(offer.getUser()))
+            throw  new NoRightToChangeException(String.format("User <%d> can't change this offer", user.getId()));
 
         offer.setTitle(dto.getTitle() == null ? offer.getTitle() : dto.getTitle());
         offer.setDescription(dto.getDescription() == null ? offer.getDescription() : dto.getDescription());

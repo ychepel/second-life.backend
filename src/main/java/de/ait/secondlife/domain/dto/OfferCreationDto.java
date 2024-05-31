@@ -43,11 +43,6 @@ public class OfferCreationDto {
     @NotNull(message = "Is free cannot be null")
     private Boolean isFree;
 
-//    //TODO remove the user id field from the authorisation context
-//    @Schema(description = "User id of the owner of the offer", example = "34")
-//    @NotNull(message = "User Id cannot be null")
-//    private Long userId;
-
     @Schema(description = "Category id", example = "22")
     @NotNull(message = "Category Id cannot be null")
     private Long categoryId;
