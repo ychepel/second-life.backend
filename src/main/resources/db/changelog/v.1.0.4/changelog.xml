@@ -14,7 +14,7 @@
     <include file="change-status-qualifiers-to-qualification.xml" relativeToChangelogFile="true"/>
     <include file="create-foreign-key-offer-to-user.xml" relativeToChangelogFile="true"/>
 =======
-    <include file="../v.1.0.3/create-foreign-key-offer-to-category.xml" relativeToChangelogFile="true"/>
+    <include file="create-foreign-key-offer-to-category.xml" relativeToChangelogFile="true"/>
 
 >>>>>>> 62664b7f73eb21f2aa98c670b154a7acede2fffb
 

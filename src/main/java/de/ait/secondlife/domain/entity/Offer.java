@@ -54,9 +54,9 @@ public class Offer {
     private Status status;
 
 
-//TODO -add offer to category dependence
-    @Column(name = "category_id")
-     private Long categoryId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "winner_bid_id")
