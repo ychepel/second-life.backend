@@ -45,9 +45,9 @@ public class Offer {
     @Column(name = "is_active")
     private Boolean isActive;
 
-    //TODO -add offer to user dependence
-    @Column(name = "user_id")
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "status_id")

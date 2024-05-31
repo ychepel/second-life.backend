@@ -5,27 +5,29 @@ import de.ait.secondlife.domain.dto.OfferCreationDto;
 import de.ait.secondlife.domain.dto.OfferResponseDto;
 import de.ait.secondlife.domain.dto.OfferResponseWithPaginationDto;
 import de.ait.secondlife.domain.dto.OfferUpdateDto;
-import de.ait.secondlife.domain.entity.Category;
 import de.ait.secondlife.domain.entity.Offer;
+import de.ait.secondlife.domain.entity.User;
+import de.ait.secondlife.exception_handling.exceptions.NoRightToChangeException;
+import de.ait.secondlife.exception_handling.exceptions.UserIsNotAuthorizedException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.CreateOfferConstraintViolationException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.is_null_exceptions.IdIsNullException;
-import de.ait.secondlife.exception_handling.exceptions.not_found_exception.CategoryNotFoundException;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.OfferNotFoundException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.WrongAuctionParameterException;
-import de.ait.secondlife.repositories.CategoriesRepository;
 import de.ait.secondlife.repositories.OfferRepository;
 import de.ait.secondlife.services.interfaces.CategoryService;
 import de.ait.secondlife.services.interfaces.OfferService;
 import de.ait.secondlife.services.interfaces.StatusService;
+import de.ait.secondlife.services.interfaces.UserService;
 import de.ait.secondlife.services.mapping.OfferMappingService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.SneakyThrows;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -40,6 +42,8 @@ public class OfferServiceImpl implements OfferService {
 
     private final OfferRepository offerRepository;
     private final OfferMappingService mappingService;
+    private final StatusService statusService;
+    private final UserService userService;
     private final StatusService statusSevice;
     private final CategoryService categoryService;
 
@@ -66,12 +70,13 @@ public class OfferServiceImpl implements OfferService {
 
     @Override
     public OfferResponseDto createOffer(OfferCreationDto dto) {
-
+           User user = getUserFromAuthContext();
         try {
             Offer newOffer = mappingService.toOffer(dto);
+            newOffer.setUser(user);
             newOffer.setCategory(categoryService.getCategoryById(dto.getCategoryId()));
             newOffer.setId(null);
-            newOffer.setStatus(statusSevice.getStatusByName(OfferStatus.DRAFT.name()));
+            newOffer.setStatus(statusService.getStatusByName(OfferStatus.DRAFT.name()));
             newOffer.setAuctionDurationDays(newOffer.getAuctionDurationDays() <= 0 ? 3 : newOffer.getAuctionDurationDays());
 
             if (Boolean.TRUE.equals(newOffer.getIsFree())) {
@@ -95,8 +100,11 @@ public class OfferServiceImpl implements OfferService {
     @Transactional
     @Override
     public void updateOffer(OfferUpdateDto dto) {
+        User user = getUserFromAuthContext();
         Offer offer = offerRepository.findById(dto.getId())
                 .orElseThrow(() -> new OfferNotFoundException(dto.getId()));
+        if(!user.equals(offer.getUser()))
+            throw  new NoRightToChangeException(String.format("User <%d> can't change this offer", user.getId()));
 
         offer.setTitle(dto.getTitle() == null ? offer.getTitle() : dto.getTitle());
         offer.setDescription(dto.getDescription() == null ? offer.getDescription() : dto.getDescription());
@@ -163,5 +171,13 @@ public class OfferServiceImpl implements OfferService {
         if (winBin != null && winBin.compareTo(BigDecimal.ZERO) > 0) {
             throw new WrongAuctionParameterException("winBid");
         }
+    }
+
+    @SneakyThrows
+    private User getUserFromAuthContext(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication.getPrincipal().equals("anonymousUser")) throw new UserIsNotAuthorizedException();
+        String username = authentication.getName();
+        return  (User) userService.loadUserByUsername(username);
     }
 }
