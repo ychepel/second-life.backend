@@ -3,6 +3,9 @@ package de.ait.secondlife.services;
 import de.ait.secondlife.domain.dto.CategoryDto;
 import de.ait.secondlife.domain.dto.NewCategoryDto;
 import de.ait.secondlife.domain.entity.Category;
+import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.CategoryIsNotEmptyException;
+import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.is_null_exceptions.IdIsNullException;
+import de.ait.secondlife.exception_handling.exceptions.not_found_exception.CategoryNotFoundException;
 import de.ait.secondlife.repositories.CategoriesRepository;
 import de.ait.secondlife.services.interfaces.CategoryService;
 import de.ait.secondlife.services.mapping.NewCategoryMappingService;
@@ -22,7 +25,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryDto getById(Long id) {
 
-        if (id == null || id <1){
+        if (id == null || id < 1) {
             throw new RuntimeException("Category ID is incorrect");
         }
 
@@ -35,7 +38,7 @@ public class CategoryServiceImpl implements CategoryService {
     public List<CategoryDto> getAll() {
         return repository.findAll()
                 .stream()
-                .filter(x-> x.isActive())
+                .filter(x -> x.isActive())
                 .map(mappingService::mapEntityToDto)
                 .toList();
     }
@@ -47,7 +50,7 @@ public class CategoryServiceImpl implements CategoryService {
 
         try {
             repository.save(entity);
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException("Cannot save category to db");
         }
 
@@ -64,7 +67,7 @@ public class CategoryServiceImpl implements CategoryService {
 
         try {
             return mappingService.mapEntityToDto(repository.save(existingCategory));
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException("Cannot save category to db");
         }
     }
@@ -78,7 +81,7 @@ public class CategoryServiceImpl implements CategoryService {
 
         try {
             return mappingService.mapEntityToDto(repository.save(existingCategory));
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException("Cannot save category to db ", e);
         }
     }
@@ -87,15 +90,21 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryDto hide(Long categoryId) {
         Category existingCategory = repository.findById(categoryId).orElseThrow(() -> new RuntimeException("Category not found with id: " + categoryId));
 
-
-        //TODO check if the list of the offers related to this category is empty
+        if (!existingCategory.getOffers().isEmpty()) throw new CategoryIsNotEmptyException(categoryId);
 
         existingCategory.setActive(false);
 
         try {
             return mappingService.mapEntityToDto(repository.save(existingCategory));
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException("Cannot save category to db ", e);
         }
+    }
+
+    @Override
+    public Category getCategoryById(Long id) {
+        if (id == null) throw new IdIsNullException();
+        return repository.findById(id)
+                .orElseThrow(() -> new CategoryNotFoundException(id));
     }
 }

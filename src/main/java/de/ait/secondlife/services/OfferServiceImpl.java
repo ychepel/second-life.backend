@@ -14,6 +14,7 @@ import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.is_
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.OfferNotFoundException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.WrongAuctionParameterException;
 import de.ait.secondlife.repositories.OfferRepository;
+import de.ait.secondlife.services.interfaces.CategoryService;
 import de.ait.secondlife.services.interfaces.OfferService;
 import de.ait.secondlife.services.interfaces.StatusService;
 import de.ait.secondlife.services.interfaces.UserService;
@@ -27,7 +28,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -44,6 +44,8 @@ public class OfferServiceImpl implements OfferService {
     private final OfferMappingService mappingService;
     private final StatusService statusService;
     private final UserService userService;
+    private final StatusService statusSevice;
+    private final CategoryService categoryService;
 
     @Override
     public OfferResponseWithPaginationDto findOffers(Pageable pageable) {
@@ -66,13 +68,13 @@ public class OfferServiceImpl implements OfferService {
         return offersToOfferRequestWithPaginationDto(pageOfOffer);
     }
 
-
     @Override
     public OfferResponseDto createOffer(OfferCreationDto dto) {
            User user = getUserFromAuthContext();
         try {
             Offer newOffer = mappingService.toOffer(dto);
             newOffer.setUser(user);
+            newOffer.setCategory(categoryService.getCategoryById(dto.getCategoryId()));
             newOffer.setId(null);
             newOffer.setStatus(statusService.getStatusByName(OfferStatus.DRAFT.name()));
             newOffer.setAuctionDurationDays(newOffer.getAuctionDurationDays() <= 0 ? 3 : newOffer.getAuctionDurationDays());
@@ -122,6 +124,9 @@ public class OfferServiceImpl implements OfferService {
             offer.setWinBid(dto.getWinBid() == null || dto.getWinBid().compareTo(BigDecimal.ZERO) == 0 ?
                     offer.getWinBid() : dto.getWinBid());
         }
+        offer.setCategory(dto.getCategoryId() == null ?
+                offer.getCategory() :
+                categoryService.getCategoryById(dto.getCategoryId()));
     }
 
     @Transactional
