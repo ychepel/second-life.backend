@@ -2,6 +2,7 @@ package de.ait.secondlife.exception_handling;
 
 import de.ait.secondlife.domain.dto.ResponseMessageDto;
 import de.ait.secondlife.exception_handling.exceptions.DuplicateUserEmailException;
+import de.ait.secondlife.exception_handling.exceptions.NoRightToChangeException;
 import de.ait.secondlife.exception_handling.exceptions.UserSavingException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.BadRequestException;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.ParameterNotFoundException;
@@ -46,6 +47,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<ResponseMessageDto> handleException(BadRequestException e) {
         return new ResponseEntity<>(new ResponseMessageDto(e.getMessage()), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(NoRightToChangeException.class)
+    public ResponseEntity<ResponseMessageDto> handleException(NoRightToChangeException e) {
+        return new ResponseEntity<>(new ResponseMessageDto(e.getMessage()), HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(ParameterNotFoundException.class)

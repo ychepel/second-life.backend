@@ -1,13 +1,12 @@
 package de.ait.secondlife.domain.entity;
 
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import java.util.Objects;
+import java.util.List;
 
 @Entity
 @Data
@@ -31,5 +30,6 @@ public class Category {
     @Column(name = "is_active",nullable = false)
     private boolean active;
 
-
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "category")
+    private List<Offer> offers;
 }

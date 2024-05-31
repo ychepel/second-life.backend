@@ -23,4 +23,5 @@ public interface OfferService {
     void removeOffer(UUID id);
 
     void recoverOffer(UUID id);
+
 }

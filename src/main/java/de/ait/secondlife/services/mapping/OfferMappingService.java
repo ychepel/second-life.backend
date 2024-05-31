@@ -11,17 +11,20 @@ import org.mapstruct.Mapping;
 public interface OfferMappingService {
 
 
-    @Mapping(source = "userId", target = "ownerId")
+    @Mapping(source = "user.id", target = "ownerId")
     @Mapping(source = "status.id", target = "statusId")
     @Mapping(source = "winnerBid.id", target = "winnerBidId")
+    @Mapping(source = "category.id", target = "categoryId")
     //TODO change the logic after creating the order status processing
     @Mapping(target = "endAt", expression = "java(offer.getCreatedAt().plusDays(offer.getAuctionDurationDays()))")
     OfferResponseDto toRequestDto(Offer offer);
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "user", ignore = true)
     @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "isActive", constant = "true")
     @Mapping(target = "status", ignore = true)
+    @Mapping(target = "category", ignore = true)
     Offer toOffer(OfferCreationDto dto);
 
 }
