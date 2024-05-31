@@ -5,18 +5,24 @@ import de.ait.secondlife.domain.dto.OfferCreationDto;
 import de.ait.secondlife.domain.dto.OfferResponseDto;
 import de.ait.secondlife.domain.dto.OfferResponseWithPaginationDto;
 import de.ait.secondlife.domain.dto.OfferUpdateDto;
+import de.ait.secondlife.domain.entity.Category;
 import de.ait.secondlife.domain.entity.Offer;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.CreateOfferConstraintViolationException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.is_null_exceptions.IdIsNullException;
+import de.ait.secondlife.exception_handling.exceptions.not_found_exception.CategoryNotFoundException;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.OfferNotFoundException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.WrongAuctionParameterException;
+import de.ait.secondlife.repositories.CategoriesRepository;
 import de.ait.secondlife.repositories.OfferRepository;
+import de.ait.secondlife.services.interfaces.CategoryService;
 import de.ait.secondlife.services.interfaces.OfferService;
 import de.ait.secondlife.services.interfaces.StatusService;
 import de.ait.secondlife.services.mapping.OfferMappingService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,6 +41,7 @@ public class OfferServiceImpl implements OfferService {
     private final OfferRepository offerRepository;
     private final OfferMappingService mappingService;
     private final StatusService statusSevice;
+    private final CategoryService categoryService;
 
     @Override
     public OfferResponseWithPaginationDto findOffers(Pageable pageable) {
@@ -59,8 +66,10 @@ public class OfferServiceImpl implements OfferService {
 
     @Override
     public OfferResponseDto createOffer(OfferCreationDto dto) {
+
         try {
             Offer newOffer = mappingService.toOffer(dto);
+            newOffer.setCategory(categoryService.getCategoryById(dto.getCategoryId()));
             newOffer.setId(null);
             newOffer.setStatus(statusSevice.getStatusByName(OfferStatus.DRAFT.name()));
             newOffer.setAuctionDurationDays(newOffer.getAuctionDurationDays() <= 0 ? 3 : newOffer.getAuctionDurationDays());
@@ -107,6 +116,9 @@ public class OfferServiceImpl implements OfferService {
             offer.setWinBid(dto.getWinBid() == null || dto.getWinBid().compareTo(BigDecimal.ZERO) == 0 ?
                     offer.getWinBid() : dto.getWinBid());
         }
+        offer.setCategory(dto.getCategoryId() == null ?
+                offer.getCategory() :
+                categoryService.getCategoryById(dto.getCategoryId()));
     }
 
     @Transactional

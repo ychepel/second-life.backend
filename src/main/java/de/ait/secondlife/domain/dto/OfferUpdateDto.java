@@ -1,7 +1,6 @@
 package de.ait.secondlife.domain.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
@@ -15,9 +14,8 @@ import java.util.UUID;
 public class OfferUpdateDto {
 
     @Schema(description = "Offer id "
-            , example = "898449f7-e9d1-4d00-9fd6-cae203452f3a",
-            accessMode = Schema.AccessMode.READ_ONLY)
-    @NotBlank(message = "Offer id cannot be empty")
+            , example = "898449f7-e9d1-4d00-9fd6-cae203452f3a")
+    @NotNull(message = "Offer id cannot be null")
     private UUID id;
 
     @Schema(description = "Title of a offer", example = "Upholstered chair")

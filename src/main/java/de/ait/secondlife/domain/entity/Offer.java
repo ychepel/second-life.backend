@@ -2,8 +2,6 @@ package de.ait.secondlife.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import jakarta.validation.constraints.*;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -56,9 +54,9 @@ public class Offer {
     private Status status;
 
 
-//TODO -add offer to category dependence
-    @Column(name = "category_id")
-     private Long categoryId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "winner_bid_id")
