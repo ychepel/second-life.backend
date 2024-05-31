@@ -5,8 +5,8 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
 
-    <changeSet id="add_tag_1.0.3" author="rslan">
-        <tagDatabase tag="v.1.0.3"/>
+    <changeSet id="add_tag_1.0.4" author="rslan">
+        <tagDatabase tag="v.1.0.4"/>
     </changeSet>
 
     <include file="add-new-status.xml" relativeToChangelogFile="true"/>
