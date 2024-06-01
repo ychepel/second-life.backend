@@ -9,6 +9,7 @@
     </changeSet>
     <include file="create-table-location.xml" relativeToChangelogFile="true"/>
     <include file="add-locations.xml" relativeToChangelogFile="true"/>
+    <include file="add-location-id-to-offer.xml" relativeToChangelogFile="true"/>
     <include file="create-foreign-key-offer-to-location.xml" relativeToChangelogFile="true"/>
     <include file="create-foreign-key-user-to-location.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

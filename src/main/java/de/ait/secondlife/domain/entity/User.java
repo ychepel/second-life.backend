@@ -31,12 +31,10 @@ public class User implements AuthenticatedUser {
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private Long locationId;
     private LocalDateTime lastActive;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "location_id")
-    @NotNull(message = "location cannot be empty")
     private Location location;
 
     @Override
