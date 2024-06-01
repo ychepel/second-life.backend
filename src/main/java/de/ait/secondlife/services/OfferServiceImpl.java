@@ -44,7 +44,6 @@ public class OfferServiceImpl implements OfferService {
     private final OfferMappingService mappingService;
     private final StatusService statusService;
     private final UserService userService;
-    private final StatusService statusSevice;
     private final CategoryService categoryService;
 
     @Override

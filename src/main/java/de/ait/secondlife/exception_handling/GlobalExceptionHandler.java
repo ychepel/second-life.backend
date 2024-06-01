@@ -7,6 +7,7 @@ import de.ait.secondlife.exception_handling.exceptions.UserSavingException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.BadRequestException;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.ParameterNotFoundException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -63,9 +64,16 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(new ResponseMessageDto("Something went wrong"), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ResponseMessageDto> handleException(IllegalArgumentException e){
+        return new ResponseEntity<>(new ResponseMessageDto("Invalid value"), HttpStatus.BAD_REQUEST);
+    }
+
     private String parseExceptionMessage(String errorMessage) {
         Pattern pattern = Pattern.compile("messageTemplate='([^']*)'");
         Matcher matcher = pattern.matcher(errorMessage);
         return matcher.find() ? matcher.group(1) : "something went wrong";
     }
+
+
 }

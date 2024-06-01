@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="add_locations" author="Kirill">
+        <insert tableName="location">
+            <column name="name" value="Deutschland"/>
+        </insert>
+        <insert tableName="location">
+            <column name="name" value="Baden-Württemberg"/>
+        </insert>
+        <insert tableName="location">
+            <column name="name" value="Bayern"/>
+        </insert>
+        <insert tableName="location">
+            <column name="name" value="Berlin"/>
+        </insert>
+        <insert tableName="location">
+            <column name="name" value="Brandenburg"/>
+        </insert>
+        <insert tableName="location">
+            <column name="name" value="Hamburg"/>
+        </insert>
+        <insert tableName="location">
+            <column name="name" value="Hessen"/>
+        </insert>
+        <insert tableName="location">
+            <column name="name" value="Mecklenburg-Vorpommern"/>
+        </insert>
+        <insert tableName="location">
+            <column name="name" value="Niedersachsen"/>
+        </insert>
+        <insert tableName="location">
+            <column name="name" value="Nordrhein-Westfalen"/>
+        </insert>
+        <insert tableName="location">
+            <column name="name" value="Rheinland-Pfalz"/>
+        </insert>
+        <insert tableName="location">
+            <column name="name" value="Sachsen"/>
+        </insert>
+        <insert tableName="location">
+            <column name="name" value="Sachsen-Anhalt"/>
+        </insert>
+        <insert tableName="location">
+            <column name="name" value="Schleswig-Holstein"/>
+        </insert>
+        <insert tableName="location">
+            <column name="name" value="Thüringen"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

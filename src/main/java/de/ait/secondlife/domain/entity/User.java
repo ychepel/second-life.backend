@@ -3,6 +3,7 @@ package de.ait.secondlife.domain.entity;
 import de.ait.secondlife.domain.interfaces.AuthenticatedUser;
 import de.ait.secondlife.security.Role;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
@@ -32,6 +33,11 @@ public class User implements AuthenticatedUser {
     private LocalDateTime updatedAt;
     private Long locationId;
     private LocalDateTime lastActive;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "location_id")
+    @NotNull(message = "location cannot be empty")
+    private Location location;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

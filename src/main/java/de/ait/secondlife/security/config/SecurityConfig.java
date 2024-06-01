@@ -54,6 +54,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/v1/offers").hasRole("USER")
                         .requestMatchers(HttpMethod.PUT, "/v1/offers", "/v1/offers/recover/{id}").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/v1/offers/{id}").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/v1/locations","/v1/locations/{id}").permitAll()
                         .anyRequest().denyAll()
                 )
                 .httpBasic(AbstractHttpConfigurer::disable)

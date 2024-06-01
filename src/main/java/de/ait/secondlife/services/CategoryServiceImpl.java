@@ -3,6 +3,7 @@ package de.ait.secondlife.services;
 import de.ait.secondlife.domain.dto.CategoryDto;
 import de.ait.secondlife.domain.dto.NewCategoryDto;
 import de.ait.secondlife.domain.entity.Category;
+import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.BadRequestException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.CategoryIsNotEmptyException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.is_null_exceptions.IdIsNullException;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.CategoryNotFoundException;
@@ -11,6 +12,7 @@ import de.ait.secondlife.services.interfaces.CategoryService;
 import de.ait.secondlife.services.mapping.NewCategoryMappingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.method.MethodValidationException;
 
 import java.util.List;
 
@@ -26,10 +28,10 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryDto getById(Long id) {
 
         if (id == null || id < 1) {
-            throw new RuntimeException("Category ID is incorrect");
+            throw new IllegalArgumentException("Category ID is incorrect");
         }
 
-        Category category = repository.findById(id).orElseThrow(() -> new RuntimeException("Category not found"));
+        Category category = repository.findById(id).orElseThrow(() -> new CategoryNotFoundException(id));
 
         return mappingService.mapEntityToDto(category);
     }

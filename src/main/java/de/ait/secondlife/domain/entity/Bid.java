@@ -36,18 +36,14 @@ public class Bid {
     @Column(name = "update_at")
     private LocalDateTime updatedAt;
 
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "offer_id")
     @NotNull(message="Offer cannot be null" )
-    private Offer offer ;
+    private Offer offer;
 
     //TODO -add bid to user dependence
     @Column(name = "user_id")
     @NotNull(message="User Id cannot be null" )
     private Long userId;
-
-
-
 }
 
