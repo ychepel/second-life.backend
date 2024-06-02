@@ -14,10 +14,7 @@ import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.is_
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.OfferNotFoundException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.WrongAuctionParameterException;
 import de.ait.secondlife.repositories.OfferRepository;
-import de.ait.secondlife.services.interfaces.CategoryService;
-import de.ait.secondlife.services.interfaces.OfferService;
-import de.ait.secondlife.services.interfaces.StatusService;
-import de.ait.secondlife.services.interfaces.UserService;
+import de.ait.secondlife.services.interfaces.*;
 import de.ait.secondlife.services.mapping.OfferMappingService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ConstraintViolationException;
@@ -45,6 +42,7 @@ public class OfferServiceImpl implements OfferService {
     private final StatusService statusService;
     private final UserService userService;
     private final CategoryService categoryService;
+    private final LocationService locationService;
 
     @Override
     public OfferResponseWithPaginationDto findOffers(Pageable pageable) {
@@ -74,6 +72,7 @@ public class OfferServiceImpl implements OfferService {
             Offer newOffer = mappingService.toOffer(dto);
             newOffer.setUser(user);
             newOffer.setCategory(categoryService.getCategoryById(dto.getCategoryId()));
+            newOffer.setLocation(locationService.getLocationById(dto.getLocationId()));
             newOffer.setId(null);
             newOffer.setStatus(statusService.getStatusByName(OfferStatus.DRAFT.name()));
             newOffer.setAuctionDurationDays(newOffer.getAuctionDurationDays() <= 0 ? 3 : newOffer.getAuctionDurationDays());
@@ -126,6 +125,9 @@ public class OfferServiceImpl implements OfferService {
         offer.setCategory(dto.getCategoryId() == null ?
                 offer.getCategory() :
                 categoryService.getCategoryById(dto.getCategoryId()));
+        offer.setLocation(dto.getLocationId() == null ?
+                offer.getLocation() :
+                locationService.getLocationById(dto.getLocationId()));
     }
 
     @Transactional

@@ -47,5 +47,4 @@ public class LocationController {
     public ResponseEntity<List<LocationDto>> getAll() {
         return ResponseEntity.ok(service.getAll());
     }
-
 }

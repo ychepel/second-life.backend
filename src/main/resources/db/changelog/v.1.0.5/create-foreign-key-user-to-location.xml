@@ -10,6 +10,7 @@
                                  baseColumnNames="location_id"
                                  constraintName="fk_user_to_location"
                                  referencedTableName="location"
-                                 referencedColumnNames="id"/>
+                                 referencedColumnNames="id"
+                                 onDelete="SET NULL"/>
     </changeSet>
 </databaseChangeLog>

@@ -62,7 +62,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryDto update(Long id, CategoryDto dto) {
 
-        Category existingCategory = repository.findById(id).orElseThrow(() -> new RuntimeException("Category not found with id: " + id));
+        Category existingCategory = repository.findById(id).orElseThrow(() -> new CategoryNotFoundException(id));
 
         existingCategory.setName(dto.getName());
         existingCategory.setDescription(dto.getDescription());
@@ -77,7 +77,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryDto setActive(Long categoryId) {
 
-        Category existingCategory = repository.findById(categoryId).orElseThrow(() -> new RuntimeException("Category not found with id: " + categoryId));
+        Category existingCategory = repository.findById(categoryId).orElseThrow(() -> new CategoryNotFoundException(categoryId));
 
         existingCategory.setActive(true);
 

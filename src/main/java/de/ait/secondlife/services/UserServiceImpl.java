@@ -5,7 +5,10 @@ import de.ait.secondlife.domain.dto.UserDto;
 import de.ait.secondlife.domain.entity.User;
 import de.ait.secondlife.exception_handling.exceptions.DuplicateUserEmailException;
 import de.ait.secondlife.exception_handling.exceptions.UserSavingException;
+import de.ait.secondlife.exception_handling.exceptions.not_found_exception.LocationNotFoundException;
+import de.ait.secondlife.exception_handling.exceptions.not_found_exception.UserNotFoundException;
 import de.ait.secondlife.repositories.UserRepository;
+import de.ait.secondlife.services.interfaces.LocationService;
 import de.ait.secondlife.services.interfaces.UserService;
 import de.ait.secondlife.services.mapping.NewUserMappingService;
 import de.ait.secondlife.services.mapping.UserMappingService;
@@ -21,14 +24,15 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    private final UserRepository repository;
+    private final UserRepository userRepository;
     private final NewUserMappingService newUserMappingService;
     private final UserMappingService userMappingService;
     private final BCryptPasswordEncoder encoder;
+    private final LocationService locationService;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = repository.findByEmail(username);
+        User user = userRepository.findByEmail(username);
         if (user == null) {
             throw new UsernameNotFoundException("User not found");
         }
@@ -38,7 +42,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto register(NewUserDto newUserDto) {
         String userEmail = newUserDto.getEmail();
-        if (repository.existsByEmail(userEmail)) {
+        if (userRepository.existsByEmail(userEmail)) {
             throw new DuplicateUserEmailException(userEmail);
         }
 
@@ -47,10 +51,11 @@ public class UserServiceImpl implements UserService {
         user.setPassword(encoder.encode(newUserDto.getPassword()));
         LocalDateTime now = LocalDateTime.now();
         user.setCreatedAt(now);
+        user.setLocation(locationService.getLocationById(1L));
         user.setUpdatedAt(now);
 
         try {
-            repository.save(user);
+            userRepository.save(user);
         } catch (Exception e) {
             throw new UserSavingException("User saving failed", e);
         }
@@ -61,6 +66,30 @@ public class UserServiceImpl implements UserService {
     @Override
     public void updateLastActive(User user) {
         user.setLastActive(LocalDateTime.now());
-        repository.save(user);
+        userRepository.save(user);
+    }
+
+    @Override
+    public UserDto setLocation(Long userId, Long locationId) {
+
+        if (userId == null || userId <1 ){
+            throw new UserNotFoundException(userId);
+        }
+
+        if (locationId == null || locationId <1 ){
+            throw new LocationNotFoundException(userId);
+        }
+
+        User user = userRepository.findById(userId).orElseThrow( () -> new UserNotFoundException(userId));
+
+        user.setLocation(locationService.getLocationById(locationId));
+
+        try {
+            userRepository.save(user);
+        } catch (Exception e) {
+            throw new UserSavingException("User saving failed", e);
+        }
+
+        return userMappingService.toDto(user);
     }
 }

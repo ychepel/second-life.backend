@@ -52,6 +52,9 @@ public class OfferResponseDto {
     @Schema(description = "Category id", example = "22")
     private Long categoryId;
 
+    @Schema(description = "Location id", example = "1")
+    private Long locationId;
+
     @Schema(description = "Winner bid id", example = "898449f7-e9d1-4d00-9fd6-cae203452f3a")
     private UUID winnerBidId;
 }

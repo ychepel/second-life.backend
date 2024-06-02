@@ -2,6 +2,8 @@ package de.ait.secondlife.services;
 
 import de.ait.secondlife.domain.dto.LocationDto;
 import de.ait.secondlife.domain.entity.Location;
+import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.is_null_exceptions.IdIsNullException;
+import de.ait.secondlife.exception_handling.exceptions.not_found_exception.CategoryNotFoundException;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.LocationNotFoundException;
 import de.ait.secondlife.repositories.LocationsRepository;
 import de.ait.secondlife.services.interfaces.LocationService;
@@ -36,5 +38,12 @@ public class LocationServiceImpl implements LocationService {
                 .stream()
                 .map(mappingService::toDto)
                 .toList();
+    }
+
+    @Override
+    public Location getLocationById(Long id) {
+        if (id == null) throw new IdIsNullException();
+        return repository.findById(id)
+                .orElseThrow(() -> new LocationNotFoundException(id));
     }
 }
