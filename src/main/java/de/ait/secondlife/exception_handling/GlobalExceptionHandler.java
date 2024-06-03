@@ -3,6 +3,7 @@ package de.ait.secondlife.exception_handling;
 import de.ait.secondlife.domain.dto.ResponseMessageDto;
 import de.ait.secondlife.exception_handling.dto.ValidationErrorDto;
 import de.ait.secondlife.exception_handling.dto.ValidationErrorsDto;
+import de.ait.secondlife.exception_handling.exceptions.DuplicateCategoryException;
 import de.ait.secondlife.exception_handling.exceptions.DuplicateUserEmailException;
 import de.ait.secondlife.exception_handling.exceptions.NoRightToChangeException;
 import de.ait.secondlife.exception_handling.exceptions.UserSavingException;
@@ -28,29 +29,29 @@ import java.util.regex.Pattern;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(UserSavingException.class)
-    public ResponseEntity<Response> handleException(UserSavingException e) {
-        Throwable causeException = e.getCause();
-        String additionalMessage = causeException == null ? null : parseExceptionMessage(causeException.getMessage());
-        Response response = new Response(e.getMessage(), additionalMessage);
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    public ResponseEntity<ResponseMessageDto> handleException(UserSavingException e) {
+        //TODO save to logs stacktrace
+        return new ResponseEntity<>(new ResponseMessageDto(e.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(DuplicateUserEmailException.class)
-    public ResponseEntity<Response> handleException(DuplicateUserEmailException e) {
-        Response response = new Response(e.getMessage());
-        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+    public ResponseEntity<ResponseMessageDto> handleException(DuplicateUserEmailException e) {
+        return new ResponseEntity<>(new ResponseMessageDto(e.getMessage()), HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+    @ExceptionHandler(DuplicateCategoryException.class)
+    public ResponseEntity<ResponseMessageDto> handleException(DuplicateCategoryException e) {
+        return new ResponseEntity<>(new ResponseMessageDto(e.getMessage()), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(CredentialException.class)
-    public ResponseEntity<Response> handleException(CredentialException e) {
-        Response response = new Response(e.getMessage());
-        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+    public ResponseEntity<ResponseMessageDto> handleException(CredentialException e) {
+        return new ResponseEntity<>(new ResponseMessageDto(e.getMessage()), HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(LoginException.class)
-    public ResponseEntity<Response> handleException(LoginException e) {
-        Response response = new Response(e.getMessage());
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    public ResponseEntity<ResponseMessageDto> handleException(LoginException e) {
+        return new ResponseEntity<>(new ResponseMessageDto(e.getMessage()), HttpStatus.BAD_REQUEST);
     }
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<ResponseMessageDto> handleException(BadRequestException e) {
@@ -86,7 +87,7 @@ public class GlobalExceptionHandler {
 
             ValidationErrorDto errorDto = ValidationErrorDto.builder()
                     .field(fieldError.getField())
-                    .message(fieldError.getDefaultMessage())
+                    .message("Field "+fieldError.getDefaultMessage())
                     .build();
 
             if (fieldError.getRejectedValue() != null) {

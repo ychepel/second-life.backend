@@ -3,6 +3,7 @@ package de.ait.secondlife.services;
 import de.ait.secondlife.domain.dto.CategoryDto;
 import de.ait.secondlife.domain.dto.NewCategoryDto;
 import de.ait.secondlife.domain.entity.Category;
+import de.ait.secondlife.exception_handling.exceptions.DuplicateCategoryException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.CategoryIsNotEmptyException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.is_null_exceptions.IdIsNullException;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.CategoryNotFoundException;
@@ -10,6 +11,7 @@ import de.ait.secondlife.repositories.CategoryRepository;
 import de.ait.secondlife.services.interfaces.CategoryService;
 import de.ait.secondlife.services.mapping.NewCategoryMappingService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -45,6 +47,11 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryDto save(NewCategoryDto categoryDto) {
+
+        String categoryName = categoryDto.getName();
+        if (repository.existsByName(categoryName)){
+            throw new DuplicateCategoryException(categoryName);
+        }
 
         Category entity = mappingService.mapDtoToEntity(categoryDto);
 

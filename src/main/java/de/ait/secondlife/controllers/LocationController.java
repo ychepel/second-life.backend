@@ -1,6 +1,8 @@
 package de.ait.secondlife.controllers;
 
+import de.ait.secondlife.domain.dto.CategoryDto;
 import de.ait.secondlife.domain.dto.LocationDto;
+import de.ait.secondlife.domain.dto.ResponseMessageDto;
 import de.ait.secondlife.services.interfaces.LocationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -27,9 +29,13 @@ public class LocationController {
 
     @Operation(summary = "Get location by id", description = "Accessible to all users")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = LocationDto.class))),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successful operation",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = CategoryDto.class))}),
+            @ApiResponse(responseCode = "404",
+                    description = "Resource not found",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class)))
     })
     @GetMapping("/{id}")
     public ResponseEntity<LocationDto> getById(@PathVariable("id") Long id) {
@@ -39,9 +45,10 @@ public class LocationController {
 
     @Operation(summary = "Get all locations", description = "Accessible to all users")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = LocationDto.class))),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successful operation",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = CategoryDto.class))})
     })
     @GetMapping()
     public ResponseEntity<List<LocationDto>> getAll() {

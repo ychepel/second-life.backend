@@ -40,7 +40,7 @@ public class UserController {
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "201",
-                    description = "User created",
+                    description = "User is successfully created",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = UserDto.class))}
             ),
             @ApiResponse(
@@ -48,9 +48,9 @@ public class UserController {
                     description = "Invalid input",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorsDto.class))
             ),
-            @ApiResponse(responseCode = "409",
+            @ApiResponse(responseCode = "422",
                     description = "Email already exists",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorsDto.class)))}
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class)))}
     )
     public ResponseEntity<UserDto> register(
             @Valid
