@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-
 @Entity
 @Table(name = "offer_status_history")
 @NoArgsConstructor
