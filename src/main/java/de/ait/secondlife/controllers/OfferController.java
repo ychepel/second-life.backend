@@ -1,11 +1,6 @@
 package de.ait.secondlife.controllers;
 
-import de.ait.secondlife.domain.dto.ResponseMessageDto;
-import de.ait.secondlife.domain.dto.OfferCreationDto;
-import de.ait.secondlife.domain.dto.OfferResponseDto;
-import de.ait.secondlife.domain.dto.OfferResponseWithPaginationDto;
-import de.ait.secondlife.domain.dto.OfferUpdateDto;
-
+import de.ait.secondlife.domain.dto.*;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.PaginationParameterIsWrongException;
 import de.ait.secondlife.services.interfaces.OfferService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,8 +19,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/v1/offers")
@@ -98,8 +91,8 @@ public class OfferController  {
     })
     public ResponseEntity<OfferResponseDto> getById(
             @PathVariable
-            @Parameter(description = "Offer id in UUID format.", example = "898449f7-e9d1-4d00-9fd6-cae203452f3a")
-            UUID id) {
+            @Parameter(description = "Offer id.", example = "123")
+            Long id) {
         return ResponseEntity.ok(service.findOfferById(id));
     }
 
@@ -185,8 +178,8 @@ public class OfferController  {
     })
     public ResponseEntity<ResponseMessageDto> remove(
             @PathVariable
-            @Parameter(description = "Offer id in UUID format.", example = "898449f7-e9d1-4d00-9fd6-cae203452f3a")
-            UUID id) {
+            @Parameter(description = "Offer id.", example = "123")
+            Long id) {
         service.removeOffer(id);
         return ResponseEntity.ok(
                 new ResponseMessageDto(String.format("Offer with id <%s> removed successful", id)));
@@ -204,8 +197,8 @@ public class OfferController  {
     })
     public ResponseEntity<ResponseMessageDto> recover(
             @PathVariable
-            @Parameter(description = "Offer id in UUID format.", example = "898449f7-e9d1-4d00-9fd6-cae203452f3a")
-            UUID id) {
+            @Parameter(description = "Offer id.", example = "123")
+            Long id) {
         service.recoverOffer(id);
         return ResponseEntity.ok(
                 new ResponseMessageDto(String.format("Offer with id <%s> recovered successful", id)));

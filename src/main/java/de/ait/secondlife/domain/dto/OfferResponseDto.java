@@ -3,19 +3,19 @@ package de.ait.secondlife.domain.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Data
 @Builder
 @Schema(description = "Offer response DTO")
 public class OfferResponseDto {
 
-    @Schema(description = "Offer id "
-            , example = "898449f7-e9d1-4d00-9fd6-cae203452f3a",
+    @Schema(description = "Offer id"
+            , example = "123",
             accessMode = Schema.AccessMode.READ_ONLY)
-    private UUID id;
+    private Long id;
 
     @Schema(description = "Title of a offer", example = "Upholstered chair")
     private String title;
@@ -52,6 +52,6 @@ public class OfferResponseDto {
     @Schema(description = "Category id", example = "22")
     private Long categoryId;
 
-    @Schema(description = "Winner bid id", example = "898449f7-e9d1-4d00-9fd6-cae203452f3a")
-    private UUID winnerBidId;
+    @Schema(description = "Winner bid id", example = "123")
+    private Long winnerBidId;
 }
