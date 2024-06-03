@@ -3,16 +3,14 @@ package de.ait.secondlife.services;
 import de.ait.secondlife.domain.dto.CategoryDto;
 import de.ait.secondlife.domain.dto.NewCategoryDto;
 import de.ait.secondlife.domain.entity.Category;
-import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.BadRequestException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.CategoryIsNotEmptyException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.is_null_exceptions.IdIsNullException;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.CategoryNotFoundException;
-import de.ait.secondlife.repositories.CategoriesRepository;
+import de.ait.secondlife.repositories.CategoryRepository;
 import de.ait.secondlife.services.interfaces.CategoryService;
 import de.ait.secondlife.services.mapping.NewCategoryMappingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.method.MethodValidationException;
 
 import java.util.List;
 
@@ -20,7 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
 
-    private final CategoriesRepository repository;
+    private final CategoryRepository repository;
 
     private final NewCategoryMappingService mappingService;
 

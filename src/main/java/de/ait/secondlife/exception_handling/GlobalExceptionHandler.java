@@ -1,6 +1,8 @@
 package de.ait.secondlife.exception_handling;
 
 import de.ait.secondlife.domain.dto.ResponseMessageDto;
+import de.ait.secondlife.exception_handling.dto.ValidationErrorDto;
+import de.ait.secondlife.exception_handling.dto.ValidationErrorsDto;
 import de.ait.secondlife.exception_handling.exceptions.DuplicateUserEmailException;
 import de.ait.secondlife.exception_handling.exceptions.NoRightToChangeException;
 import de.ait.secondlife.exception_handling.exceptions.UserSavingException;
@@ -9,11 +11,16 @@ import de.ait.secondlife.exception_handling.exceptions.not_found_exception.Param
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import javax.security.auth.login.CredentialException;
 import javax.security.auth.login.LoginException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -67,6 +74,32 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ResponseMessageDto> handleException(IllegalArgumentException e){
         return new ResponseEntity<>(new ResponseMessageDto("Invalid value"), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ValidationErrorsDto> handleValidationException(MethodArgumentNotValidException e) {
+        List<ValidationErrorDto> validationErrors = new ArrayList<>();
+        List<ObjectError> errors = e.getBindingResult().getAllErrors();
+
+        for (ObjectError error : errors) {
+            FieldError fieldError = (FieldError) error;
+
+            ValidationErrorDto errorDto = ValidationErrorDto.builder()
+                    .field(fieldError.getField())
+                    .message(fieldError.getDefaultMessage())
+                    .build();
+
+            if (fieldError.getRejectedValue() != null) {
+                errorDto.setRejectedValue(fieldError.getRejectedValue().toString());
+            }
+
+            validationErrors.add(errorDto);
+        }
+
+        return ResponseEntity.badRequest()
+                .body(ValidationErrorsDto.builder()
+                        .errors(validationErrors)
+                        .build());
     }
 
     private String parseExceptionMessage(String errorMessage) {

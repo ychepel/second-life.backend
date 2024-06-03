@@ -48,7 +48,9 @@ public class UserController {
                     description = "Invalid input",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorsDto.class))
             ),
-            @ApiResponse(responseCode = "409", description = "Email already exists", content = @Content)}
+            @ApiResponse(responseCode = "409",
+                    description = "Email already exists",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorsDto.class)))}
     )
     public ResponseEntity<UserDto> register(
             @Valid
@@ -57,11 +59,5 @@ public class UserController {
             NewUserDto newUserDto) {
         UserDto userDto = userService.register(newUserDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(userDto);
-    }
-
-
-    @PatchMapping("/v1/users/{id}/set-location")
-    public ResponseEntity<UserDto> setLocation(@PathVariable("id") Long userId, Long locationId){
-        return ResponseEntity.ok(userService.setLocation(userId,locationId));
     }
 }

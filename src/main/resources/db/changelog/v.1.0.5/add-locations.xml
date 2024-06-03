@@ -6,9 +6,6 @@
 
     <changeSet id="add_locations" author="Kirill">
         <insert tableName="location">
-            <column name="name" value="Deutschland"/>
-        </insert>
-        <insert tableName="location">
             <column name="name" value="Baden-Württemberg"/>
         </insert>
         <insert tableName="location">

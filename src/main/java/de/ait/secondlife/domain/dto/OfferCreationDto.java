@@ -28,6 +28,8 @@ public class OfferCreationDto {
     private String description;
 
     @Schema(description = "Auction duration in days", example = "3")
+    @NotNull(message = "Auction duration cannot be null")
+    @Size(min = 1, max = 7,message = "minimum days 1, maximum days 7")
     private Integer auctionDurationDays;
 
     @Schema(description = "Starting offer price", example = "1234.34")

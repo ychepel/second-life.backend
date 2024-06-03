@@ -3,9 +3,8 @@ package de.ait.secondlife.services;
 import de.ait.secondlife.domain.dto.LocationDto;
 import de.ait.secondlife.domain.entity.Location;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.is_null_exceptions.IdIsNullException;
-import de.ait.secondlife.exception_handling.exceptions.not_found_exception.CategoryNotFoundException;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.LocationNotFoundException;
-import de.ait.secondlife.repositories.LocationsRepository;
+import de.ait.secondlife.repositories.LocationRepository;
 import de.ait.secondlife.services.interfaces.LocationService;
 import de.ait.secondlife.services.mapping.LocationMappingService;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +18,7 @@ public class LocationServiceImpl implements LocationService {
 
     private final LocationMappingService mappingService;
 
-    private final LocationsRepository repository;
+    private final LocationRepository repository;
     @Override
     public LocationDto getById(Long id) {
 

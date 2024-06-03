@@ -51,7 +51,6 @@ public class UserServiceImpl implements UserService {
         user.setPassword(encoder.encode(newUserDto.getPassword()));
         LocalDateTime now = LocalDateTime.now();
         user.setCreatedAt(now);
-        user.setLocation(locationService.getLocationById(1L));
         user.setUpdatedAt(now);
 
         try {
