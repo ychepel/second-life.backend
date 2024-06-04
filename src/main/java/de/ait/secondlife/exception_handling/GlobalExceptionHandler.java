@@ -9,6 +9,7 @@ import de.ait.secondlife.exception_handling.exceptions.NoRightToChangeException;
 import de.ait.secondlife.exception_handling.exceptions.UserSavingException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.BadRequestException;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.ParameterNotFoundException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -38,6 +39,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ResponseMessageDto> handleException(DuplicateUserEmailException e) {
         return new ResponseEntity<>(new ResponseMessageDto(e.getMessage()), HttpStatus.UNPROCESSABLE_ENTITY);
     }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ResponseMessageDto> handleException(DataIntegrityViolationException e) {
+        return new ResponseEntity<>(new ResponseMessageDto(e.getMessage()), HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
 
     @ExceptionHandler(DuplicateCategoryException.class)
     public ResponseEntity<ResponseMessageDto> handleException(DuplicateCategoryException e) {
