@@ -1,6 +1,6 @@
 package de.ait.secondlife.services;
 
-import de.ait.secondlife.domain.constants.OfferStatus;
+import de.ait.secondlife.constants.OfferStatus;
 import de.ait.secondlife.domain.dto.OfferCreationDto;
 import de.ait.secondlife.domain.dto.OfferResponseDto;
 import de.ait.secondlife.domain.dto.OfferResponseWithPaginationDto;
@@ -42,7 +42,7 @@ public class OfferServiceImpl implements OfferService {
     private final OfferMappingService mappingService;
     private final StatusService statusService;
     private final UserService userService;
-    private final StatusService statusSevice;
+
     private final CategoryService categoryService;
 
     @Override
