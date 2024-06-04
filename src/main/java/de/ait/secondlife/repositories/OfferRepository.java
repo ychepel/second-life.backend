@@ -6,13 +6,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
-import java.util.UUID;
 
-public interface OfferRepository extends JpaRepository<Offer, UUID> {
+public interface OfferRepository extends JpaRepository<Offer, Long> {
 
     Page<Offer> findAllByIsActiveTrue(Pageable pageable);
 
-    Optional<Offer> findByIdAndIsActiveTrue(UUID offerId);
+    Optional<Offer> findByIdAndIsActiveTrue(Long offerId);
 
     Page<Offer> findByUserIdAndIsActiveTrue(Long id, Pageable pageable);
 }

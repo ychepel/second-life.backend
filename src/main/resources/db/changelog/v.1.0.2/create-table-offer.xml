@@ -7,7 +7,7 @@
     <changeSet id="create_table_offer" author="rslan">
         <createTable tableName="offer">
 
-            <column name="id" type="uuid" >
+            <column name="id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
 
@@ -51,7 +51,7 @@
                 <constraints nullable="false"/>
             </column>
 
-            <column name="winner_bid_id" type="uuid" />
+            <column name="winner_bid_id" type="bigint" />
 
         </createTable>
     </changeSet>

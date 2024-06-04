@@ -5,8 +5,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Data;
+
 import java.math.BigDecimal;
-import java.util.UUID;
 
 @Data
 @Builder
@@ -14,9 +14,9 @@ import java.util.UUID;
 public class OfferUpdateDto {
 
     @Schema(description = "Offer id "
-            , example = "898449f7-e9d1-4d00-9fd6-cae203452f3a")
+            , example = "123")
     @NotNull(message = "Offer id cannot be null")
-    private UUID id;
+    private Long id;
 
     @Schema(description = "Title of a offer", example = "Upholstered chair")
     @Size(min = 5, max = 64, message = "Title must be between 5 and 64 characters")

@@ -9,8 +9,6 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.UUID;
-
 
 @Entity
 @Table(name = "bid")
@@ -21,9 +19,9 @@ import java.util.UUID;
 public class Bid {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private UUID id;
+    private Long id;
 
     @Column(name = "bid_value")
     @NotNull(message = "Bid value cannot be null")

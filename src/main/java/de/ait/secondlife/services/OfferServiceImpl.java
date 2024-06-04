@@ -10,9 +10,9 @@ import de.ait.secondlife.domain.entity.User;
 import de.ait.secondlife.exception_handling.exceptions.NoRightToChangeException;
 import de.ait.secondlife.exception_handling.exceptions.UserIsNotAuthorizedException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.CreateOfferConstraintViolationException;
+import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.WrongAuctionParameterException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.is_null_exceptions.IdIsNullException;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.OfferNotFoundException;
-import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.WrongAuctionParameterException;
 import de.ait.secondlife.repositories.OfferRepository;
 import de.ait.secondlife.services.interfaces.*;
 import de.ait.secondlife.services.mapping.OfferMappingService;
@@ -29,9 +29,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
-
 
 @Service
 @RequiredArgsConstructor
@@ -51,7 +49,7 @@ public class OfferServiceImpl implements OfferService {
     }
 
     @Override
-    public OfferResponseDto findOfferById(UUID id) {
+    public OfferResponseDto findOfferById(Long id) {
         if (id == null) throw new IdIsNullException();
         Offer offer = offerRepository.findByIdAndIsActiveTrue(id)
                 .orElseThrow(() -> new OfferNotFoundException(id));
@@ -132,7 +130,7 @@ public class OfferServiceImpl implements OfferService {
 
     @Transactional
     @Override
-    public void removeOffer(UUID id) {
+    public void removeOffer(Long id) {
         if (id == null) throw new IdIsNullException();
         Offer offer = offerRepository.findByIdAndIsActiveTrue(id)
                 .orElseThrow(() -> new OfferNotFoundException(id));
@@ -141,7 +139,7 @@ public class OfferServiceImpl implements OfferService {
 
     @Transactional
     @Override
-    public void recoverOffer(UUID id) {
+    public void recoverOffer(Long id) {
         if (id == null) throw new IdIsNullException();
         Offer offer = offerRepository.findById(id)
                 .orElseThrow(() -> new OfferNotFoundException(id));
