@@ -132,8 +132,6 @@ public class OfferController {
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = OfferResponseDto.class))),
             @ApiResponse(responseCode = "400", description = "Invalid input",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorsDto.class))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
             @ApiResponse(responseCode = "403", description = "Forbidden",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
             @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
@@ -157,8 +155,6 @@ public class OfferController {
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
             @ApiResponse(responseCode = "400", description = "Invalid input",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorsDto.class))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
             @ApiResponse(responseCode = "403", description = "Forbidden",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
             @ApiResponse(responseCode = "404", description = "Offer not found",
@@ -186,8 +182,6 @@ public class OfferController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
             @ApiResponse(responseCode = "403", description = "Forbidden",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
             @ApiResponse(responseCode = "404", description = "Offer not found",
@@ -209,8 +203,6 @@ public class OfferController {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
             @ApiResponse(responseCode = "403", description = "Forbidden",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),

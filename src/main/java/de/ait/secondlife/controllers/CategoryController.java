@@ -64,10 +64,6 @@ public class CategoryController {
                     description = "Invalid input",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorsDto.class))),
             @ApiResponse(
-                    responseCode = "401",
-                    description = "Unauthorized",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
-            @ApiResponse(
                     responseCode = "409",
                     description = "Conflict, category with this name already exists",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class)))}
@@ -87,10 +83,6 @@ public class CategoryController {
                     responseCode = "400",
                     description = "Invalid input",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorsDto.class))),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "Unauthorized",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
             @ApiResponse(responseCode = "403",
                     description = "Forbidden",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
@@ -110,10 +102,6 @@ public class CategoryController {
                     responseCode = "200",
                     description = "Category hided",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = CategoryDto.class))),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "Unauthorized",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
             @ApiResponse(responseCode = "403",
                     description = "Forbidden",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
@@ -134,10 +122,6 @@ public class CategoryController {
                     responseCode = "200",
                     description = "Category activated",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = CategoryDto.class))),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "Unauthorized",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
             @ApiResponse(responseCode = "403",
                     description = "Forbidden",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
