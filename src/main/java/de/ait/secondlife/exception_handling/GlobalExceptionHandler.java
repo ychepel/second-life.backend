@@ -58,10 +58,10 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ResponseMessageDto> handleException(ParameterNotFoundException e) {
         return new ResponseEntity<>(new ResponseMessageDto(e.getMessage()), HttpStatus.NOT_FOUND);
     }
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<ResponseMessageDto> handleException(RuntimeException e) {
-        return new ResponseEntity<>(new ResponseMessageDto("Something went wrong"), HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+//    @ExceptionHandler(RuntimeException.class)
+//    public ResponseEntity<ResponseMessageDto> handleException(RuntimeException e) {
+//        return new ResponseEntity<>(new ResponseMessageDto("Something went wrong"), HttpStatus.INTERNAL_SERVER_ERROR);
+//    }
 
     private String parseExceptionMessage(String errorMessage) {
         Pattern pattern = Pattern.compile("messageTemplate='([^']*)'");

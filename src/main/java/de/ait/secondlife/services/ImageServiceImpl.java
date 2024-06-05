@@ -4,13 +4,17 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import de.ait.secondlife.constants.ImageConstants;
+import de.ait.secondlife.domain.dto.ImagePropsResponseDto;
 import de.ait.secondlife.domain.entity.EntityImage;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.BadFileFormatException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.BadFileSizeException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.is_null_exceptions.ParameterIsNullException;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.BadEntityTypeException;
+import de.ait.secondlife.exception_handling.exceptions.not_found_exception.ImagesNotFoundException;
 import de.ait.secondlife.repositories.ImageRepository;
 import de.ait.secondlife.services.interfaces.ImageService;
+import de.ait.secondlife.services.mapping.ImagePropsMappingService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,8 +27,10 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 
 import java.nio.file.Path;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +38,7 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
 
     private final AmazonS3 s3Client;
     private final ImageRepository repository;
+    private final ImagePropsMappingService mappingService;
 
     @Value("${BUCKET_NAME}")
     private String bucketName;
@@ -50,44 +57,47 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
             metadata.setContentType(type);
         } else throw new BadFileFormatException();
 
-        Set<int[]> fileSizes = switch (entityType) {
-            case OFFER -> Set.of(IMG_1_SIZE, IMG_2_SIZE, IMG_3_SIZE);
-            case USER -> Set.of(IMG_2_SIZE, IMG_3_SIZE);
-            case CATEGORY -> Set.of(IMG_3_SIZE);
-            default -> throw new BadEntityTypeException(entityType);
-        };
+        Set<int[]> fileSizes =
+                switch (entityType) {
+                    case OFFER -> Set.of(IMG_1_SIZE, IMG_2_SIZE, IMG_3_SIZE);
+                    case USER -> Set.of(IMG_2_SIZE, IMG_3_SIZE);
+                    case CATEGORY -> Set.of(IMG_3_SIZE);
+                    default -> throw new BadEntityTypeException(entityType);
+                };
         Path path = Path.of(dirPrefix, entityType, entityId.toString());
-
-        EntityImage newImage = EntityImage.builder()
-                .extension(IMG_EXP)
-                .path(path.toString())
-                .entityType(entityType)
-                .entityId(entityId)
-                .build();
-
+        UUID baseName = UUID.randomUUID();
         fileSizes.forEach(e -> {
-            UUID baseName = UUID.randomUUID();
             String size = e[0] + "x" + e[1];
+
             String fileName = String.format("%s_%s.%s", size, baseName, IMG_EXP);
 
             PutObjectRequest request = new PutObjectRequest(
                     bucketName,
-                    Path.of(path.toString(), fileName).toString(),
+                    toUnixStylePath( Path.of(path.toString(), fileName)),
                     compressFile(file, e),
                     metadata
-            ).withCannedAcl(CannedAccessControlList.Private);
+            ).withCannedAcl(CannedAccessControlList.PublicReadWrite);
             s3Client.putObject(request);
 
-            newImage.setBaseName(baseName.toString());
-            newImage.setSize(size);
-
-            repository.save(newImage);
+            repository.save(EntityImage.builder()
+                    .extension(IMG_EXP)
+                    .size(size)
+                    .baseName(baseName.toString())
+                    .path(toUnixStylePath(path))
+                    .entityType(entityType)
+                    .entityId(entityId)
+                    .build());
         });
     }
 
     @Override
-    public Set<String> findAllImageForEntity(String entityType, Long entityId) {
-        return Set.of();
+    public Set<ImagePropsResponseDto> findAllImageForEntity(String entityType, Long entityId) {
+        Set<ImagePropsResponseDto> dtos =
+                repository.findAllByEntityIdAndEntityType(entityId, entityType).stream()
+                        .map(mappingService::toDto)
+                        .collect(Collectors.toSet());
+        if (dtos.isEmpty()) throw new ImagesNotFoundException(entityType, entityId);
+        return dtos;
     }
 
     @Override
@@ -121,4 +131,7 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
         return new ByteArrayInputStream(outputStream.toByteArray());
     }
 
+    private String toUnixStylePath(Path path) {
+        return path.toString().replace("\\", "/");
+    }
 }
