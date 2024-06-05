@@ -71,7 +71,6 @@ class CategoriesIntegrationTest {
         }
         @Test
         public void return_404_for_not_existed_category() throws Exception{
-
             mockMvc.perform(get("/v1/categories/12"))
                     .andExpect(status().isNotFound());
         }

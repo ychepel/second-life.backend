@@ -47,6 +47,9 @@ public class OfferUpdateDto {
 
     @Schema(description = "Category id", example = "22")
     private Long categoryId;
+
+    @Schema(description = "Location id", example = "1")
+    private Long locationId;
 }
 
 

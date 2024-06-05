@@ -1,6 +1,7 @@
 package de.ait.secondlife.controllers;
 
 import de.ait.secondlife.domain.dto.NewUserDto;
+import de.ait.secondlife.domain.dto.ResponseMessageDto;
 import de.ait.secondlife.domain.dto.UserDto;
 import de.ait.secondlife.exception_handling.dto.ValidationErrorsDto;
 import de.ait.secondlife.services.interfaces.UserService;
@@ -14,10 +15,7 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/v1/users")
@@ -42,7 +40,7 @@ public class UserController {
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "201",
-                    description = "User created",
+                    description = "User is successfully created",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = UserDto.class))}
             ),
             @ApiResponse(
@@ -50,7 +48,9 @@ public class UserController {
                     description = "Invalid input",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorsDto.class))
             ),
-            @ApiResponse(responseCode = "409", description = "Email already exists", content = @Content)}
+            @ApiResponse(responseCode = "422",
+                    description = "Email already exists",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class)))}
     )
     public ResponseEntity<UserDto> register(
             @Valid
