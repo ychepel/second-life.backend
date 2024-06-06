@@ -54,4 +54,7 @@ public class OfferResponseDto {
 
     @Schema(description = "Winner bid id", example = "123")
     private Long winnerBidId;
+
+    @Schema(description = "List of image's path")
+    private ImagePathsResponseDto images;
 }

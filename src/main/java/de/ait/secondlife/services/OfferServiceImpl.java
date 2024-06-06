@@ -1,5 +1,6 @@
 package de.ait.secondlife.services;
 
+import de.ait.secondlife.constants.EntityType;
 import de.ait.secondlife.constants.OfferStatus;
 import de.ait.secondlife.domain.dto.OfferCreationDto;
 import de.ait.secondlife.domain.dto.OfferResponseDto;
@@ -14,10 +15,7 @@ import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.Wro
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.is_null_exceptions.IdIsNullException;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.OfferNotFoundException;
 import de.ait.secondlife.repositories.OfferRepository;
-import de.ait.secondlife.services.interfaces.CategoryService;
-import de.ait.secondlife.services.interfaces.OfferService;
-import de.ait.secondlife.services.interfaces.StatusService;
-import de.ait.secondlife.services.interfaces.UserService;
+import de.ait.secondlife.services.interfaces.*;
 import de.ait.secondlife.services.mapping.OfferMappingService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ConstraintViolationException;
@@ -42,8 +40,8 @@ public class OfferServiceImpl implements OfferService {
     private final OfferMappingService mappingService;
     private final StatusService statusService;
     private final UserService userService;
-
     private final CategoryService categoryService;
+    private final ImageService imageService;
 
     @Override
     public OfferResponseWithPaginationDto findOffers(Pageable pageable) {
@@ -56,7 +54,7 @@ public class OfferServiceImpl implements OfferService {
         if (id == null) throw new IdIsNullException();
         Offer offer = offerRepository.findByIdAndIsActiveTrue(id)
                 .orElseThrow(() -> new OfferNotFoundException(id));
-        return mappingService.toRequestDto(offer);
+        return toOfferResponseDtoWithImages(offer);
     }
 
     @Override
@@ -68,7 +66,7 @@ public class OfferServiceImpl implements OfferService {
 
     @Override
     public OfferResponseDto createOffer(OfferCreationDto dto) {
-           User user = getUserFromAuthContext();
+        User user = getUserFromAuthContext();
         try {
             Offer newOffer = mappingService.toOffer(dto);
             newOffer.setUser(user);
@@ -89,7 +87,7 @@ public class OfferServiceImpl implements OfferService {
                 }
             }
             newOffer = offerRepository.save(newOffer);
-            return mappingService.toRequestDto(newOffer);
+            return toOfferResponseDtoWithImages(newOffer);
         } catch (ConstraintViolationException | DataIntegrityViolationException e) {
             throw new CreateOfferConstraintViolationException("Constraint violation: " + e.getMessage());
         }
@@ -101,8 +99,8 @@ public class OfferServiceImpl implements OfferService {
         User user = getUserFromAuthContext();
         Offer offer = offerRepository.findById(dto.getId())
                 .orElseThrow(() -> new OfferNotFoundException(dto.getId()));
-        if(!user.equals(offer.getUser()))
-            throw  new NoRightToChangeException(String.format("User <%d> can't change this offer", user.getId()));
+        if (!user.equals(offer.getUser()))
+            throw new NoRightToChangeException(String.format("User <%d> can't change this offer", user.getId()));
 
         offer.setTitle(dto.getTitle() == null ? offer.getTitle() : dto.getTitle());
         offer.setDescription(dto.getDescription() == null ? offer.getDescription() : dto.getDescription());
@@ -148,7 +146,7 @@ public class OfferServiceImpl implements OfferService {
     private OfferResponseWithPaginationDto offersToOfferRequestWithPaginationDto(Page<Offer> pageOfOffer) {
         Set<OfferResponseDto> offers;
         offers = pageOfOffer.stream()
-                .map(mappingService::toRequestDto)
+                .map(this::toOfferResponseDtoWithImages)
                 .collect(Collectors.toSet());
         return OfferResponseWithPaginationDto.builder()
                 .offers(offers)
@@ -172,10 +170,18 @@ public class OfferServiceImpl implements OfferService {
     }
 
     @SneakyThrows
-    private User getUserFromAuthContext(){
+    private User getUserFromAuthContext() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication.getPrincipal().equals("anonymousUser")) throw new UserIsNotAuthorizedException();
         String username = authentication.getName();
-        return  (User) userService.loadUserByUsername(username);
+        return (User) userService.loadUserByUsername(username);
+    }
+
+
+    private OfferResponseDto toOfferResponseDtoWithImages(Offer offer) {
+        OfferResponseDto dto = mappingService.toRequestDto(offer);
+        String entityType = EntityType.OFFER.getType();
+        dto.setImages(imageService.findAllImageForEntity(entityType, offer.getId()));
+        return dto;
     }
 }

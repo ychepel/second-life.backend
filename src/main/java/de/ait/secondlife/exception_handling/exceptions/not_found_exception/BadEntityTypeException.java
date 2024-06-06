@@ -5,4 +5,9 @@ public class BadEntityTypeException extends ParameterNotFoundException {
 
         super(String.format("Entity type <%s> not found",type));
     }
+
+    public BadEntityTypeException(Integer code) {
+
+        super(String.format("Entity type by code <%d> not found",code));
+    }
 }
