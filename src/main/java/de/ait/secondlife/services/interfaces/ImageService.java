@@ -13,5 +13,5 @@ public interface ImageService {
 
     ImagePathsResponseDto findAllImageForEntity(String entityType, Long entityId);
 
-    InputStream getImage(String size, String baseName) ;
+    InputStream getImage(String fileName) ;
 }

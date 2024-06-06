@@ -5,6 +5,7 @@ import de.ait.secondlife.constants.EntityType;
 import de.ait.secondlife.domain.dto.ImageCreateDto;
 
 import de.ait.secondlife.domain.dto.ImagePathsResponseDto;
+import de.ait.secondlife.domain.dto.ImageRequestDto;
 import de.ait.secondlife.domain.dto.ResponseMessageDto;
 import de.ait.secondlife.services.interfaces.ImageService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,7 +21,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
+import java.io.InputStream;
 import java.util.Set;
 
 @RestController
@@ -65,15 +68,14 @@ public class ImageContorller {
 
     @GetMapping
     @Operation(
-            summary = "Get entity's image",
-            description = "Get all image of entity by type and id"
+            summary = "Get names of entity images",
+            description = "Get all names of image of entity by type and id"
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(mediaType = "application/json"
                             , schema = @Schema(implementation = ImagePathsResponseDto.class)
                     ))})
-
     public ResponseEntity<ImagePathsResponseDto> getImages(
             @RequestParam
             @Parameter(description = "Code of type of entity", examples = {
@@ -89,5 +91,21 @@ public class ImageContorller {
         return ResponseEntity.ok(imageService.findAllImageForEntity(entityType, id));
     }
 
+  @PostMapping
+  @Operation(
+          summary = "Get image",
+          description = "Get image by filename"
+  )
+  @ApiResponses(value = {
+          @ApiResponse(responseCode = "200", description = "Successful operation",
+                  content = @Content(mediaType = "application/json"
+                          , schema = @Schema(implementation = StreamingResponseBody.class)
+                  ))})
+    public ResponseEntity<StreamingResponseBody> getImageByFile(
+            @RequestBody ImageRequestDto dto
+  ){
+      InputStream inputStream = imageService.getImage(dto.getFileName());
+      return ResponseEntity.ok(inputStream::transferTo);
+  }
 
 }

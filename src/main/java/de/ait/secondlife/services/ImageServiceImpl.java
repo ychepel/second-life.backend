@@ -3,19 +3,19 @@ package de.ait.secondlife.services;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.S3Object;
 import de.ait.secondlife.constants.EntityType;
 import de.ait.secondlife.constants.ImageConstants;
 import de.ait.secondlife.domain.dto.ImageCreateDto;
-
 import de.ait.secondlife.domain.dto.ImagePathsResponseDto;
 import de.ait.secondlife.domain.entity.EntityImage;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.BadFileFormatException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.BadFileSizeException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.is_null_exceptions.ParameterIsNullException;
+import de.ait.secondlife.exception_handling.exceptions.not_found_exception.FileNotFoundExecption;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.ImagesNotFoundException;
 import de.ait.secondlife.repositories.ImageRepository;
 import de.ait.secondlife.services.interfaces.ImageService;
-
 import lombok.RequiredArgsConstructor;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,8 +29,6 @@ import java.io.*;
 
 import java.nio.file.Path;
 import java.util.*;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -38,7 +36,6 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
 
     private final AmazonS3 s3Client;
     private final ImageRepository repository;
-
 
     @Value("${BUCKET_NAME}")
     private String bucketName;
@@ -70,7 +67,6 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
         fileSizes.forEach(e -> {
             String size = e[0] + "x" + e[1];
 
-
             PutObjectRequest request = new PutObjectRequest(
                     bucketName,
                     toUnixStylePath(Path.of(path.toString(), makeFileName(size, baseName.toString()))),
@@ -98,19 +94,26 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
         Path path = Path.of(dirPrefix, entityType, entityId.toString());
 
         Map<String, String> map = new HashMap<>();
-
         imgs.forEach(
                 e -> map.put(e.getSize(),
                         toUnixStylePath(Path.of(
                                 path.toString(),
-                                makeFileName(e.getSize(), e.getBaseName()))
+                                makeFileName(e.getSize(),
+                                        e.getBaseName()))
                         )));
         return new ImagePathsResponseDto(map);
     }
 
     @Override
-    public InputStream getImage(String size, String baseName) {
-        return null;
+    public InputStream getImage(String fileName) {
+        if(fileName.isBlank()) throw new FileNotFoundExecption(fileName);
+        S3Object s3Object;
+        try {
+            s3Object = s3Client.getObject(bucketName, fileName);
+        }catch (Exception e) {
+            throw new FileNotFoundExecption(fileName);
+        }
+        return s3Object.getObjectContent();
     }
 
     private InputStream compressFile(MultipartFile file, int[] size) {
