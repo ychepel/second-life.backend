@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.util.Map;
+import java.util.Set;
 
 @Data
 @Schema(description = "Image's path dto")
@@ -18,5 +19,5 @@ public class ImagePathsResponseDto {
                     @ExampleObject(name = "320x320", value = "prod/offer/1/320x320_91dcf1db-b934-479a-828f-59b46a522a5a.jpg"),
                     @ExampleObject(name = "64x64", value = "prod/offer/1/64x64_91dcf1db-b934-479a-828f-59b46a522a5a.jpg")
             })
-    private Map<String,String> images;
+    private Map<String, Set<String>> images;
 }

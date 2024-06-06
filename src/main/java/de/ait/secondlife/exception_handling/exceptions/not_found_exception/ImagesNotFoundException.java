@@ -5,4 +5,8 @@ public class ImagesNotFoundException extends ParameterNotFoundException {
 
         super(String.format("Images for entity type : <%s> id : <%d> not found",type, id));
     }
+
+    public ImagesNotFoundException(String basename) {
+        super(String.format("Images with base name   <%s>  <%d> not found",basename));
+    }
 }

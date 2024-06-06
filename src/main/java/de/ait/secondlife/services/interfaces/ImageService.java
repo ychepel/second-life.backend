@@ -5,7 +5,7 @@ import de.ait.secondlife.domain.dto.ImagePathsResponseDto;
 
 
 import java.io.InputStream;
-import java.util.Set;
+
 
 public interface ImageService {
 
@@ -13,5 +13,8 @@ public interface ImageService {
 
     ImagePathsResponseDto findAllImageForEntity(String entityType, Long entityId);
 
-    InputStream getImage(String fileName) ;
+    InputStream getImage(String fileName);
+
+    void deleteImage(String fileNme);
+
 }

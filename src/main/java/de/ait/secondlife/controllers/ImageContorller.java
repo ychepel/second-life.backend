@@ -102,10 +102,30 @@ public class ImageContorller {
                           , schema = @Schema(implementation = StreamingResponseBody.class)
                   ))})
     public ResponseEntity<StreamingResponseBody> getImageByFile(
+          @Parameter(description = "Dto with name of file ",
+                  schema = @Schema(implementation = ImageRequestDto.class))
             @RequestBody ImageRequestDto dto
   ){
       InputStream inputStream = imageService.getImage(dto.getFileName());
       return ResponseEntity.ok(inputStream::transferTo);
   }
 
+  @DeleteMapping
+  @Operation(
+          summary = "Delete image",
+          description = "Delete all images by base name in filename"
+  )
+  @ApiResponses(value = {
+          @ApiResponse(responseCode = "200", description = "Successful operation",
+                  content = @Content(mediaType = "application/json"
+                          , schema = @Schema(implementation = ResponseMessageDto.class)
+                  ))})
+    public ResponseEntity<ResponseMessageDto> deleteImage(
+          @Parameter(description = "Dto with name of file ",
+                  schema = @Schema(implementation = ImageRequestDto.class))
+          @RequestBody ImageRequestDto dto
+  ){
+        imageService.deleteImage(dto.getFileName());
+        return ResponseEntity.ok(new ResponseMessageDto("Image deleted successfully"));
+  }
 }

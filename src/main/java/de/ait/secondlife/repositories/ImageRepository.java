@@ -8,4 +8,8 @@ import java.util.Set;
 public interface ImageRepository extends JpaRepository<EntityImage,Long> {
 
     Set<EntityImage> findAllByEntityIdAndEntityType(Long id, String entityType);
+
+    Set<EntityImage> findAllByBaseName(String baseName);
+
+    void deleteAllByBaseName(String baseName);
 }
