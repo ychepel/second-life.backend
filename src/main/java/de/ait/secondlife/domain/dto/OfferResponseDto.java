@@ -54,6 +54,7 @@ public class OfferResponseDto {
 
     @Schema(description = "Winner bid id", example = "123")
     private Long winnerBidId;
+
     @Schema(description = "Location id", example = "1")
     private Long locationId;
 }

@@ -50,6 +50,9 @@ public class OfferCreationDto {
     @Schema(description = "Location id", example = "1")
     @NotNull(message = "Location Id cannot be null")
     private Long locationId;
+
+    @Schema(description = "Requirement for Admin verification ", example = "true")
+    private Boolean sendToVerification;
 }
 
 

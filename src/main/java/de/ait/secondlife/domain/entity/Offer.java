@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "offer")
@@ -30,8 +31,14 @@ public class Offer {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
     @Column(name = "auction_duration_days")
     private Integer auctionDurationDays;
+
+    @Column(name = "auction_finished_at")
+    private LocalDateTime auctionFinishedAt;
 
     @Column(name = "start_price")
     private BigDecimal startPrice;
@@ -67,6 +74,9 @@ public class Offer {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "winner_bid_id")
     private Bid winnerBid;
+
+    @OneToMany(mappedBy = "offer", fetch = FetchType.LAZY)
+    private List<Bid> bids;
 }
 
 

@@ -18,7 +18,7 @@ public class AspectLogging {
     @After("allInBadRequestExceptionPackage()")
     public void logAllInBadRequestExceptionPackage(JoinPoint joinPoint) {
         RuntimeException e = (RuntimeException) joinPoint.getArgs()[0];
-        log.error(String.format("[%s] : %s", e.getClass(),e.getMessage()));
+        log.error(String.format("[%s] : %s", e.getClass(), e.getMessage()));
     }
 
     @Pointcut("execution(* de.ait.secondlife.exception_handling.exceptions.not_found_exception..*(..))")
@@ -27,6 +27,6 @@ public class AspectLogging {
     @After("allInNotFoundExceptionPackage()")
     public void logAllInNotFoundExceptionPackage(JoinPoint joinPoint) {
         RuntimeException e = (RuntimeException) joinPoint.getArgs()[0];
-        log.error(String.format("[%s] : %s", e.getClass(),e.getMessage()));
+        log.error(String.format("[%s] : %s", e.getClass(), e.getMessage()));
     }
 }

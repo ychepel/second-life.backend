@@ -50,6 +50,9 @@ public class OfferUpdateDto {
 
     @Schema(description = "Location id", example = "1")
     private Long locationId;
+
+    @Schema(description = "Requirement for Admin verification ", example = "true")
+    private Boolean sendToVerification;
 }
 
 

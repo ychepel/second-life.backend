@@ -1,11 +1,6 @@
 package de.ait.secondlife.controllers;
 
 import de.ait.secondlife.domain.dto.*;
-import de.ait.secondlife.domain.dto.ResponseMessageDto;
-import de.ait.secondlife.domain.dto.OfferCreationDto;
-import de.ait.secondlife.domain.dto.OfferResponseDto;
-import de.ait.secondlife.domain.dto.OfferResponseWithPaginationDto;
-import de.ait.secondlife.domain.dto.OfferUpdateDto;
 
 import de.ait.secondlife.exception_handling.dto.ValidationErrorsDto;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.PaginationParameterIsWrongException;
@@ -26,6 +21,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import javax.security.auth.login.CredentialException;
 
 @RestController
 @RequestMapping("/v1/offers")
@@ -141,7 +138,7 @@ public class OfferController {
             @Valid
             @RequestBody
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Offer create DTO ")
-            OfferCreationDto dto) {
+            OfferCreationDto dto) throws CredentialException {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.createOffer(dto));
     }
 
@@ -152,7 +149,7 @@ public class OfferController {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = OfferResponseDto.class))),
             @ApiResponse(responseCode = "400", description = "Invalid input",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorsDto.class))),
             @ApiResponse(responseCode = "403", description = "Forbidden",
@@ -164,14 +161,13 @@ public class OfferController {
             @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class)))
     })
-    public ResponseEntity<ResponseMessageDto> update(
+    public ResponseEntity<OfferResponseDto> update(
             @Valid
             @RequestBody
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Offer update DTO ")
-            OfferUpdateDto dto) {
-        service.updateOffer(dto);
-        return ResponseEntity.ok(
-                new ResponseMessageDto(String.format("Offer with id <%s> updated successful", dto.getId())));
+            OfferUpdateDto dto
+    ) throws CredentialException {
+        return ResponseEntity.ok(service.updateOffer(dto));
     }
 
     @DeleteMapping("/{id}")
@@ -216,5 +212,119 @@ public class OfferController {
         service.recoverOffer(id);
         return ResponseEntity.ok(
                 new ResponseMessageDto(String.format("Offer with id <%s> recovered successful", id)));
+    }
+
+    @PatchMapping("/{id}/draft")
+    @Operation(
+            summary = "Change offer status to Draft",
+            description = "Returning an offer to <i>Draft</i> status if the ad does not comply with site policies. Available only for Admin role and for Offers in <i>Verification</i> status."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid input",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorsDto.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
+            @ApiResponse(responseCode = "404", description = "Offer not found",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
+    })
+    public ResponseEntity<ResponseMessageDto> draft(
+            @PathVariable Long id,
+            @RequestBody @Valid OfferToDraftDto offerToDraftDto
+    ) {
+        service.draftOffer(offerToDraftDto);
+        return ResponseEntity.ok(
+                new ResponseMessageDto(
+                        String.format("Status for offer with id <%s> was changed to DRAFT successfully", id)
+                )
+        );
+    }
+
+    @PatchMapping("/{id}/start-auction")
+    @Operation(
+            summary = "Start auction",
+            description = "Transferring an Offer from <i>Verification</i> status to the <i>Auction started</i>. Available only for Admin role and for Offers in <i>Verification</i> status."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
+            @ApiResponse(responseCode = "404", description = "Offer not found",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
+    })
+    public ResponseEntity<ResponseMessageDto> startAuction(@PathVariable Long id) {
+        service.startAuction(id);
+        return ResponseEntity.ok(
+                new ResponseMessageDto(
+                        String.format("Auction for offer with id <%s> was started successfully", id)
+                )
+        );
+    }
+
+    @DeleteMapping("/{id}/cancel")
+    @Operation(
+            summary = "Cancel offer by owner",
+            description = "Disabling an Offer. Available only for Offer owners and for Offers in statuses: <i>Verification, Auction started, Auction finished, Qualification</i>."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
+            @ApiResponse(responseCode = "404", description = "Offer not found",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
+    })
+    public ResponseEntity<ResponseMessageDto> cancel(@PathVariable Long id) {
+        service.cancelOffer(id);
+        return ResponseEntity.ok(
+                new ResponseMessageDto(String.format("Offer with id <%s> was canceled successfully", id))
+        );
+    }
+
+    @DeleteMapping("/{id}/block-by-admin")
+    @Operation(
+            summary = "Cancel offer by admin",
+            description = "Disabling an Offer. Available only for Admin role and for Offers in statuses: <i>Draft, Verification, Auction started, Auction finished, Qualification</i>."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
+            @ApiResponse(responseCode = "404", description = "Offer not found",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
+    })
+    public ResponseEntity<ResponseMessageDto> block(@PathVariable Long id) {
+        service.blockOfferByAdmin(id);
+        return ResponseEntity.ok(
+                new ResponseMessageDto(String.format("Offer with id <%s> was blocked successfully", id))
+        );
+    }
+
+    @PatchMapping("/{id}/complete")
+    @Operation(
+            summary = "Completing offer",
+            description = "Indication of the winner's bid and transferring an Offer from <i>Qualification</i> status to Completed. Available only for Offer owners and for Offers in <i>Qualification</i> status."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid input",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorsDto.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
+            @ApiResponse(responseCode = "404", description = "Offer not found",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
+    })
+    public ResponseEntity<ResponseMessageDto> complete(
+            @PathVariable Long id,
+            @RequestBody @Valid OfferToCompleteDto offerToCompleteDto
+    ) {
+        service.completeOffer(offerToCompleteDto);
+        return ResponseEntity.ok(
+                new ResponseMessageDto(String.format("Offer with id <%s> was marked as completed", id))
+        );
     }
 }

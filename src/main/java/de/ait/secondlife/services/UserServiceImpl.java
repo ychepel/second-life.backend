@@ -4,20 +4,26 @@ import de.ait.secondlife.domain.dto.NewUserDto;
 import de.ait.secondlife.domain.dto.UserDto;
 import de.ait.secondlife.domain.entity.User;
 import de.ait.secondlife.exception_handling.exceptions.DuplicateUserEmailException;
+import de.ait.secondlife.exception_handling.exceptions.UserIsNotAuthenticatedException;
+import de.ait.secondlife.exception_handling.exceptions.UserIsNotAuthorizedException;
 import de.ait.secondlife.exception_handling.exceptions.UserSavingException;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.LocationNotFoundException;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.UserNotFoundException;
 import de.ait.secondlife.repositories.UserRepository;
 import de.ait.secondlife.services.interfaces.LocationService;
+import de.ait.secondlife.security.Role;
 import de.ait.secondlife.services.interfaces.UserService;
 import de.ait.secondlife.services.mapping.NewUserMappingService;
 import de.ait.secondlife.services.mapping.UserMappingService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.security.auth.login.CredentialException;
 import java.time.LocalDateTime;
 
 @Service
@@ -90,5 +96,18 @@ public class UserServiceImpl implements UserService {
         }
 
         return userMappingService.toDto(user);
+    }
+
+    @Override
+    public User getAuthenticatedUser() throws CredentialException {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication.getPrincipal().equals("anonymousUser")) {
+            throw new UserIsNotAuthenticatedException();
+        }
+        if (!authentication.getAuthorities().contains(Role.ROLE_USER)) {
+            throw new UserIsNotAuthorizedException();
+        }
+        String username = authentication.getName();
+        return (User) loadUserByUsername(username);
     }
 }

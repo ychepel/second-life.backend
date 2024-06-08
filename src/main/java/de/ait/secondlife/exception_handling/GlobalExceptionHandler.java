@@ -9,9 +9,9 @@ import de.ait.secondlife.exception_handling.exceptions.NoRightToChangeException;
 import de.ait.secondlife.exception_handling.exceptions.UserSavingException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.BadRequestException;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.ParameterNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
@@ -23,15 +23,14 @@ import javax.security.auth.login.CredentialException;
 import javax.security.auth.login.LoginException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @ControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(UserSavingException.class)
     public ResponseEntity<ResponseMessageDto> handleException(UserSavingException e) {
-        //TODO save to logs stacktrace
+        log.warn("UserSavingException occurred", e);
         return new ResponseEntity<>(new ResponseMessageDto(e.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
@@ -44,7 +43,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ResponseMessageDto> handleException(DataIntegrityViolationException e) {
         return new ResponseEntity<>(new ResponseMessageDto(e.getMessage()), HttpStatus.UNPROCESSABLE_ENTITY);
     }
-
 
     @ExceptionHandler(DuplicateCategoryException.class)
     public ResponseEntity<ResponseMessageDto> handleException(DuplicateCategoryException e) {
@@ -60,9 +58,16 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ResponseMessageDto> handleException(LoginException e) {
         return new ResponseEntity<>(new ResponseMessageDto(e.getMessage()), HttpStatus.BAD_REQUEST);
     }
+
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<ResponseMessageDto> handleException(BadRequestException e) {
         return new ResponseEntity<>(new ResponseMessageDto(e.getMessage()), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ResponseMessageDto> handleException(IllegalStateException e) {
+        log.warn("IllegalStateException occurred", e);
+        return new ResponseEntity<>(new ResponseMessageDto("Something went wrong"), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(NoRightToChangeException.class)
@@ -74,8 +79,10 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ResponseMessageDto> handleException(ParameterNotFoundException e) {
         return new ResponseEntity<>(new ResponseMessageDto(e.getMessage()), HttpStatus.NOT_FOUND);
     }
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ResponseMessageDto> handleException(RuntimeException e) {
+        log.error("RuntimeException occurred", e);
         return new ResponseEntity<>(new ResponseMessageDto("Something went wrong"), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -109,12 +116,4 @@ public class GlobalExceptionHandler {
                         .errors(validationErrors)
                         .build());
     }
-
-    private String parseExceptionMessage(String errorMessage) {
-        Pattern pattern = Pattern.compile("messageTemplate='([^']*)'");
-        Matcher matcher = pattern.matcher(errorMessage);
-        return matcher.find() ? matcher.group(1) : "something went wrong";
-    }
-
-
 }

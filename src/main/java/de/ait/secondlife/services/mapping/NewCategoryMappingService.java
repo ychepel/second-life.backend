@@ -8,7 +8,7 @@ import org.mapstruct.Mapper;
 @Mapper
 public interface NewCategoryMappingService {
 
-    CategoryDto mapEntityToDto(Category entity);
+    CategoryDto toDto(Category entity);
 
-    Category mapDtoToEntity(NewCategoryDto dto);
+    Category toEntity(NewCategoryDto dto);
 }
