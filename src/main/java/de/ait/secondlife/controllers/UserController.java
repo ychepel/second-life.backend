@@ -14,10 +14,7 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/v1/users")
@@ -55,9 +52,19 @@ public class UserController {
     public ResponseEntity<UserDto> register(
             @Valid
             @RequestBody
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "User date to register")
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "User data to register")
             NewUserDto newUserDto) {
         UserDto userDto = userService.register(newUserDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(userDto);
+    }
+
+
+    @GetMapping("{id}/set-active")
+    public ResponseEntity<UserDto> setActive(
+            @Valid
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Set active the user according to confirmation code")
+            @PathVariable("id") Long userId, @RequestParam("code") String code){
+        UserDto userDto = userService.setActive(userId,code);
+        return ResponseEntity.ok(userDto);
     }
 }

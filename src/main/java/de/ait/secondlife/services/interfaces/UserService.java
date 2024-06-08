@@ -9,4 +9,6 @@ public interface UserService extends UserDetailsService {
     UserDto register(NewUserDto userDto);
 
     void updateLastActive(User user);
+
+    UserDto setActive(Long userId, String code);
 }

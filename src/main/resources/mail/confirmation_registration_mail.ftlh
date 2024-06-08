@@ -5,8 +5,8 @@
     <title>Email Confirmation</title>
 </head>
 <body>
-<h1 style="color: green">Подтверждение регистрации</h1>
-<h2>Добрый день, ${name}!</h2>
-<p>Для подтверждения регистрации пройдите по <a href="${link}">ссылке</a></p>
+<h1 style="color: green">Registration Confirmation</h1>
+<h2>Hello, ${name}!</h2>
+<p>To confirm your registration, please follow this <a href="${link}">link</a></p>
 </body>
 </html>
