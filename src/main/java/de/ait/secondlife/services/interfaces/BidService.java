@@ -4,5 +4,5 @@ import de.ait.secondlife.domain.entity.Bid;
 
 public interface BidService {
 
-    Bid getById(long id);
+    Bid getById(Long id);
 }

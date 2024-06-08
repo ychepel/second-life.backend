@@ -13,7 +13,7 @@ public class BidServiceImpl implements BidService {
     private final BidRepository bidRepository;
 
     @Override
-    public Bid getById(long id) {
+    public Bid getById(Long id) {
         return bidRepository.findById(id).orElse(null);
     }
 }
