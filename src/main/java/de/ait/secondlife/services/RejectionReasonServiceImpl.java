@@ -13,7 +13,7 @@ public class RejectionReasonServiceImpl implements RejectionReasonService {
     private final RejectionReasonRepository reasonRepository;
 
     @Override
-    public RejectionReason getById(long id) {
+    public RejectionReason getById(Long id) {
         return reasonRepository.findById(id).orElse(null);
     }
 }

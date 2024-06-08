@@ -4,5 +4,5 @@ import de.ait.secondlife.domain.entity.RejectionReason;
 
 public interface RejectionReasonService {
 
-    RejectionReason getById(long id);
+    RejectionReason getById(Long id);
 }
