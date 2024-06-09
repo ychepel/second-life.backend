@@ -5,6 +5,7 @@ import de.ait.secondlife.domain.entity.Offer;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,8 +19,6 @@ public interface OfferRepository extends JpaRepository<Offer, Long> {
 
     Page<Offer> findByUserIdAndIsActiveTrue(Long id, Pageable pageable);
 
-    List<Offer> findByAuctionFinishedAtLessThanEqualAndStatusNameAndIsActiveTrue(
-            LocalDateTime currentTime,
-            OfferStatus status
-    );
+    @Query("SELECT o FROM Offer o WHERE o.auctionFinishedAt <= :currentTime AND o.status.name = :status AND o.isActive = TRUE")
+    List<Offer> findFinishedActiveAuctions(LocalDateTime currentTime, OfferStatus status);
 }

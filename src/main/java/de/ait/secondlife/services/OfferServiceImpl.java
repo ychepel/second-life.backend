@@ -252,7 +252,7 @@ public class OfferServiceImpl implements OfferService {
 
     @Override
     public List<Offer> findUnfinishedAuctions() {
-        return offerRepository.findByAuctionFinishedAtLessThanEqualAndStatusNameAndIsActiveTrue(
+        return offerRepository.findFinishedActiveAuctions(
                 LocalDateTime.now(),
                 OfferStatus.AUCTION_STARTED
         );
