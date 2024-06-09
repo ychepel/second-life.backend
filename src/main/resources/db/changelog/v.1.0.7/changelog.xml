@@ -12,5 +12,6 @@
     <include file="change-status-id-nullable-in-offer-table.xml" relativeToChangelogFile="true"/>
     <include file="add-auction-finished-at-and-updated-at-to-offer.xml" relativeToChangelogFile="true"/>
     <include file="add-rejected-status.xml" relativeToChangelogFile="true"/>
+    <include file="remove-choose-winner-status.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

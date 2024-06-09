@@ -8,7 +8,6 @@ public enum OfferStatus {
     AUCTION_STARTED,
     AUCTION_FINISHED,
     QUALIFICATION,
-    CHOOSE_WINNER,
     COMPLETED,
     CANCELED
 }
