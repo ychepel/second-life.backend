@@ -30,7 +30,9 @@ public interface OfferService {
 
     List<Offer> findUnfinishedAuctions();
 
-    void draftOffer(OfferToDraftDto offerToDraftDto);
+    void draftOffer(Offer offer);
+
+    void rejectOffer(Long id, OfferRejectionDto offerRejectionDto);
 
     void verifyOffer(Offer offer);
 
@@ -40,7 +42,7 @@ public interface OfferService {
 
     void qualifyAuction(Long id);
 
-    void completeOffer(OfferToCompleteDto offerToCompleteDto);
+    OfferResponseDto completeOffer(Long id, OfferCompletionDto offerCompletionDto);
 
     void cancelOffer(Long id);
 

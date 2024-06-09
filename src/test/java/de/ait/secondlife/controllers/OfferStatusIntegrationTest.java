@@ -247,12 +247,7 @@ class OfferStatusIntegrationTest {
             Offer offerFromDB = offerRepository.findById(offerId).get();
             assertEquals("Test title", offerFromDB.getTitle());
             assertEquals(OfferStatus.VERIFICATION, offerFromDB.getStatus().getName());
-
-            Optional<OfferStatusHistory> lastHistory = offerStatusHistoryRepository.findByOfferId(offerId)
-                    .stream()
-                    .skip(1)
-                    .findFirst();
-            assertEquals(OfferStatus.VERIFICATION, lastHistory.get().getStatus().getName());
+            assertEquals(OfferStatus.VERIFICATION, getLastHistoryStatus(offerId));
         }
     }
 
@@ -274,7 +269,7 @@ class OfferStatusIntegrationTest {
 
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
             assertEquals(OfferStatus.DRAFT, offerFromDB.getStatus().getName());
-            assertEquals(OfferStatus.DRAFT, getLastHistoryStatus());
+            assertEquals(OfferStatus.DRAFT, getLastHistoryStatus(user1OfferId));
         }
 
         @Test
@@ -317,22 +312,22 @@ class OfferStatusIntegrationTest {
 
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
             assertEquals(OfferStatus.VERIFICATION, offerFromDB.getStatus().getName());
-            assertEquals(OfferStatus.VERIFICATION, getLastHistoryStatus());
+            assertEquals(OfferStatus.VERIFICATION, getLastHistoryStatus(user1OfferId));
         }
     }
 
     @Nested
-    @DisplayName("PATCH /v1/offers/{id}/draft")
+    @DisplayName("PATCH /v1/offers/{id}/reject")
     @Transactional
     @Rollback
     public class DraftOffer {
 
         @Test
-        public void draft_offer_from_verification_status_by_admin() throws Exception {
+        public void reject_offer_from_verification_status_by_admin() throws Exception {
             Offer offer = offerRepository.findById(user1OfferId).get();
             offer.setStatus(statusService.getByOfferStatus(OfferStatus.VERIFICATION));
 
-            mockMvc.perform(patch("/v1/offers/" + user1OfferId + "/draft")
+            mockMvc.perform(patch("/v1/offers/" + user1OfferId + "/reject")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{\n" +
                                     "\"id\": \"" + user1OfferId + "\",\n" +
@@ -341,22 +336,22 @@ class OfferStatusIntegrationTest {
                     .andExpect(status().isOk());
 
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
-            assertEquals(OfferStatus.DRAFT, offerFromDB.getStatus().getName());
+            assertEquals(OfferStatus.REJECTED, offerFromDB.getStatus().getName());
 
             List<OfferStatusHistory> statusHistory = offerStatusHistoryRepository.findByOfferId(user1OfferId);
             Optional<OfferStatusHistory> lastHistory = statusHistory.stream()
                     .skip(statusHistory.size() - 1)
                     .findFirst();
-            assertEquals(OfferStatus.DRAFT, lastHistory.get().getStatus().getName());
+            assertEquals(OfferStatus.REJECTED, lastHistory.get().getStatus().getName());
             assertEquals(rejectionReasonId, lastHistory.get().getRejection().getId());
         }
 
         @Test
-        public void return_401_on_draft_offer_from_verification_status_by_owner() throws Exception {
+        public void return_401_on_reject_offer_from_verification_status_by_owner() throws Exception {
             Offer offer = offerRepository.findById(user1OfferId).get();
             offer.setStatus(statusService.getByOfferStatus(OfferStatus.VERIFICATION));
 
-            mockMvc.perform(patch("/v1/offers/" + user1OfferId + "/draft")
+            mockMvc.perform(patch("/v1/offers/" + user1OfferId + "/reject")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{\n" +
                                     "\"id\": \"" + user1OfferId + "\",\n" +
@@ -369,11 +364,11 @@ class OfferStatusIntegrationTest {
         }
 
         @Test
-        public void return_500_on_draft_offer_from_auction_started_status_by_admin() throws Exception {
+        public void return_500_on_reject_offer_from_auction_started_status_by_admin() throws Exception {
             Offer offer = offerRepository.findById(user1OfferId).get();
             offer.setStatus(statusService.getByOfferStatus(OfferStatus.AUCTION_STARTED));
 
-            mockMvc.perform(patch("/v1/offers/" + user1OfferId + "/draft")
+            mockMvc.perform(patch("/v1/offers/" + user1OfferId + "/reject")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{\n" +
                                     "\"id\": \"" + user1OfferId + "\",\n" +
@@ -386,11 +381,11 @@ class OfferStatusIntegrationTest {
         }
 
         @Test
-        public void return_500_on_draft_offer_from_auction_finished_status_by_admin() throws Exception {
+        public void return_500_on_reject_offer_from_auction_finished_status_by_admin() throws Exception {
             Offer offer = offerRepository.findById(user1OfferId).get();
             offer.setStatus(statusService.getByOfferStatus(OfferStatus.AUCTION_FINISHED));
 
-            mockMvc.perform(patch("/v1/offers/" + user1OfferId + "/draft")
+            mockMvc.perform(patch("/v1/offers/" + user1OfferId + "/reject")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{\n" +
                                     "\"id\": \"" + user1OfferId + "\",\n" +
@@ -403,11 +398,11 @@ class OfferStatusIntegrationTest {
         }
 
         @Test
-        public void return_500_on_draft_offer_from_qualification_status_by_admin() throws Exception {
+        public void return_500_on_reject_offer_from_qualification_status_by_admin() throws Exception {
             Offer offer = offerRepository.findById(user1OfferId).get();
             offer.setStatus(statusService.getByOfferStatus(OfferStatus.QUALIFICATION));
 
-            mockMvc.perform(patch("/v1/offers/" + user1OfferId + "/draft")
+            mockMvc.perform(patch("/v1/offers/" + user1OfferId + "/reject")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{\n" +
                                     "\"id\": \"" + user1OfferId + "\",\n" +
@@ -420,11 +415,11 @@ class OfferStatusIntegrationTest {
         }
 
         @Test
-        public void return_500_on_draft_offer_from_completed_status_by_admin() throws Exception {
+        public void return_500_on_reject_offer_from_completed_status_by_admin() throws Exception {
             Offer offer = offerRepository.findById(user1OfferId).get();
             offer.setStatus(statusService.getByOfferStatus(OfferStatus.COMPLETED));
 
-            mockMvc.perform(patch("/v1/offers/" + user1OfferId + "/draft")
+            mockMvc.perform(patch("/v1/offers/" + user1OfferId + "/reject")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{\n" +
                                     "\"id\": \"" + user1OfferId + "\",\n" +
@@ -437,12 +432,12 @@ class OfferStatusIntegrationTest {
         }
 
         @Test
-        public void return_500_on_draft_offer_from_blocked_status_by_admin() throws Exception {
+        public void return_500_on_reject_offer_from_blocked_status_by_admin() throws Exception {
             Offer offer = offerRepository.findById(user1OfferId).get();
             offer.setStatus(statusService.getByOfferStatus(OfferStatus.BLOCKED_BY_ADMIN));
             offer.setIsActive(false);
 
-            mockMvc.perform(patch("/v1/offers/" + user1OfferId + "/draft")
+            mockMvc.perform(patch("/v1/offers/" + user1OfferId + "/reject")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{\n" +
                                     "\"id\": \"" + user1OfferId + "\",\n" +
@@ -473,7 +468,7 @@ class OfferStatusIntegrationTest {
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
             assertEquals(OfferStatus.AUCTION_STARTED, offerFromDB.getStatus().getName());
             assertNotNull(offerFromDB.getAuctionFinishedAt());
-            assertEquals(OfferStatus.AUCTION_STARTED, getLastHistoryStatus());
+            assertEquals(OfferStatus.AUCTION_STARTED, getLastHistoryStatus(user1OfferId));
         }
 
         @Test
@@ -486,6 +481,18 @@ class OfferStatusIntegrationTest {
 
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
             assertEquals(OfferStatus.DRAFT, offerFromDB.getStatus().getName());
+        }
+
+        @Test
+        public void return_500_on_start_auction_from_rejected_status_by_admin() throws Exception {
+            Offer offer = offerRepository.findById(user1OfferId).get();
+            offer.setStatus(statusService.getByOfferStatus(OfferStatus.REJECTED));
+
+            mockMvc.perform(patch("/v1/offers/" + user1OfferId + "/start-auction").cookie(adminCookie))
+                    .andExpect(status().isInternalServerError());
+
+            Offer offerFromDB = offerRepository.findById(user1OfferId).get();
+            assertEquals(OfferStatus.REJECTED, offerFromDB.getStatus().getName());
         }
 
         @Test
@@ -576,7 +583,7 @@ class OfferStatusIntegrationTest {
             auctionFinisher.finishAuction();
             offerFromDB = offerRepository.findById(user1OfferId).get();
             assertEquals(OfferStatus.COMPLETED, offerFromDB.getStatus().getName());
-            assertEquals(OfferStatus.COMPLETED, getLastHistoryStatus());
+            assertEquals(OfferStatus.COMPLETED, getLastHistoryStatus(user1OfferId));
         }
 
         @Test
@@ -594,7 +601,7 @@ class OfferStatusIntegrationTest {
             auctionFinisher.finishAuction();
             offerFromDB = offerRepository.findById(user1OfferId).get();
             assertEquals(OfferStatus.AUCTION_STARTED, offerFromDB.getStatus().getName());
-            assertEquals(OfferStatus.AUCTION_STARTED, getLastHistoryStatus());
+            assertEquals(OfferStatus.AUCTION_STARTED, getLastHistoryStatus(user1OfferId));
         }
 
         @Test
@@ -623,7 +630,7 @@ class OfferStatusIntegrationTest {
 //            offerFromDB = offerRepository.findById(user1OfferId).get();
 //            assertEquals(OfferStatus.COMPLETED, offerFromDB.getStatus().getName());
 //            assertEquals(bid.getId(), offerFromDB.getWinnerBid().getId());
-//            assertEquals(OfferStatus.COMPLETED, getLastHistoryStatus());
+//            assertEquals(OfferStatus.COMPLETED, getLastHistoryStatus(user1OfferId));
         }
 
         @Test
@@ -653,7 +660,7 @@ class OfferStatusIntegrationTest {
 //            List<Bid> bids = offerFromDB.getBids();
 //
 //            assertEquals(OfferStatus.QUALIFICATION, offerFromDB.getStatus().getName());
-//            assertEquals(OfferStatus.QUALIFICATION, getLastHistoryStatus());
+//            assertEquals(OfferStatus.QUALIFICATION, getLastHistoryStatus(user1OfferId));
         }
     }
 
@@ -664,26 +671,25 @@ class OfferStatusIntegrationTest {
     public class BlockOffer {
 
         @Test
-        public void block_offer_from_draft_status_by_admin() throws Exception {
+        public void return_500_on_blocking_offer_from_draft_status_by_admin() throws Exception {
             mockMvc.perform(delete("/v1/offers/" + user1OfferId + "/block-by-admin").cookie(adminCookie))
-                    .andExpect(status().isOk());
+                    .andExpect(status().isInternalServerError());
 
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
-            assertEquals(OfferStatus.BLOCKED_BY_ADMIN, offerFromDB.getStatus().getName());
-            assertEquals(OfferStatus.BLOCKED_BY_ADMIN, getLastHistoryStatus());
+            assertEquals(OfferStatus.DRAFT, offerFromDB.getStatus().getName());
+            assertEquals(OfferStatus.DRAFT, getLastHistoryStatus(user1OfferId));
         }
 
         @Test
-        public void block_offer_from_verification_status_by_admin() throws Exception {
+        public void return_500_on_blocking_offer_from_verification_status_by_admin() throws Exception {
             Offer offer = offerRepository.findById(user1OfferId).get();
             offer.setStatus(statusService.getByOfferStatus(OfferStatus.VERIFICATION));
 
             mockMvc.perform(delete("/v1/offers/" + user1OfferId + "/block-by-admin").cookie(adminCookie))
-                    .andExpect(status().isOk());
+                    .andExpect(status().isInternalServerError());
 
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
-            assertEquals(OfferStatus.BLOCKED_BY_ADMIN, offerFromDB.getStatus().getName());
-            assertEquals(OfferStatus.BLOCKED_BY_ADMIN, getLastHistoryStatus());
+            assertEquals(OfferStatus.VERIFICATION, offerFromDB.getStatus().getName());
         }
 
         @Test
@@ -696,7 +702,7 @@ class OfferStatusIntegrationTest {
 
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
             assertEquals(OfferStatus.BLOCKED_BY_ADMIN, offerFromDB.getStatus().getName());
-            assertEquals(OfferStatus.BLOCKED_BY_ADMIN, getLastHistoryStatus());
+            assertEquals(OfferStatus.BLOCKED_BY_ADMIN, getLastHistoryStatus(user1OfferId));
         }
 
         @Test
@@ -709,7 +715,7 @@ class OfferStatusIntegrationTest {
 
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
             assertEquals(OfferStatus.BLOCKED_BY_ADMIN, offerFromDB.getStatus().getName());
-            assertEquals(OfferStatus.BLOCKED_BY_ADMIN, getLastHistoryStatus());
+            assertEquals(OfferStatus.BLOCKED_BY_ADMIN, getLastHistoryStatus(user1OfferId));
         }
 
         @Test
@@ -750,7 +756,20 @@ class OfferStatusIntegrationTest {
 
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
             assertEquals(OfferStatus.CANCELED, offerFromDB.getStatus().getName());
-            assertEquals(OfferStatus.CANCELED, getLastHistoryStatus());
+            assertEquals(OfferStatus.CANCELED, getLastHistoryStatus(user1OfferId));
+        }
+
+        @Test
+        public void cancel_offer_from_rejected_status_by_owner() throws Exception {
+            Offer offer = offerRepository.findById(user1OfferId).get();
+            offer.setStatus(statusService.getByOfferStatus(OfferStatus.REJECTED));
+
+            mockMvc.perform(delete("/v1/offers/" + user1OfferId + "/cancel").cookie(user1Cookie))
+                    .andExpect(status().isOk());
+
+            Offer offerFromDB = offerRepository.findById(user1OfferId).get();
+            assertEquals(OfferStatus.CANCELED, offerFromDB.getStatus().getName());
+            assertEquals(OfferStatus.CANCELED, getLastHistoryStatus(user1OfferId));
         }
 
         @Test
@@ -763,7 +782,7 @@ class OfferStatusIntegrationTest {
 
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
             assertEquals(OfferStatus.CANCELED, offerFromDB.getStatus().getName());
-            assertEquals(OfferStatus.CANCELED, getLastHistoryStatus());
+            assertEquals(OfferStatus.CANCELED, getLastHistoryStatus(user1OfferId));
         }
 
         @Test
@@ -776,7 +795,7 @@ class OfferStatusIntegrationTest {
 
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
             assertEquals(OfferStatus.CANCELED, offerFromDB.getStatus().getName());
-            assertEquals(OfferStatus.CANCELED, getLastHistoryStatus());
+            assertEquals(OfferStatus.CANCELED, getLastHistoryStatus(user1OfferId));
         }
 
         @Test
@@ -789,7 +808,7 @@ class OfferStatusIntegrationTest {
 
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
             assertEquals(OfferStatus.CANCELED, offerFromDB.getStatus().getName());
-            assertEquals(OfferStatus.CANCELED, getLastHistoryStatus());
+            assertEquals(OfferStatus.CANCELED, getLastHistoryStatus(user1OfferId));
         }
 
         @Test
@@ -817,8 +836,8 @@ class OfferStatusIntegrationTest {
         }
     }
 
-    private OfferStatus getLastHistoryStatus() {
-        List<OfferStatusHistory> statusHistory = offerStatusHistoryRepository.findByOfferId(user1OfferId);
+    private OfferStatus getLastHistoryStatus(Long id) {
+        List<OfferStatusHistory> statusHistory = offerStatusHistoryRepository.findByOfferId(id);
         Optional<OfferStatusHistory> lastHistory = statusHistory.stream()
                 .skip(statusHistory.size() - 1)
                 .findFirst();

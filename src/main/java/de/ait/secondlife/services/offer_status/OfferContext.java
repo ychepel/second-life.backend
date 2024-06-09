@@ -2,10 +2,12 @@ package de.ait.secondlife.services.offer_status;
 
 import de.ait.secondlife.domain.constants.OfferStatus;
 import de.ait.secondlife.domain.entity.Offer;
+import de.ait.secondlife.domain.entity.Status;
 import de.ait.secondlife.services.interfaces.AdminService;
 import de.ait.secondlife.services.interfaces.BidService;
 import de.ait.secondlife.services.interfaces.OfferService;
 import de.ait.secondlife.services.interfaces.UserService;
+import de.ait.secondlife.services.mapping.OfferMappingService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -20,6 +22,7 @@ public class OfferContext {
     private final UserService userService;
     private final AdminService adminService;
     private final BidService bidService;
+    private final OfferMappingService offerMappingService;
 
     private Offer offer;
 
@@ -28,13 +31,22 @@ public class OfferContext {
 
     public void setOffer(Offer offer) {
         this.offer = offer;
-        setStateFromOfferStatus(offer.getStatus().getName());
+        setStateFromOfferStatus(offer);
     }
 
-    private void setStateFromOfferStatus(OfferStatus offerStatus) {
+    private void setStateFromOfferStatus(Offer offer) {
+        Status status = offer.getStatus();
+        if (status == null) {
+            this.stateStrategy = new DraftState();
+            return;
+        }
+        OfferStatus offerStatus = status.getName();
         switch (offerStatus) {
             case DRAFT:
                 this.stateStrategy = new DraftState();
+                break;
+            case REJECTED:
+                this.stateStrategy = new RejectedState();
                 break;
             case VERIFICATION:
                 this.stateStrategy = new VerificationState();
@@ -62,8 +74,12 @@ public class OfferContext {
         }
     }
 
-    public void draft(Long rejectionReasonId) {
-        stateStrategy.draft(this, rejectionReasonId);
+    public void draft() {
+        stateStrategy.draft(this);
+    }
+
+    public void reject(Long rejectionReasonId) {
+        stateStrategy.reject(this, rejectionReasonId);
     }
 
     public void verify() {

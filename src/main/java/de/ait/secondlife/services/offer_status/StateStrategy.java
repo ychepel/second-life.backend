@@ -10,7 +10,9 @@ import java.util.Objects;
 
 public abstract class StateStrategy {
 
-    abstract void draft(OfferContext context, Long rejectionReasonId);
+    abstract void draft(OfferContext context);
+
+    abstract void reject(OfferContext context, Long rejectionReasonId);
 
     abstract void verify(OfferContext context);
 

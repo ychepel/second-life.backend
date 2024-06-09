@@ -95,10 +95,10 @@ public class OfferServiceImpl implements OfferService {
             }
             newOffer = offerRepository.save(newOffer);
 
-            setStatus(newOffer, OfferStatus.DRAFT);
-
             if (Boolean.TRUE.equals(dto.getSendToVerification())) {
                 verifyOffer(newOffer);
+            } else {
+                draftOffer(newOffer);
             }
 
             return mappingService.toDto(newOffer);
@@ -144,6 +144,8 @@ public class OfferServiceImpl implements OfferService {
 
         if (Boolean.TRUE.equals(dto.getSendToVerification())) {
             verifyOffer(offer);
+        } else {
+            draftOffer(offer);
         }
 
         return mappingService.toDto(offer);
@@ -169,9 +171,16 @@ public class OfferServiceImpl implements OfferService {
 
     @Transactional
     @Override
-    public void draftOffer(OfferToDraftDto offerToDraftDto) {
-        offerContext.setOffer(getOfferById(offerToDraftDto.getId()));
-        offerContext.draft(offerToDraftDto.getRejectionReasonId());
+    public void draftOffer(Offer offer) {
+        offerContext.setOffer(offer);
+        offerContext.draft();
+    }
+
+    @Transactional
+    @Override
+    public void rejectOffer(Long id, OfferRejectionDto offerRejectionDto) {
+        offerContext.setOffer(getOfferById(id));
+        offerContext.reject(offerRejectionDto.getRejectionReasonId());
     }
 
     @Transactional
@@ -204,9 +213,11 @@ public class OfferServiceImpl implements OfferService {
 
     @Transactional
     @Override
-    public void completeOffer(OfferToCompleteDto offerToCompleteDto) {
-        offerContext.setOffer(getOfferById(offerToCompleteDto.getId()));
-        offerContext.complete(offerToCompleteDto.getWinnerBidId());
+    public OfferResponseDto completeOffer(Long id, OfferCompletionDto offerCompletionDto) {
+        Offer offer = getOfferById(id);
+        offerContext.setOffer(offer);
+        offerContext.complete(offerCompletionDto.getWinnerBidId());
+        return mappingService.toDto(offer);
     }
 
     @Transactional

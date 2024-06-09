@@ -214,10 +214,10 @@ public class OfferController {
                 new ResponseMessageDto(String.format("Offer with id <%s> recovered successful", id)));
     }
 
-    @PatchMapping("/{id}/draft")
+    @PatchMapping("/{id}/reject")
     @Operation(
-            summary = "Change offer status to Draft",
-            description = "Returning an offer to <i>Draft</i> status if the ad does not comply with site policies. Available only for Admin role and for Offers in <i>Verification</i> status."
+            summary = "Change offer status to Rejected",
+            description = "Rejecting an Offer if the ad does not comply with site policies. Available only for Admin role and for Offers in <i>Verification</i> status."
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -229,11 +229,11 @@ public class OfferController {
             @ApiResponse(responseCode = "404", description = "Offer not found",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
     })
-    public ResponseEntity<ResponseMessageDto> draft(
+    public ResponseEntity<ResponseMessageDto> reject(
             @PathVariable Long id,
-            @RequestBody @Valid OfferToDraftDto offerToDraftDto
+            @RequestBody @Valid OfferRejectionDto offerRejectionDto
     ) {
-        service.draftOffer(offerToDraftDto);
+        service.rejectOffer(id, offerRejectionDto);
         return ResponseEntity.ok(
                 new ResponseMessageDto(
                         String.format("Status for offer with id <%s> was changed to DRAFT successfully", id)
@@ -310,7 +310,7 @@ public class OfferController {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = OfferResponseDto.class))),
             @ApiResponse(responseCode = "400", description = "Invalid input",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorsDto.class))),
             @ApiResponse(responseCode = "403", description = "Forbidden",
@@ -318,13 +318,11 @@ public class OfferController {
             @ApiResponse(responseCode = "404", description = "Offer not found",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
     })
-    public ResponseEntity<ResponseMessageDto> complete(
+    public ResponseEntity<OfferResponseDto> complete(
             @PathVariable Long id,
-            @RequestBody @Valid OfferToCompleteDto offerToCompleteDto
+            @RequestBody @Valid OfferCompletionDto offerCompletionDto
     ) {
-        service.completeOffer(offerToCompleteDto);
-        return ResponseEntity.ok(
-                new ResponseMessageDto(String.format("Offer with id <%s> was marked as completed", id))
-        );
+        ;
+        return ResponseEntity.ok(service.completeOffer(id, offerCompletionDto));
     }
 }

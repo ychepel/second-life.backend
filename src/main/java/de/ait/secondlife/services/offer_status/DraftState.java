@@ -8,7 +8,15 @@ import de.ait.secondlife.services.interfaces.OfferService;
 public class DraftState extends StateStrategy {
 
     @Override
-    public void draft(OfferContext context, Long rejectionReasonId) {
+    public void draft(OfferContext context) {
+        Offer offer = getOfferAllowedForCurrentUser(context);
+        OfferService offerService = context.getOfferService();
+        offerService.setStatus(offer, OfferStatus.DRAFT);
+        context.setStateStrategy(new DraftState());
+    }
+
+    @Override
+    void reject(OfferContext context, Long rejectionReasonId) {
         throw new ProhibitedOfferStateChangeException(context.getOffer());
     }
 
@@ -51,11 +59,6 @@ public class DraftState extends StateStrategy {
 
     @Override
     public void blockByAdmin(OfferContext context) {
-        Offer offer = getOfferAllowedForCurrentAdmin(context);
-        OfferService offerService = context.getOfferService();
-        offerService.setStatus(offer, OfferStatus.BLOCKED_BY_ADMIN);
-        offer.setIsActive(false);
-        //TODO: mailing - inform offer owner about blocking offer
-        context.setStateStrategy(new BlockByAdminState());
+        throw new ProhibitedOfferStateChangeException(context.getOffer());
     }
 }

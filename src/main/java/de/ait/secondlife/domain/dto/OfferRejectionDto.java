@@ -7,11 +7,7 @@ import lombok.ToString;
 
 @Data
 @ToString
-public class OfferToDraftDto {
-
-    @NotNull(message = "Offer ID cannot be null")
-    @Schema(description = "Offer iD", example = "123")
-    private Long id;
+public class OfferRejectionDto {
 
     @NotNull(message = "Rejection reason ID cannot be null")
     @Schema(description = "Rejection reason ID", example = "123")

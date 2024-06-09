@@ -1,6 +1,6 @@
 package de.ait.secondlife.services;
 
-import de.ait.secondlife.domain.dto.NewUserDto;
+import de.ait.secondlife.domain.dto.UserCreationDto;
 import de.ait.secondlife.domain.dto.UserDto;
 import de.ait.secondlife.domain.entity.User;
 import de.ait.secondlife.exception_handling.exceptions.DuplicateUserEmailException;
@@ -46,7 +46,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto register(NewUserDto newUserDto) {
+    public UserDto register(UserCreationDto newUserDto) {
         String userEmail = newUserDto.getEmail();
         if (userRepository.existsByEmail(userEmail)) {
             throw new DuplicateUserEmailException(userEmail);

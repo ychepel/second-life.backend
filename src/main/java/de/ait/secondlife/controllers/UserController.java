@@ -1,6 +1,6 @@
 package de.ait.secondlife.controllers;
 
-import de.ait.secondlife.domain.dto.NewUserDto;
+import de.ait.secondlife.domain.dto.UserCreationDto;
 import de.ait.secondlife.domain.dto.ResponseMessageDto;
 import de.ait.secondlife.domain.dto.UserDto;
 import de.ait.secondlife.exception_handling.dto.ValidationErrorsDto;
@@ -56,7 +56,7 @@ public class UserController {
             @Valid
             @RequestBody
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "User date to register")
-            NewUserDto newUserDto) {
+            UserCreationDto newUserDto) {
         UserDto userDto = userService.register(newUserDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(userDto);
     }

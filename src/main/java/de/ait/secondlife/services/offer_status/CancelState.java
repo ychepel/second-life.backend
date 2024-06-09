@@ -5,7 +5,12 @@ import de.ait.secondlife.exception_handling.exceptions.ProhibitedOfferStateChang
 public class CancelState extends StateStrategy {
 
     @Override
-    public void draft(OfferContext context, Long rejectionReasonId) {
+    public void draft(OfferContext context) {
+        throw new ProhibitedOfferStateChangeException(context.getOffer());
+    }
+
+    @Override
+    void reject(OfferContext context, Long rejectionReasonId) {
         throw new ProhibitedOfferStateChangeException(context.getOffer());
     }
 

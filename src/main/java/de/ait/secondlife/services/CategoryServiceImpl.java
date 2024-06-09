@@ -1,7 +1,7 @@
 package de.ait.secondlife.services;
 
 import de.ait.secondlife.domain.dto.CategoryDto;
-import de.ait.secondlife.domain.dto.NewCategoryDto;
+import de.ait.secondlife.domain.dto.CategoryCreationDto;
 import de.ait.secondlife.domain.entity.Category;
 import de.ait.secondlife.exception_handling.exceptions.DuplicateCategoryException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.CategoryIsNotEmptyException;
@@ -45,7 +45,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public CategoryDto save(NewCategoryDto categoryDto) {
+    public CategoryDto save(CategoryCreationDto categoryDto) {
 
         String categoryName = categoryDto.getName();
         if (repository.existsByName(categoryName)){
