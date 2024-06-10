@@ -37,7 +37,7 @@ public class Bid {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "offer_id")
     @NotNull(message="Offer cannot be null" )
-    private Offer offer ;
+    private Offer offer;
 
     //TODO -add bid to user dependence
     @Column(name = "user_id")

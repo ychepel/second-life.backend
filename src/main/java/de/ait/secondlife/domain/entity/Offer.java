@@ -60,6 +60,10 @@ public class Offer {
     @JoinColumn(name = "category_id")
     private Category category;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "location_id")
+    private Location location;
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "winner_bid_id")
     private Bid winnerBid;

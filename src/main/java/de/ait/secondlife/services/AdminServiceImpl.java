@@ -18,7 +18,7 @@ public class AdminServiceImpl implements AdminService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Admin admin = repository.findByEmail(username);
         if (admin == null) {
-            throw new RuntimeException("Admin not found");
+            throw new UsernameNotFoundException("Admin not found");
         }
         return admin;
     }

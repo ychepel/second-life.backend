@@ -42,6 +42,7 @@ public class OfferServiceImpl implements OfferService {
     private final UserService userService;
     private final CategoryService categoryService;
     private final ImageService imageService;
+    private final LocationService locationService;
 
     @Override
     public OfferResponseWithPaginationDto findOffers(Pageable pageable) {
@@ -123,6 +124,9 @@ public class OfferServiceImpl implements OfferService {
         offer.setCategory(dto.getCategoryId() == null ?
                 offer.getCategory() :
                 categoryService.getCategoryById(dto.getCategoryId()));
+        offer.setLocation(dto.getLocationId() == null ?
+                offer.getLocation() :
+                locationService.getLocationById(dto.getLocationId()));
     }
 
     @Transactional

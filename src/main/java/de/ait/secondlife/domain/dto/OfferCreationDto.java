@@ -46,6 +46,10 @@ public class OfferCreationDto {
     @Schema(description = "Category id", example = "22")
     @NotNull(message = "Category Id cannot be null")
     private Long categoryId;
+
+    @Schema(description = "Location id", example = "1")
+    @NotNull(message = "Location Id cannot be null")
+    private Long locationId;
 }
 
 

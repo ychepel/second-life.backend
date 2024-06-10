@@ -1,6 +1,13 @@
 package de.ait.secondlife.controllers;
 
 import de.ait.secondlife.domain.dto.*;
+import de.ait.secondlife.domain.dto.ResponseMessageDto;
+import de.ait.secondlife.domain.dto.OfferCreationDto;
+import de.ait.secondlife.domain.dto.OfferResponseDto;
+import de.ait.secondlife.domain.dto.OfferResponseWithPaginationDto;
+import de.ait.secondlife.domain.dto.OfferUpdateDto;
+
+import de.ait.secondlife.exception_handling.dto.ValidationErrorsDto;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.PaginationParameterIsWrongException;
 import de.ait.secondlife.services.interfaces.OfferService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,21 +31,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/v1/offers")
 @RequiredArgsConstructor
 @Tag(name = "Offer controller", description = "Controller for some operations with available offer")
-@ApiResponses(value = {
-        @ApiResponse(responseCode = "400", description = "Bad request", content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = ResponseMessageDto.class)
-        )),
-        @ApiResponse(responseCode = "404", description = "Resource not found", content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = ResponseMessageDto.class)
-        )),
-        @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = ResponseMessageDto.class)
-        ))
-})
-public class OfferController  {
+public class OfferController {
 
     private final OfferService service;
 
@@ -53,8 +46,7 @@ public class OfferController  {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = OfferResponseWithPaginationDto.class))),
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = OfferResponseWithPaginationDto.class))),
     })
     public ResponseEntity<OfferResponseWithPaginationDto> getAll(
             @RequestParam(defaultValue = PAGE_VALUE)
@@ -86,8 +78,9 @@ public class OfferController  {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = OfferResponseDto.class))),
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = OfferResponseDto.class))),
+            @ApiResponse(responseCode = "404", description = "Offer not found",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class)))
     })
     public ResponseEntity<OfferResponseDto> getById(
             @PathVariable
@@ -103,8 +96,9 @@ public class OfferController  {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = OfferResponseWithPaginationDto.class))),
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = OfferResponseWithPaginationDto.class))),
+            @ApiResponse(responseCode = "404", description = "Offers not found",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class)))
     })
     public ResponseEntity<OfferResponseWithPaginationDto> getByUserId(
             @RequestParam(defaultValue = "0")
@@ -134,9 +128,14 @@ public class OfferController  {
             description = "Creating a new offer and saving it in the database"
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Entity created",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = OfferResponseDto.class))),
+            @ApiResponse(responseCode = "201", description = "Offer created",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = OfferResponseDto.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid input",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorsDto.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
+            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class)))
     })
     public ResponseEntity<OfferResponseDto> create(
             @Valid
@@ -153,8 +152,17 @@ public class OfferController  {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ResponseMessageDto.class))),
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid input",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorsDto.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
+            @ApiResponse(responseCode = "404", description = "Offer not found",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
+            @ApiResponse(responseCode = "409", description = "Conflict",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
+            @ApiResponse(responseCode = "422", description = "Unprocessable Entity",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class)))
     })
     public ResponseEntity<ResponseMessageDto> update(
             @Valid
@@ -173,8 +181,11 @@ public class OfferController  {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ResponseMessageDto.class))),
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
+            @ApiResponse(responseCode = "404", description = "Offer not found",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class)))
     })
     public ResponseEntity<ResponseMessageDto> remove(
             @PathVariable
@@ -192,8 +203,11 @@ public class OfferController  {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ResponseMessageDto.class))),
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
+            @ApiResponse(responseCode = "404", description = "Offer not found",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
     })
     public ResponseEntity<ResponseMessageDto> recover(
             @PathVariable
