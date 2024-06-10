@@ -57,7 +57,7 @@ public class CategoryServiceImpl implements CategoryService {
         try {
             repository.save(entity);
         } catch (Exception e) {
-            throw new RuntimeException("Cannot save category to db");
+            throw new RuntimeException("Cannot save category to db", e);
         }
 
         return mappingService.mapEntityToDto(entity);
@@ -74,7 +74,7 @@ public class CategoryServiceImpl implements CategoryService {
         try {
             return mappingService.mapEntityToDto(repository.save(existingCategory));
         } catch (Exception e) {
-            throw new RuntimeException("Cannot save category to db");
+            throw new RuntimeException("Cannot save category to db", e);
         }
     }
 
@@ -88,13 +88,13 @@ public class CategoryServiceImpl implements CategoryService {
         try {
             return mappingService.mapEntityToDto(repository.save(existingCategory));
         } catch (Exception e) {
-            throw new RuntimeException("Cannot save category to db ", e);
+            throw new RuntimeException("Cannot save category to db", e);
         }
     }
 
     @Override
     public CategoryDto hide(Long categoryId) {
-        Category existingCategory = repository.findById(categoryId).orElseThrow(() -> new RuntimeException("Category not found with id: " + categoryId));
+        Category existingCategory = repository.findById(categoryId).orElseThrow(() -> new CategoryNotFoundException(categoryId));
 
         if (!existingCategory.getOffers().isEmpty()) throw new CategoryIsNotEmptyException(categoryId);
 
@@ -103,7 +103,7 @@ public class CategoryServiceImpl implements CategoryService {
         try {
             return mappingService.mapEntityToDto(repository.save(existingCategory));
         } catch (Exception e) {
-            throw new RuntimeException("Cannot save category to db ", e);
+            throw new RuntimeException("Cannot save category to db", e);
         }
     }
 
