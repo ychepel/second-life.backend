@@ -7,10 +7,10 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 @Mapper
-public interface NewCategoryMappingService {
+public abstract class NewCategoryMappingService extends EntityWIthImageMappingService {
 
-    @Mapping(target = "images", ignore = true)
-    CategoryDto mapEntityToDto(Category entity);
+    @Mapping(target = "images", expression = "java(getImages(entity))")
+    public abstract CategoryDto mapEntityToDto(Category entity);
 
-    Category mapDtoToEntity(NewCategoryDto dto);
+    public abstract Category mapDtoToEntity(NewCategoryDto dto);
 }

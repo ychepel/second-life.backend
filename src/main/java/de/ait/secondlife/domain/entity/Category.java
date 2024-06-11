@@ -1,5 +1,6 @@
 package de.ait.secondlife.domain.entity;
 
+import de.ait.secondlife.domain.interfaces.EntityWithImage;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "category")
-public class Category {
+public class Category implements EntityWithImage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

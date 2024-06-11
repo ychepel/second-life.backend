@@ -7,7 +7,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
-public interface OfferMappingService {
+public abstract class OfferMappingService extends EntityWIthImageMappingService {
 
     @Mapping(source = "user.id", target = "ownerId")
     @Mapping(source = "status.id", target = "statusId")
@@ -15,9 +15,9 @@ public interface OfferMappingService {
     @Mapping(source = "category.id", target = "categoryId")
     //TODO change the logic after creating the order status processing
     @Mapping(target = "endAt", expression = "java(offer.getCreatedAt().plusDays(offer.getAuctionDurationDays()))")
-    @Mapping(target = "images", ignore = true)
+    @Mapping(target = "images", expression = "java(getImages(offer))")
     @Mapping(source = "location.id", target = "locationId")
-    OfferResponseDto toRequestDto(Offer offer);
+    public abstract OfferResponseDto toRequestDto(Offer offer);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "user", ignore = true)
@@ -25,7 +25,7 @@ public interface OfferMappingService {
     @Mapping(target = "isActive", constant = "true")
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "category", ignore = true)
-    Offer toOffer(OfferCreationDto dto);
+    public abstract Offer toOffer(OfferCreationDto dto);
 
 }
 
