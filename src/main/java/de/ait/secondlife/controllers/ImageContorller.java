@@ -27,7 +27,10 @@ public class ImageContorller {
     @PostMapping("/upload")
     @Operation(
             summary = "Create new image",
-            description = "Create new image for entity by entity id "
+            description = "Create new image for entity by entity id. " +
+                    "The maximum allowable image upload size is 8MB. " +
+                    "The maximum number of images for the Offer entity is 5. " +
+                    "For Category and User - 1."
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",

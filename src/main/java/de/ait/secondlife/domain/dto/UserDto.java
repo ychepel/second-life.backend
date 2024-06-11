@@ -31,4 +31,7 @@ public class UserDto {
 
     @Schema(description = "User last login")
     private LocalDateTime lastActive;
+
+    @Schema(description = "List of image's path")
+    private ImagePathsResponseDto images;
 }

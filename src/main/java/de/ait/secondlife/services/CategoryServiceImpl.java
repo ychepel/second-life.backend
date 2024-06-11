@@ -1,14 +1,19 @@
 package de.ait.secondlife.services;
 
+import de.ait.secondlife.constants.EntityType;
 import de.ait.secondlife.domain.dto.CategoryDto;
 import de.ait.secondlife.domain.dto.NewCategoryDto;
+import de.ait.secondlife.domain.dto.UserDto;
 import de.ait.secondlife.domain.entity.Category;
+import de.ait.secondlife.domain.entity.User;
 import de.ait.secondlife.exception_handling.exceptions.DuplicateCategoryException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.CategoryIsNotEmptyException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.is_null_exceptions.IdIsNullException;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.CategoryNotFoundException;
 import de.ait.secondlife.repositories.CategoryRepository;
 import de.ait.secondlife.services.interfaces.CategoryService;
+import de.ait.secondlife.services.interfaces.ImageService;
+import de.ait.secondlife.services.interfaces.UserService;
 import de.ait.secondlife.services.mapping.NewCategoryMappingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,6 +28,8 @@ public class CategoryServiceImpl implements CategoryService {
 
     private final NewCategoryMappingService mappingService;
 
+    private final ImageService imageService;
+
     @Override
     public CategoryDto getById(Long id) {
 
@@ -32,15 +39,15 @@ public class CategoryServiceImpl implements CategoryService {
 
         Category category = repository.findById(id).orElseThrow(() -> new CategoryNotFoundException(id));
 
-        return mappingService.mapEntityToDto(category);
+        return toCategoryDtoWithImages(category);
     }
 
     @Override
     public List<CategoryDto> getAll() {
         return repository.findAll()
                 .stream()
-                .filter(x -> x.isActive())
-                .map(mappingService::mapEntityToDto)
+                .filter(Category::isActive)
+                .map(this::toCategoryDtoWithImages)
                 .toList();
     }
 
@@ -60,7 +67,7 @@ public class CategoryServiceImpl implements CategoryService {
             throw new RuntimeException("Cannot save category to db");
         }
 
-        return mappingService.mapEntityToDto(entity);
+        return toCategoryDtoWithImages(entity);
     }
 
     @Override
@@ -72,7 +79,7 @@ public class CategoryServiceImpl implements CategoryService {
         existingCategory.setDescription(dto.getDescription());
 
         try {
-            return mappingService.mapEntityToDto(repository.save(existingCategory));
+            return toCategoryDtoWithImages(repository.save(existingCategory));
         } catch (Exception e) {
             throw new RuntimeException("Cannot save category to db");
         }
@@ -86,7 +93,7 @@ public class CategoryServiceImpl implements CategoryService {
         existingCategory.setActive(true);
 
         try {
-            return mappingService.mapEntityToDto(repository.save(existingCategory));
+            return toCategoryDtoWithImages(repository.save(existingCategory));
         } catch (Exception e) {
             throw new RuntimeException("Cannot save category to db ", e);
         }
@@ -101,7 +108,7 @@ public class CategoryServiceImpl implements CategoryService {
         existingCategory.setActive(false);
 
         try {
-            return mappingService.mapEntityToDto(repository.save(existingCategory));
+            return toCategoryDtoWithImages(repository.save(existingCategory));
         } catch (Exception e) {
             throw new RuntimeException("Cannot save category to db ", e);
         }
@@ -112,5 +119,12 @@ public class CategoryServiceImpl implements CategoryService {
         if (id == null) throw new IdIsNullException();
         return repository.findById(id)
                 .orElseThrow(() -> new CategoryNotFoundException(id));
+    }
+
+    private CategoryDto toCategoryDtoWithImages(Category category) {
+        CategoryDto dto= mappingService.mapEntityToDto(category);
+        String entityType = EntityType.CATEGORY.getType();
+        dto.setImages(imageService.findAllImageForEntity(entityType, category.getId()));
+        return dto;
     }
 }

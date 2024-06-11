@@ -23,4 +23,7 @@ public class CategoryDto {
 
     @Schema(description = "active or not flag", example = "true")
     private boolean active;
+
+    @Schema(description = "List of image's path")
+    private ImagePathsResponseDto images;
 }

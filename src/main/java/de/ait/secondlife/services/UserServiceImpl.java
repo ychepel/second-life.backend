@@ -1,13 +1,17 @@
 package de.ait.secondlife.services;
 
+import de.ait.secondlife.constants.EntityType;
 import de.ait.secondlife.domain.dto.NewUserDto;
+import de.ait.secondlife.domain.dto.OfferResponseDto;
 import de.ait.secondlife.domain.dto.UserDto;
+import de.ait.secondlife.domain.entity.Offer;
 import de.ait.secondlife.domain.entity.User;
 import de.ait.secondlife.exception_handling.exceptions.DuplicateUserEmailException;
 import de.ait.secondlife.exception_handling.exceptions.UserSavingException;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.LocationNotFoundException;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.UserNotFoundException;
 import de.ait.secondlife.repositories.UserRepository;
+import de.ait.secondlife.services.interfaces.ImageService;
 import de.ait.secondlife.services.interfaces.LocationService;
 import de.ait.secondlife.services.interfaces.UserService;
 import de.ait.secondlife.services.mapping.NewUserMappingService;
@@ -29,6 +33,7 @@ public class UserServiceImpl implements UserService {
     private final UserMappingService userMappingService;
     private final BCryptPasswordEncoder encoder;
     private final LocationService locationService;
+    private final ImageService imageService;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -59,7 +64,7 @@ public class UserServiceImpl implements UserService {
             throw new UserSavingException("User saving failed", e);
         }
 
-        return userMappingService.toDto(user);
+        return toUserDtoWithImages(user);
     }
 
     @Override
@@ -89,6 +94,13 @@ public class UserServiceImpl implements UserService {
             throw new UserSavingException("User saving failed", e);
         }
 
-        return userMappingService.toDto(user);
+        return toUserDtoWithImages(user);
+    }
+
+    private UserDto toUserDtoWithImages(User user) {
+        UserDto dto= userMappingService.toDto(user);
+        String entityType = EntityType.USER.getType();
+        dto.setImages(imageService.findAllImageForEntity(entityType, user.getId()));
+        return dto;
     }
 }
