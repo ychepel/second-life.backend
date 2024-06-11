@@ -127,4 +127,5 @@ public class ImagesIntegrationTest {
         public void del_image_for_offer() throws Exception {
 
         }
+    }
 }
