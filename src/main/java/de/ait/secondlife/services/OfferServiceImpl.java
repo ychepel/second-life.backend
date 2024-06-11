@@ -132,6 +132,7 @@ public class OfferServiceImpl implements OfferService {
     @Transactional
     @Override
     public void removeOffer(Long id) {
+        //TODO   Only the owner and admin has the right to make changes
         if (id == null) throw new IdIsNullException();
         Offer offer = offerRepository.findByIdAndIsActiveTrue(id)
                 .orElseThrow(() -> new OfferNotFoundException(id));
@@ -141,6 +142,7 @@ public class OfferServiceImpl implements OfferService {
     @Transactional
     @Override
     public void recoverOffer(Long id) {
+        //TODO   Only the owner and admin has the right to make changes
         if (id == null) throw new IdIsNullException();
         Offer offer = offerRepository.findById(id)
                 .orElseThrow(() -> new OfferNotFoundException(id));

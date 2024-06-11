@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Data
 @Builder
-public class EntityImage {
+public class ImageEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -27,12 +27,9 @@ public class EntityImage {
     @Column(name = "size")
     private String size;
 
-    @Column(name = "path")
-    private String path;
-
     @Column(name = "base_name")
     private String baseName;
 
-    @Column(name = "extension")
-    private String extension;
+    @Column(name="full_path")
+    private String fullPath;
 }

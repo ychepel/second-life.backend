@@ -74,11 +74,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ResponseMessageDto> handleException(ParameterNotFoundException e) {
         return new ResponseEntity<>(new ResponseMessageDto(e.getMessage()), HttpStatus.NOT_FOUND);
     }
-//    @ExceptionHandler(RuntimeException.class)
-//    public ResponseEntity<ResponseMessageDto> handleException(RuntimeException e) {
-//        return new ResponseEntity<>(new ResponseMessageDto("Something went wrong"), HttpStatus.INTERNAL_SERVER_ERROR);
-//    }
 
+    // TODO message isn't informative
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ResponseMessageDto> handleException(RuntimeException e) {
+        return new ResponseEntity<>(new ResponseMessageDto("Something went wrong"), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    // TODO message isn't informative
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ResponseMessageDto> handleException(IllegalArgumentException e){
         return new ResponseEntity<>(new ResponseMessageDto("Invalid value"), HttpStatus.BAD_REQUEST);
@@ -109,7 +111,7 @@ public class GlobalExceptionHandler {
                         .errors(validationErrors)
                         .build());
     }
-
+//TODO no usages
     private String parseExceptionMessage(String errorMessage) {
         Pattern pattern = Pattern.compile("messageTemplate='([^']*)'");
         Matcher matcher = pattern.matcher(errorMessage);

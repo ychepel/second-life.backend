@@ -34,31 +34,30 @@ public class SecurityConfig {
                 .sessionManagement(x -> x
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(x -> x
-                        .requestMatchers(HttpMethod.GET, "/v1/auth/admin/logout").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/v1/auth/user/logout").hasRole("USER")
-                        .requestMatchers(HttpMethod.POST,
-                                "/v1/auth/admin/login",
-                                "/v1/auth/admin/access",
-                                "/v1/auth/user/login",
-                                "/v1/auth/user/access"
-                        ).permitAll()
-                        .requestMatchers(HttpMethod.GET, "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/v1/users/register").permitAll()
-                        .requestMatchers(HttpMethod.PATCH, "/v1/users/{id}/set-location").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/v1/categories", "/v1/categories/{category-id}").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/v1/categories").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/v1/categories/{category-id}").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PATCH, "/v1/categories/{category-id}/set-active").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/v1/categories/{category-id}").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/v1/offers/all", "/v1/offers/{id}").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/v1/offers/user/{id}").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/v1/offers").hasRole("USER")
-                        .requestMatchers(HttpMethod.PUT, "/v1/offers", "/v1/offers/recover/{id}").authenticated()
-                        .requestMatchers(HttpMethod.DELETE, "/v1/offers/{id}").authenticated()
-//                        .anyRequest().denyAll()
+                                .requestMatchers(HttpMethod.GET, "/v1/auth/admin/logout").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/v1/auth/user/logout").hasRole("USER")
+                                .requestMatchers(HttpMethod.POST,
+                                        "/v1/auth/admin/login",
+                                        "/v1/auth/admin/access",
+                                        "/v1/auth/user/login",
+                                        "/v1/auth/user/access"
+                                ).permitAll()
+                                .requestMatchers(HttpMethod.GET, "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/v1/users/register").permitAll()
+                                .requestMatchers(HttpMethod.PATCH, "/v1/users/{id}/set-location").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/v1/categories", "/v1/categories/{category-id}").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/v1/categories").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.PUT, "/v1/categories/{category-id}").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.PATCH, "/v1/categories/{category-id}/set-active").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/v1/categories/{category-id}").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/v1/offers/all", "/v1/offers/{id}").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/v1/offers/user/{id}").authenticated()
+                                .requestMatchers(HttpMethod.POST, "/v1/offers").hasRole("USER")
+                                .requestMatchers(HttpMethod.PUT, "/v1/offers", "/v1/offers/recover/{id}").authenticated()
+                                .requestMatchers(HttpMethod.DELETE, "/v1/offers/{id}").authenticated()
+                                .requestMatchers(HttpMethod.GET, "/v1/locations", "/v1/locations/{id}").permitAll()
+//                                .anyRequest().denyAll()
                                 .anyRequest().permitAll()
-                        .requestMatchers(HttpMethod.GET, "/v1/locations","/v1/locations/{id}").permitAll()
-                        .anyRequest().denyAll()
                 )
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .addFilterAfter(filter, UsernamePasswordAuthenticationFilter.class)

@@ -23,19 +23,18 @@
                 <constraints nullable="false" />
             </column>
 
-            <column name="path" type="varchar(64)">
-                <constraints nullable="false"/>
-            </column>
-
             <column name="base_name" type="varchar(64)">
                 <constraints nullable="false"/>
             </column>
 
-            <column name="extension" type="varchar(64)">
+            <column name="full_path" type="varchar(256)">
                 <constraints nullable="false" />
             </column>
 
         </createTable>
+        <createIndex indexName="idx_base_name" tableName="image">
+            <column name="base_name"/>
+        </createIndex>
     </changeSet>
 
 </databaseChangeLog>
