@@ -24,7 +24,7 @@ public class ImageContorller {
 
     private final ImageService imageService;
 
-    @PostMapping("/upload")
+    @PostMapping("/upload") //TODO: PR review - remove "/upload" from endpoint url. POST method to root controller is enough
     @Operation(
             summary = "Create new image",
             description = "Create new image for entity by entity id. " +
