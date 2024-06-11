@@ -196,7 +196,7 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
 
     private String getBaseNameOfImage(String fileNme) {
         int startIndex = fileNme.indexOf('_') + 1;
-        int endIndex = fileNme.indexOf('.');
+        int endIndex = fileNme.lastIndexOf('.');
         if (startIndex >= 0 && endIndex >= 0 && startIndex < endIndex)
             return fileNme.substring(startIndex, endIndex);
         else throw new FileNameIsWrongException(fileNme);
