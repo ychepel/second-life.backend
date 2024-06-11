@@ -75,16 +75,16 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(new ResponseMessageDto(e.getMessage()), HttpStatus.NOT_FOUND);
     }
 
-//    // TODO message isn't informative
-//    @ExceptionHandler(RuntimeException.class)
-//    public ResponseEntity<ResponseMessageDto> handleException(RuntimeException e) {
-//        return new ResponseEntity<>(new ResponseMessageDto("Something went wrong"), HttpStatus.INTERNAL_SERVER_ERROR);
-//    }
-//    // TODO message isn't informative
-//    @ExceptionHandler(IllegalArgumentException.class)
-//    public ResponseEntity<ResponseMessageDto> handleException(IllegalArgumentException e){
-//        return new ResponseEntity<>(new ResponseMessageDto("Invalid value"), HttpStatus.BAD_REQUEST);
-//    }
+    // TODO message isn't informative
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ResponseMessageDto> handleException(RuntimeException e) {
+        return new ResponseEntity<>(new ResponseMessageDto("Something went wrong"), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    // TODO message isn't informative
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ResponseMessageDto> handleException(IllegalArgumentException e){
+        return new ResponseEntity<>(new ResponseMessageDto("Invalid value"), HttpStatus.BAD_REQUEST);
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ValidationErrorsDto> handleValidationException(MethodArgumentNotValidException e) {
