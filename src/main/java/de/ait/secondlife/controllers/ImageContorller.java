@@ -1,6 +1,6 @@
 package de.ait.secondlife.controllers;
 
-import de.ait.secondlife.domain.dto.ImageCreateDto;
+import de.ait.secondlife.domain.dto.ImageCreationDto;
 import de.ait.secondlife.domain.dto.ImageRequestDto;
 import de.ait.secondlife.domain.dto.ResponseMessageDto;
 import de.ait.secondlife.services.interfaces.ImageService;
@@ -35,7 +35,7 @@ public class ImageContorller {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ResponseMessageDto.class))),
+                            schema = @Schema(implementation = ResponseMessageDto.class))), //TODO: PR review - method should return Schema ImagePathsResponseDto.class
             @ApiResponse(responseCode = "400", description = "Bad request", content = @Content(
                     mediaType = "application/json",
                     schema = @Schema(implementation = ResponseMessageDto.class)
@@ -44,10 +44,10 @@ public class ImageContorller {
                     mediaType = "application/json",
                     schema = @Schema(implementation = ResponseMessageDto.class)
             ))})
-    public ResponseEntity<ResponseMessageDto> uploadImage(
+    public ResponseEntity<ResponseMessageDto> uploadImage( //TODO: PR review - method should return ResponseEntity<ImagePathsResponseDto>
             @Valid
-            @Parameter(description = "Dto with image file, entity type and entity id ", schema = @Schema(implementation = ImageCreateDto.class))
-            ImageCreateDto request) {
+            @Parameter(description = "Dto with image file, entity type and entity id ", schema = @Schema(implementation = ImageCreationDto.class))
+            ImageCreationDto request) {
         imageService.saveNewImage(request);
         return ResponseEntity.ok(
                 new ResponseMessageDto("Image(s) successful saved"));
@@ -71,7 +71,7 @@ public class ImageContorller {
                     schema = @Schema(implementation = ResponseMessageDto.class)
             ))})
     public ResponseEntity<ResponseMessageDto> deleteImage(
-            @Parameter(description = "Dto with name of file ",
+            @Parameter(description = "Dto with name of file", //TODO: PR review - "Dto with base_name of files"
                     schema = @Schema(implementation = ImageRequestDto.class))
             @RequestBody ImageRequestDto dto
     ) {
