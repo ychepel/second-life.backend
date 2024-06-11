@@ -6,10 +6,8 @@ import de.ait.secondlife.domain.entity.Offer;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-
 @Mapper(componentModel = "spring")
 public interface OfferMappingService {
-
 
     @Mapping(source = "user.id", target = "ownerId")
     @Mapping(source = "status.id", target = "statusId")
@@ -17,6 +15,7 @@ public interface OfferMappingService {
     @Mapping(source = "category.id", target = "categoryId")
     //TODO change the logic after creating the order status processing
     @Mapping(target = "endAt", expression = "java(offer.getCreatedAt().plusDays(offer.getAuctionDurationDays()))")
+    @Mapping(source = "location.id", target = "locationId")
     OfferResponseDto toRequestDto(Offer offer);
 
     @Mapping(target = "id", ignore = true)
