@@ -9,7 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Data
 @Schema(description = "Image create dto")
-public class ImageCreateDto {
+public class ImageCreationDto {
 
     @Parameter(description = "Type of entity",
             examples = {
@@ -21,9 +21,10 @@ public class ImageCreateDto {
     private String entityType;
 
     @Schema(description = "Id of entity", example = "324")
-    @NotNull
+    @NotNull //TODO: PR review - remove @NotNull to allow creating temporary images before entity creation
     private Long entityId;
 
     @Schema(description = "File with image")
+    //TODO: PR review - add @NotNull
     private MultipartFile file;
 }

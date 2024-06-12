@@ -1,5 +1,6 @@
 package de.ait.secondlife.domain.entity;
 
+import de.ait.secondlife.domain.interfaces.EntityWithImage;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,7 +16,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Data
 @Builder
-public class Offer {
+public class Offer implements EntityWithImage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")

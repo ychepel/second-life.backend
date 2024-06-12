@@ -1,6 +1,5 @@
 package de.ait.secondlife.services;
 
-import de.ait.secondlife.constants.EntityType;
 import de.ait.secondlife.constants.OfferStatus;
 import de.ait.secondlife.domain.dto.OfferCreationDto;
 import de.ait.secondlife.domain.dto.OfferResponseDto;
@@ -41,7 +40,6 @@ public class OfferServiceImpl implements OfferService {
     private final StatusService statusService;
     private final UserService userService;
     private final CategoryService categoryService;
-    private final ImageService imageService;
     private final LocationService locationService;
 
     @Override
@@ -55,7 +53,7 @@ public class OfferServiceImpl implements OfferService {
         if (id == null) throw new IdIsNullException();
         Offer offer = offerRepository.findByIdAndIsActiveTrue(id)
                 .orElseThrow(() -> new OfferNotFoundException(id));
-        return toOfferResponseDtoWithImages(offer);
+        return mappingService.toRequestDto(offer);
     }
 
     @Override
@@ -88,7 +86,7 @@ public class OfferServiceImpl implements OfferService {
                 }
             }
             newOffer = offerRepository.save(newOffer);
-            return toOfferResponseDtoWithImages(newOffer);
+            return mappingService.toRequestDto(newOffer);
         } catch (ConstraintViolationException | DataIntegrityViolationException e) {
             throw new CreateOfferConstraintViolationException("Constraint violation: " + e.getMessage());
         }
@@ -152,7 +150,7 @@ public class OfferServiceImpl implements OfferService {
     private OfferResponseWithPaginationDto offersToOfferRequestWithPaginationDto(Page<Offer> pageOfOffer) {
         Set<OfferResponseDto> offers;
         offers = pageOfOffer.stream()
-                .map(this::toOfferResponseDtoWithImages)
+                .map(mappingService::toRequestDto)
                 .collect(Collectors.toSet());
         return OfferResponseWithPaginationDto.builder()
                 .offers(offers)
@@ -181,13 +179,5 @@ public class OfferServiceImpl implements OfferService {
         if (authentication.getPrincipal().equals("anonymousUser")) throw new UserIsNotAuthorizedException();
         String username = authentication.getName();
         return (User) userService.loadUserByUsername(username);
-    }
-
-
-    private OfferResponseDto toOfferResponseDtoWithImages(Offer offer) {
-        OfferResponseDto dto = mappingService.toRequestDto(offer);
-        String entityType = EntityType.OFFER.getType();
-        dto.setImages(imageService.findAllImageForEntity(entityType, offer.getId()));
-        return dto;
     }
 }
