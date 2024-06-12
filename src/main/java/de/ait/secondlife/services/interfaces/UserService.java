@@ -15,4 +15,6 @@ public interface UserService extends AuthenticatedUserService {
     UserDto setLocation(Long userId, Long locationId);
 
     User getAuthenticatedUser() throws CredentialException;
+
+    UserDto getCurrentUser() throws CredentialException;
 }

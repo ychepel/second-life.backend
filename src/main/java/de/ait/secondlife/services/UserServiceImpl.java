@@ -110,4 +110,9 @@ public class UserServiceImpl implements UserService {
         String username = authentication.getName();
         return (User) loadUserByUsername(username);
     }
+
+    @Override
+    public UserDto getCurrentUser() throws CredentialException {
+        return userMappingService.toDto(getAuthenticatedUser());
+    }
 }
