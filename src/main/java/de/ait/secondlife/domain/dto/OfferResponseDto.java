@@ -46,8 +46,8 @@ public class OfferResponseDto {
     @Schema(description = "User id of the owner of the offer", example = "34")
     private Long ownerId;
 
-    @Schema(description = "Status id", example = "26")
-    private Long statusId;
+    @Schema(description = "Current status", example = "VERIFICATION")
+    private String status;
 
     @Schema(description = "Category id", example = "22")
     private Long categoryId;
