@@ -83,12 +83,10 @@ public class OfferServiceImpl implements OfferService {
             newOffer.setAuctionDurationDays(newOffer.getAuctionDurationDays() <= 0 ? 3 : newOffer.getAuctionDurationDays());
 
             if (Boolean.TRUE.equals(newOffer.getIsFree())) {
-                checkOfferIfIsFree(dto.getStartPrice(), dto.getStep(), dto.getWinBid());
+                checkOfferIfIsFree(dto.getStartPrice(), dto.getWinBid());
             } else {
                 if (dto.getStartPrice() == null || dto.getStartPrice().compareTo(BigDecimal.ZERO) == 0)
                     throw new WrongAuctionParameterException("start prise");
-                if (dto.getStep() == null || dto.getStep().compareTo(BigDecimal.ZERO) == 0)
-                    throw new WrongAuctionParameterException("step");
                 if (dto.getWinBid() != null && dto.getWinBid().compareTo(BigDecimal.ZERO) == 0) {
                     throw new WrongAuctionParameterException("winBid");
                 }
@@ -122,15 +120,12 @@ public class OfferServiceImpl implements OfferService {
                 offer.getAuctionDurationDays() : dto.getAuctionDurationDays());
         offer.setIsFree(dto.getIsFree() == null ? offer.getIsFree() : dto.getIsFree());
         if (offer.getIsFree()) {
-            checkOfferIfIsFree(dto.getStartPrice(), dto.getStep(), dto.getWinBid());
+            checkOfferIfIsFree(dto.getStartPrice(), dto.getWinBid());
             offer.setStartPrice(null);
-            offer.setStep(null);
             offer.setWinBid(null);
         } else {
             offer.setStartPrice(dto.getStartPrice() == null || dto.getStartPrice().compareTo(BigDecimal.ZERO) == 0 ?
                     offer.getStartPrice() : dto.getStartPrice());
-            offer.setStep(dto.getStep() == null || dto.getStep().compareTo(BigDecimal.ZERO) == 0 ?
-                    offer.getStep() : dto.getStep());
             offer.setWinBid(dto.getWinBid() == null || dto.getWinBid().compareTo(BigDecimal.ZERO) == 0 ?
                     offer.getWinBid() : dto.getWinBid());
         }
@@ -278,11 +273,9 @@ public class OfferServiceImpl implements OfferService {
                 .build();
     }
 
-    private void checkOfferIfIsFree(BigDecimal startPrice, BigDecimal step, BigDecimal winBin) {
+    private void checkOfferIfIsFree(BigDecimal startPrice, BigDecimal winBin) {
         if (startPrice != null && startPrice.compareTo(BigDecimal.ZERO) > 0)
             throw new WrongAuctionParameterException("start prise");
-        if (step != null && step.compareTo(BigDecimal.ZERO) > 0)
-            throw new WrongAuctionParameterException("step");
         if (winBin != null && winBin.compareTo(BigDecimal.ZERO) > 0) {
             throw new WrongAuctionParameterException("winBid");
         }

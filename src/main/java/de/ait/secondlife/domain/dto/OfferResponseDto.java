@@ -34,9 +34,6 @@ public class OfferResponseDto {
     @Schema(description = "Starting offer price", example = "123")
     private BigDecimal startPrice;
 
-    @Schema(description = "Bidding step", example = "12.34")
-    private BigDecimal step;
-
     @Schema(description = "Possible buyout price without bidding", example = "322")
     private BigDecimal winBid;
 
