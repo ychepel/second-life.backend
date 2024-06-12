@@ -9,7 +9,7 @@ import java.util.Objects;
 @Data
 @ToString
 @Schema(name = "Category", description = "Description of the category")
-public class CategoryDto {
+public class CategoryDto extends BaseNameOfImages{
 
     @Schema(description = "category id", example = "1")
     private Long id;

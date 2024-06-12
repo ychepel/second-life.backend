@@ -9,6 +9,7 @@ import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.is_
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.LocationNotFoundException;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.UserNotFoundException;
 import de.ait.secondlife.repositories.UserRepository;
+import de.ait.secondlife.services.interfaces.ImageService;
 import de.ait.secondlife.services.interfaces.LocationService;
 import de.ait.secondlife.services.interfaces.UserService;
 import de.ait.secondlife.services.mapping.NewUserMappingService;
@@ -30,6 +31,7 @@ public class UserServiceImpl implements UserService {
     private final UserMappingService userMappingService;
     private final BCryptPasswordEncoder encoder;
     private final LocationService locationService;
+    private final ImageService imageService;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -55,7 +57,8 @@ public class UserServiceImpl implements UserService {
         user.setUpdatedAt(now);
 
         try {
-            userRepository.save(user);
+            User newUser = userRepository.save(user);
+            imageService.connectTempImgsToEntity(newUserDto.getBaseNameOfImgs(),newUser.getId());
         } catch (Exception e) {
             throw new UserSavingException("User saving failed", e);
         }
@@ -72,15 +75,15 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto setLocation(Long userId, Long locationId) {
 
-        if (userId == null || userId <1 ){
+        if (userId == null || userId < 1) {
             throw new UserNotFoundException(userId);
         }
 
-        if (locationId == null || locationId <1 ){
+        if (locationId == null || locationId < 1) {
             throw new LocationNotFoundException(userId);
         }
 
-        User user = userRepository.findById(userId).orElseThrow( () -> new UserNotFoundException(userId));
+        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
 
         user.setLocation(locationService.getLocationById(locationId));
 

@@ -127,6 +127,7 @@ public class OfferServiceImpl implements OfferService {
         offer.setLocation(dto.getLocationId() == null ?
                 offer.getLocation() :
                 locationService.getLocationById(dto.getLocationId()));
+        imageService.connectTempImgsToEntity(dto.getBaseNameOfImgs(), dto.getId());
     }
 
     @Transactional

@@ -9,6 +9,7 @@ import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.is_
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.CategoryNotFoundException;
 import de.ait.secondlife.repositories.CategoryRepository;
 import de.ait.secondlife.services.interfaces.CategoryService;
+import de.ait.secondlife.services.interfaces.ImageService;
 import de.ait.secondlife.services.mapping.NewCategoryMappingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,8 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository repository;
 
     private final NewCategoryMappingService mappingService;
+
+    private final ImageService imageService;
 
     @Override
     public CategoryDto getById(Long id) {
@@ -48,14 +51,15 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryDto save(NewCategoryDto categoryDto) {
 
         String categoryName = categoryDto.getName();
-        if (repository.existsByName(categoryName)){
+        if (repository.existsByName(categoryName)) {
             throw new DuplicateCategoryException(categoryName);
         }
 
         Category entity = mappingService.mapDtoToEntity(categoryDto);
 
         try {
-            repository.save(entity);
+            Category newCategory = repository.save(entity);
+            imageService.connectTempImgsToEntity(categoryDto.getBaseNameOfImgs(), newCategory.getId());
         } catch (Exception e) {
             throw new RuntimeException("Cannot save category to db", e);
         }
@@ -70,6 +74,8 @@ public class CategoryServiceImpl implements CategoryService {
 
         existingCategory.setName(dto.getName());
         existingCategory.setDescription(dto.getDescription());
+
+        imageService.connectTempImgsToEntity(dto.getBaseNameOfImgs(), id);
 
         try {
             return mappingService.mapEntityToDto(repository.save(existingCategory));

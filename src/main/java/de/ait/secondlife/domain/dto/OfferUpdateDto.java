@@ -7,11 +7,12 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.util.Set;
 
 @Data
 @Builder
 @Schema(description = "Offer update DTO")
-public class OfferUpdateDto {
+public class OfferUpdateDto extends BaseNameOfImages{
 
     @Schema(description = "Offer id "
             , example = "123")
@@ -50,6 +51,10 @@ public class OfferUpdateDto {
 
     @Schema(description = "Location id", example = "1")
     private Long locationId;
+
+    @Schema(description = "List of base names of picture files that have been previously created",
+            example = "[\"d3f1a2b3-c456-789d-012e-3456789abcde\", \"a1b2c3d4-e5f6-7890-1234-56789abcdef0\", \"0fedcba9-8765-4321-0fed-cba987654321\"]")
+    private Set<String> baseNameOfImgs;
 }
 
 
