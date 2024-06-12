@@ -28,8 +28,11 @@ public class OfferResponseDto {
                     "became the beloved guardian of the magical garden.\n")
     private String description;
 
+    @Schema(description = "Date and time of the start of the auction", example = "2024-05-27T17:11:18.149566")
+    private LocalDateTime auctionStartAt;
+
     @Schema(description = "Date and time of the end of the auction", example = "2024-05-30T17:11:18.149566")
-    private LocalDateTime endAt;
+    private LocalDateTime auctionEndAt;
 
     @Schema(description = "Starting offer price", example = "123")
     private BigDecimal startPrice;

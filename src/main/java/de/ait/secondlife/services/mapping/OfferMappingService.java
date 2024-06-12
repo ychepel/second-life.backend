@@ -14,6 +14,11 @@ public interface OfferMappingService {
     @Mapping(target = "categoryId", source = "category.id")
     @Mapping(target = "locationId", source = "location.id")
     @Mapping(target = "status", expression = "java(offer.getStatus().getName().toString())")
+    @Mapping(
+            target = "auctionStartAt",
+            expression = "java(offer.getAuctionFinishedAt() != null ? offer.getAuctionFinishedAt().minusDays(offer.getAuctionDurationDays()) : null)"
+    )
+    @Mapping(target = "auctionEndAt", source = "auctionFinishedAt")
     OfferResponseDto toDto(Offer offer);
 
     @Mapping(target = "id", ignore = true)
