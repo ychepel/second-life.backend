@@ -43,9 +43,6 @@ public class Offer {
     @Column(name = "start_price")
     private BigDecimal startPrice;
 
-    @Column(name = "step")
-    private BigDecimal step;
-
     @Column(name = "win_bid")
     private BigDecimal winBid;
 

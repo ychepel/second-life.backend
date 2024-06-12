@@ -12,4 +12,5 @@
     <include file="v.1.0.5/changelog.xml" relativeToChangelogFile="true"/>
 <!--    TODO: replace with Ruslan's changelog in task sl-43-->
     <include file="v.1.0.7/changelog.xml" relativeToChangelogFile="true"/>
+    <include file="v.1.0.8/changelog.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>
