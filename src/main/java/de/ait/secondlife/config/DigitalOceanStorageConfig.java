@@ -6,26 +6,32 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import lombok.Data;
+import org.springframework.beans.factory.annotation.Value;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+@Data
 @Configuration
-public class AppConfig {
+public class DigitalOceanStorageConfig {
+
+    @Value("${DOProperties.accessKey}")
+    private String accessKey;
+    @Value("${DOProperties.secretKey}")
+    private String secretKey;
+    @Value("${DOProperties.endpoint}")
+    private String endpoint;
+    @Value("${DOProperties.region}")
+    private String region;
 
     @Bean
-    public AmazonS3 amazonClient(DOProperties properties) {
+    public AmazonS3 amazonClient() {
 
-        AWSCredentials credentials =
-                new BasicAWSCredentials(
-                        properties.getAccessKey(),
-                        properties.getSecretKey()
-                );
+        AWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
 
         AwsClientBuilder.EndpointConfiguration endpointConfiguration =
-                new AwsClientBuilder.EndpointConfiguration(
-                        properties.getEndpoint(),
-                        properties.getRegion()
-                );
+                new AwsClientBuilder.EndpointConfiguration(endpoint, region);
 
         AmazonS3ClientBuilder builder = AmazonS3ClientBuilder
                 .standard()
@@ -34,7 +40,4 @@ public class AppConfig {
 
         return builder.build();
     }
-
-
-
 }

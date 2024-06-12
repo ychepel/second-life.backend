@@ -6,10 +6,10 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 @Mapper
-public interface UserMappingService {
+public abstract class UserMappingService extends EntityWIthImageMappingService {
 
-    User toEntity(UserDto userDto);
+    public abstract User toEntity(UserDto userDto);
 
-    @Mapping(target = "images", ignore = true)
-    UserDto toDto(User user);
+    @Mapping(target = "images", expression = "java(getImages(user))")
+    public abstract UserDto toDto(User user);
 }

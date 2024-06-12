@@ -2,6 +2,7 @@ package de.ait.secondlife.constants;
 
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.BadEntityTypeException;
 
+//TODO: PR review - rename enum to ImageEntity of something like this with reference to "Image"
 public enum EntityType {
     OFFER("offer"),
 

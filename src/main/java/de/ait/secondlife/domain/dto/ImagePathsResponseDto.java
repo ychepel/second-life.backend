@@ -16,7 +16,7 @@ public class ImagePathsResponseDto {
     @Parameter(description = "Code of type of entity",
             examples = {
                     @ExampleObject(
-                            name = "1",
+                            name = "1", //TODO: PR review - replace int indexes with base_name
                             value = "{\"1024x1024\": \"https://second-life.fra1.digitaloceanspaces.com\\prod\\offer\\1\\1024x1024_d3f1a2b3-c456-789d-012e-3456789abcde.jpg\"," +
                                     " \"320x320\": \"https://second-life.fra1.digitaloceanspaces.com\\prod\\offer\\1\\320x320_d3f1a2b3-c456-789d-012e-3456789abcde.jpg\"," +
                                     " \"64x64\": \"https://second-life.fra1.digitaloceanspaces.com\\prod\\offer\\1\\64x64_d3f1a2b3-c456-789d-012e-3456789abcde.jpg\"}"),
@@ -41,5 +41,5 @@ public class ImagePathsResponseDto {
                                     "\"320x320\": \"https://second-life.fra1.digitaloceanspaces.com\\prod\\offer\\5\\320x320_abcdef12-3456-7890-abcd-ef1234567890.jpg\"," +
                                     " \"64x64\": \"https://second-life.fra1.digitaloceanspaces.com\\prod\\offer\\5\\64x64_abcdef12-3456-7890-abcd-ef1234567890.jpg\"}")
             })
-    private Map<Integer, Map<String, String>> images;
+    private Map<Integer, Map<String, String>> images; //TODO: PR review - rename variable to "values" for avoiding mistakes with expected json content
 }
