@@ -1,7 +1,7 @@
 package de.ait.secondlife.controllers;
 
+import de.ait.secondlife.domain.dto.CategoryCreationDto;
 import de.ait.secondlife.domain.dto.CategoryDto;
-import de.ait.secondlife.domain.dto.NewCategoryDto;
 import de.ait.secondlife.domain.dto.ResponseMessageDto;
 import de.ait.secondlife.exception_handling.dto.ValidationErrorsDto;
 import de.ait.secondlife.services.interfaces.CategoryService;
@@ -68,7 +68,7 @@ public class CategoryController {
                     description = "Conflict, category with this name already exists",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class)))}
     )
-    public ResponseEntity<CategoryDto> add(@Valid @RequestBody NewCategoryDto dto) {
+    public ResponseEntity<CategoryDto> add(@Valid @RequestBody CategoryCreationDto dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.save(dto));
     }
 

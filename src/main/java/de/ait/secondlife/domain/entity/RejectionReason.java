@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Data
 @Builder
-public class RejectionReasons {
+public class RejectionReason {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -3,7 +3,6 @@ package de.ait.secondlife.domain.entity;
 import de.ait.secondlife.domain.interfaces.AuthenticatedUser;
 import de.ait.secondlife.security.Role;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;

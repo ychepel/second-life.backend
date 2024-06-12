@@ -1,6 +1,10 @@
 package de.ait.secondlife.services.interfaces;
 
-import org.springframework.security.core.userdetails.UserDetailsService;
+import de.ait.secondlife.domain.entity.Admin;
 
-public interface AdminService extends UserDetailsService {
+import javax.security.auth.login.CredentialException;
+
+public interface AdminService extends AuthenticatedUserService {
+
+    Admin getAuthenticatedAdmin() throws CredentialException;
 }

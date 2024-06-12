@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+
+    <changeSet id="remove_choose_winner_status" author="ychepel">
+
+        <delete tableName="status">
+            <where>name = 'CHOOSE_WINNER'</where>
+        </delete>
+
+    </changeSet>
+
+</databaseChangeLog>

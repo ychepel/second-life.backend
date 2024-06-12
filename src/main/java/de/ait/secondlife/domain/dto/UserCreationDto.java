@@ -11,7 +11,7 @@ import lombok.ToString;
 @Data
 @ToString
 @Schema(name = "New user data", description = "Data for registration new user")
-public class NewUserDto {
+public class UserCreationDto {
 
     @NotBlank(message = "First Name cannot be empty")
     @Schema(description = "User First Name", example = "John")
