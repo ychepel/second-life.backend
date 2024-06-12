@@ -41,6 +41,7 @@ public class OfferServiceImpl implements OfferService {
     private final UserService userService;
     private final CategoryService categoryService;
     private final LocationService locationService;
+    private final ImageService imageService;
 
     @Override
     public OfferResponseWithPaginationDto findOffers(Pageable pageable) {
@@ -86,6 +87,7 @@ public class OfferServiceImpl implements OfferService {
                 }
             }
             newOffer = offerRepository.save(newOffer);
+            imageService.connectTempImgsToEntity(dto.getBaseNameOfImgs(), newOffer.getId());
             return mappingService.toRequestDto(newOffer);
         } catch (ConstraintViolationException | DataIntegrityViolationException e) {
             throw new CreateOfferConstraintViolationException("Constraint violation: " + e.getMessage());
@@ -179,5 +181,11 @@ public class OfferServiceImpl implements OfferService {
         if (authentication.getPrincipal().equals("anonymousUser")) throw new UserIsNotAuthorizedException();
         String username = authentication.getName();
         return (User) userService.loadUserByUsername(username);
+    }
+
+    @Override
+    public boolean checkEntityExistsById(Long id) {
+        if (id == null) throw new IdIsNullException();
+        return offerRepository.existsByIdAndIsActiveTrue(id);
     }
 }

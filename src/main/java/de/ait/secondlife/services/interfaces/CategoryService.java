@@ -6,7 +6,7 @@ import de.ait.secondlife.domain.entity.Category;
 
 import java.util.List;
 
-public interface CategoryService {
+public interface CategoryService extends CheckEntityExistsService{
 
     CategoryDto getById(Long id);
     List<CategoryDto> getAll();

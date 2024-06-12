@@ -6,7 +6,7 @@ import de.ait.secondlife.domain.dto.OfferResponseWithPaginationDto;
 import de.ait.secondlife.domain.dto.OfferUpdateDto;
 import org.springframework.data.domain.Pageable;
 
-public interface OfferService {
+public interface OfferService extends CheckEntityExistsService{
 
     OfferResponseDto createOffer(OfferCreationDto dto);
 

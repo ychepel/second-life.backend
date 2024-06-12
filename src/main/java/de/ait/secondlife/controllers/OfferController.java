@@ -1,6 +1,5 @@
 package de.ait.secondlife.controllers;
 
-import de.ait.secondlife.domain.dto.*;
 import de.ait.secondlife.domain.dto.ResponseMessageDto;
 import de.ait.secondlife.domain.dto.OfferCreationDto;
 import de.ait.secondlife.domain.dto.OfferResponseDto;

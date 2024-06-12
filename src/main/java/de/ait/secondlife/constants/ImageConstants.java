@@ -7,4 +7,5 @@ public interface ImageConstants {
     int[] IMG_2_SIZE = new int[]{320, 320};
     int[] IMG_3_SIZE = new int[]{64, 64};
     long MAX_FILE_SIZE = 8000 * 1024;
+    String TEMP_IMG_DIR = "temp";
 }

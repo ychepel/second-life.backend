@@ -17,14 +17,15 @@ public class ImageCreationDto {
                     @ExampleObject(value = "user"),
                     @ExampleObject(value = "category")
             })
-    @NotNull
+    @NotNull(message = "Entity type cannot be null")
     private String entityType;
 
-    @Schema(description = "Id of entity", example = "324")
-    @NotNull //TODO: PR review - remove @NotNull to allow creating temporary images before entity creation
+    @Schema(description = "Id of entity." +
+            " Can be null if the entity has not yet been " +
+            "created during pre-registration", examples = {"34", "null"})
     private Long entityId;
 
     @Schema(description = "File with image")
-    //TODO: PR review - add @NotNull
+    @NotNull(message = "Image file cannot be null")
     private MultipartFile file;
 }

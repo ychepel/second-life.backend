@@ -113,4 +113,10 @@ public class CategoryServiceImpl implements CategoryService {
         return repository.findById(id)
                 .orElseThrow(() -> new CategoryNotFoundException(id));
     }
+
+    @Override
+    public boolean checkEntityExistsById(Long id) {
+        if (id == null) throw new IdIsNullException();
+        return repository.existsByIdAndActiveTrue(id);
+    }
 }

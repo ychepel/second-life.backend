@@ -3,16 +3,17 @@ package de.ait.secondlife.services;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import de.ait.secondlife.constants.EntityType;
+import de.ait.secondlife.constants.EntityTypeWithImgs;
 import de.ait.secondlife.constants.ImageConstants;
 import de.ait.secondlife.domain.dto.ImageCreationDto;
 import de.ait.secondlife.domain.dto.ImagePathsResponseDto;
 import de.ait.secondlife.domain.entity.ImageEntity;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.*;
-import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.is_null_exceptions.ParameterIsNullException;
+import de.ait.secondlife.exception_handling.exceptions.not_found_exception.BadEntityTypeException;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.ImagesNotFoundException;
 import de.ait.secondlife.repositories.ImageRepository;
 import de.ait.secondlife.services.interfaces.ImageService;
+import de.ait.secondlife.services.utilities.EntityUtilities;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
@@ -36,6 +37,7 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
     private final AmazonS3 s3Client;
     private final ImageRepository repository;
 
+
     @Value("${do.buket.name}")
     private String bucketName;
 
@@ -45,19 +47,10 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
     @Value("${do.base.path}")
     private String basePath;
 
-    //TODO: PR review - move these count values to enum EntityType
-    private final int MAX_IMAGE_COUNT_FOR_OFFER = 5;
-    private final int MAX_IMAGE_COUNT = 1;
-
     @Override
-    public void saveNewImage(ImageCreationDto dto) {
+    public ImagePathsResponseDto saveNewImage(String entityType, Long entityId, ImageCreationDto dto) {
         MultipartFile file = dto.getFile();
         checkFile(file);
-
-        String entityType = EntityType.get(dto.getEntityType()).getType();
-        Long entityId = dto.getEntityId();
-
-        //TODO: PR review - add checking for existing entity with requested ID and throw exception if it is not existed
 
         //TODO: add checking authority rights for attaching images to a requested entity
 
@@ -69,9 +62,11 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
 
         Set<int[]> fileSizes = getFileSizesForEntityType(entityType);
 
-        Path path = Path.of(dirPrefix, entityType, entityId.toString());
         UUID baseName = UUID.randomUUID();
-
+        Path path = entityId != null ?
+                Path.of(dirPrefix, entityType, entityId.toString()) :
+                Path.of(TEMP_IMG_DIR, baseName.toString());
+        Set<ImageEntity> savedImgEntities = new HashSet<>();
         fileSizes.forEach(e -> {
             String size = e[0] + "x" + e[1];
 
@@ -88,45 +83,65 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
 
             s3Client.putObject(request);
 
-            repository.save(ImageEntity.builder()
+            ImageEntity savedImgEntity = repository.save(ImageEntity.builder()
                     .size(size)
                     .baseName(baseName.toString())
                     .entityType(entityType)
                     .entityId(entityId)
                     .fullPath(toUnixStylePath(basePath + imgPath))
                     .build());
+            savedImgEntities.add(savedImgEntity);
         });
+        return getImagePathsResponseDto(savedImgEntities);
     }
 
     @Override
     public ImagePathsResponseDto findAllImageForEntity(String entityType, Long entityId) {
-
         Set<ImageEntity> imgs = repository.findAllByEntityIdAndEntityType(entityId, entityType);
+        return getImagePathsResponseDto(imgs);
+    }
 
-        Map<Integer, Map<String, String>> images = new HashMap<>();
+    @Override
+    public void connectTempImgsToEntity(Set<String> baseNames, Long entityId) {
+        if (baseNames != null && entityId != null) {
+            baseNames.forEach(e -> {
+                        Set<ImageEntity> imgs = repository.findAllByBaseName(e);
 
-        if (!imgs.isEmpty()) {
-            Set<String> imgBaseNames = new HashSet<>();
-            imgs.forEach(e -> imgBaseNames.add(e.getBaseName()));
+                        imgs.forEach(k -> {
+                            k.setEntityId(entityId);
+                            Path path = Path.of(dirPrefix,
+                                    k.getEntityType(),
+                                    entityId.toString(),
+                                    makeFileName(k.getSize(), e));
 
-            Integer i = 0;
-            for (String img : imgBaseNames) {
-                Map<String, String> files = images.computeIfAbsent(i, k -> new HashMap<>());
-                Set<ImageEntity> imgsByBaseName = imgs.stream()
-                        .filter(e -> e.getBaseName().equals(img))
-                        .collect(Collectors.toSet());
-                imgsByBaseName.forEach(e -> files.putIfAbsent(e.getSize(), e.getFullPath()));
-                i++;
-            }
+                            String oldPath = k.getFullPath();
+                            String newPath = toUnixStylePath(basePath + path);
+
+                            k.setFullPath(newPath);
+                            repository.save(k);
+                            relocateImgFile(oldPath, newPath);
+                        });
+                    }
+            );
         }
-        return new ImagePathsResponseDto(images);
+    }
+
+    private void relocateImgFile(String oldPath, String newPath) {
+        String oldDoPath = oldPath.substring(basePath.length());
+        String newDoPath = newPath.substring(basePath.length());
+        s3Client.copyObject(
+                bucketName,
+                oldDoPath,
+                bucketName,
+                newDoPath
+        );
+        s3Client.deleteObject(bucketName, oldDoPath);
     }
 
     @Transactional
     @Override
-    public void deleteImage(String fileNme) {
+    public void deleteImage(String baseName) {
 //TODO   Only the owner and admin has the right to make changes
-        String baseName = getBaseNameOfImage(fileNme);
 
         Set<ImageEntity> images = repository.findAllByBaseName(baseName);
         if (images.isEmpty()) throw new ImagesNotFoundException(baseName);
@@ -138,6 +153,27 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
 
         repository.deleteAllByBaseName(baseName);
     }
+
+    private ImagePathsResponseDto getImagePathsResponseDto(Set<ImageEntity> imgs) {
+        Map<String, Map<String, String>> images = new HashMap<>();
+
+        if (!imgs.isEmpty()) {
+            Set<String> imgBaseNames = new HashSet<>();
+
+            imgs.forEach(e -> imgBaseNames.add(e.getBaseName()));
+
+            for (String baseName : imgBaseNames) {
+                Map<String, String> files = images.computeIfAbsent(baseName, k -> new HashMap<>());
+
+                Set<ImageEntity> imgsByBaseName = imgs.stream()
+                        .filter(e -> e.getBaseName().equals(baseName))
+                        .collect(Collectors.toSet());
+                imgsByBaseName.forEach(e -> files.putIfAbsent(e.getSize(), e.getFullPath()));
+            }
+        }
+        return new ImagePathsResponseDto(images);
+    }
+
 
     private InputStream compressFile(MultipartFile file, int[] size) {
 
@@ -184,13 +220,12 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
             throw new BadFileSizeException(file.getOriginalFilename(), file.getSize(), MAX_FILE_SIZE);
     }
 
-    private void checkCountOfImageForEntityType(ImagePathsResponseDto currentImages, String entityType) {
-        if (entityType.equals(EntityType.OFFER.getType())) {
-            if (currentImages.getImages().size() >= MAX_IMAGE_COUNT_FOR_OFFER)
-                throw new MaxImageCountException(MAX_IMAGE_COUNT_FOR_OFFER);
-        } else {
-            if (currentImages.getImages().size() >= MAX_IMAGE_COUNT)
-                throw new MaxImageCountException(MAX_IMAGE_COUNT);
+    private void checkCountOfImageForEntityType(
+            ImagePathsResponseDto currentImages,
+            String entityType) {
+        int maxCountOfImage = EntityTypeWithImgs.get(entityType.toLowerCase()).getMaxCountOfImgs();
+        if (currentImages.getValues().size() >= maxCountOfImage) {
+            throw new MaxImageCountException(entityType, maxCountOfImage);
         }
     }
 
@@ -207,7 +242,7 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
     }
 
     private Set<int[]> getFileSizesForEntityType(String entityType) {
-        return switch (EntityType.get(entityType)) {
+        return switch (EntityTypeWithImgs.get(entityType.toLowerCase())) {
             case OFFER -> Set.of(IMG_1_SIZE, IMG_2_SIZE, IMG_3_SIZE);
             case USER -> Set.of(IMG_2_SIZE, IMG_3_SIZE);
             case CATEGORY -> Set.of(IMG_3_SIZE);

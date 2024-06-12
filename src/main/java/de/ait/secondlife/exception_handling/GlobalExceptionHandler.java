@@ -60,6 +60,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ResponseMessageDto> handleException(LoginException e) {
         return new ResponseEntity<>(new ResponseMessageDto(e.getMessage()), HttpStatus.BAD_REQUEST);
     }
+
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<ResponseMessageDto> handleException(BadRequestException e) {
         return new ResponseEntity<>(new ResponseMessageDto(e.getMessage()), HttpStatus.BAD_REQUEST);
@@ -75,17 +76,15 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(new ResponseMessageDto(e.getMessage()), HttpStatus.NOT_FOUND);
     }
 
-    // TODO: make response message more informative
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<ResponseMessageDto> handleException(RuntimeException e) {
-        return new ResponseEntity<>(new ResponseMessageDto("Something went wrong"), HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    // TODO: make response message more informative
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ResponseMessageDto> handleException(IllegalArgumentException e){
-        return new ResponseEntity<>(new ResponseMessageDto("Invalid value"), HttpStatus.BAD_REQUEST);
-    }
+//    @ExceptionHandler(RuntimeException.class)
+//    public ResponseEntity<ResponseMessageDto> handleException(RuntimeException e) {
+//        return new ResponseEntity<>(new ResponseMessageDto("Something went wrong"), HttpStatus.INTERNAL_SERVER_ERROR);
+//    }
+//
+//    @ExceptionHandler(IllegalArgumentException.class)
+//    public ResponseEntity<ResponseMessageDto> handleException(IllegalArgumentException e) {
+//        return new ResponseEntity<>(new ResponseMessageDto("Invalid value"), HttpStatus.BAD_REQUEST);
+//    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ValidationErrorsDto> handleValidationException(MethodArgumentNotValidException e) {
@@ -97,7 +96,7 @@ public class GlobalExceptionHandler {
 
             ValidationErrorDto errorDto = ValidationErrorDto.builder()
                     .field(fieldError.getField())
-                    .message("Field "+fieldError.getDefaultMessage())
+                    .message("Field " + fieldError.getDefaultMessage())
                     .build();
 
             if (fieldError.getRejectedValue() != null) {
@@ -112,7 +111,8 @@ public class GlobalExceptionHandler {
                         .errors(validationErrors)
                         .build());
     }
-//TODO no usages
+
+    //TODO no usages
     private String parseExceptionMessage(String errorMessage) {
         Pattern pattern = Pattern.compile("messageTemplate='([^']*)'");
         Matcher matcher = pattern.matcher(errorMessage);

@@ -11,9 +11,7 @@
                 <constraints primaryKey="true" nullable="false"/>
             </column>
 
-            <column name="entity_id" type="bigint" >
-                <constraints nullable="false"/>
-            </column>
+            <column name="entity_id" type="bigint" />
 
             <column name="entity_type" type="varchar(64)">
                 <constraints nullable="false" />
