@@ -17,15 +17,28 @@ public abstract class OfferMappingService extends EntityWIthImageMappingService 
     @Mapping(target = "endAt", expression = "java(offer.getCreatedAt().plusDays(offer.getAuctionDurationDays()))")
     @Mapping(target = "images", expression = "java(getImages(offer))")
     @Mapping(source = "location.id", target = "locationId")
-    public abstract OfferResponseDto toRequestDto(Offer offer);
+    @Mapping(target = "status", expression = "java(offer.getStatus().getName().toString())")
+    @Mapping(
+            target = "auctionStartAt",
+            expression = "java(offer.getAuctionFinishedAt() != null ? offer.getAuctionFinishedAt().minusDays(offer.getAuctionDurationDays()) : null)"
+    )
+    @Mapping(target = "auctionEndAt", source = "auctionFinishedAt")
+    @Mapping(
+            target = "ownerFullName",
+            expression = "java(offer.getUser().getFirstName() + ' ' + offer.getUser().getLastName())"
+    )
+    public abstract OfferResponseDto toDto(Offer offer);
+
+
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "user", ignore = true)
     @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
+    @Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "isActive", constant = "true")
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "category", ignore = true)
-    public abstract Offer toOffer(OfferCreationDto dto);
+    public abstract Offer toEntity(OfferCreationDto dto);
 
 }
 

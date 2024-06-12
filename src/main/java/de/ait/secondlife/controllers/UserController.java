@@ -1,6 +1,6 @@
 package de.ait.secondlife.controllers;
 
-import de.ait.secondlife.domain.dto.NewUserDto;
+import de.ait.secondlife.domain.dto.UserCreationDto;
 import de.ait.secondlife.domain.dto.ResponseMessageDto;
 import de.ait.secondlife.domain.dto.UserDto;
 import de.ait.secondlife.exception_handling.dto.ValidationErrorsDto;
@@ -16,6 +16,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import javax.security.auth.login.CredentialException;
 
 @RestController
 @RequestMapping("/v1/users")
@@ -56,8 +58,26 @@ public class UserController {
             @Valid
             @RequestBody
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "User date to register")
-            NewUserDto newUserDto) {
+            UserCreationDto newUserDto) {
         UserDto userDto = userService.register(newUserDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(userDto);
+    }
+
+    @GetMapping("/me")
+    @Operation(summary = "Getting information about current user", description = "Available only for User role")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successful operation",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDto.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Forbidden",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))
+            )
+    })
+    public ResponseEntity<UserDto> getCurrentUser() throws CredentialException {
+        return ResponseEntity.ok(userService.getCurrentUser());
     }
 }

@@ -1,7 +1,7 @@
 package de.ait.secondlife.services;
 
 import de.ait.secondlife.domain.dto.CategoryDto;
-import de.ait.secondlife.domain.dto.NewCategoryDto;
+import de.ait.secondlife.domain.dto.CategoryCreationDto;
 import de.ait.secondlife.domain.entity.Category;
 import de.ait.secondlife.exception_handling.exceptions.DuplicateCategoryException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.CategoryIsNotEmptyException;
@@ -35,7 +35,7 @@ public class CategoryServiceImpl implements CategoryService {
 
         Category category = repository.findById(id).orElseThrow(() -> new CategoryNotFoundException(id));
 
-        return mappingService.mapEntityToDto(category);
+        return mappingService.toDto(category);
     }
 
     @Override
@@ -43,19 +43,19 @@ public class CategoryServiceImpl implements CategoryService {
         return repository.findAll()
                 .stream()
                 .filter(Category::isActive)
-                .map(mappingService::mapEntityToDto)
+                .map(mappingService::toDto)
                 .toList();
     }
 
     @Override
-    public CategoryDto save(NewCategoryDto categoryDto) {
+    public CategoryDto save(CategoryCreationDto categoryDto) {
 
         String categoryName = categoryDto.getName();
         if (repository.existsByName(categoryName)) {
             throw new DuplicateCategoryException(categoryName);
         }
 
-        Category entity = mappingService.mapDtoToEntity(categoryDto);
+        Category entity = mappingService.toEntity(categoryDto);
 
         try {
             Category newCategory = repository.save(entity);
@@ -64,7 +64,7 @@ public class CategoryServiceImpl implements CategoryService {
             throw new RuntimeException("Cannot save category to db", e);
         }
 
-        return mappingService.mapEntityToDto(entity);
+        return mappingService.toDto(entity);
     }
 
     @Override
@@ -78,7 +78,7 @@ public class CategoryServiceImpl implements CategoryService {
         imageService.connectTempImgsToEntity(dto.getBaseNameOfImgs(), id);
 
         try {
-            return mappingService.mapEntityToDto(repository.save(existingCategory));
+            return mappingService.toDto(repository.save(existingCategory));
         } catch (Exception e) {
             throw new RuntimeException("Cannot save category to db", e);
         }
@@ -92,7 +92,7 @@ public class CategoryServiceImpl implements CategoryService {
         existingCategory.setActive(true);
 
         try {
-            return mappingService.mapEntityToDto(repository.save(existingCategory));
+            return mappingService.toDto(repository.save(existingCategory));
         } catch (Exception e) {
             throw new RuntimeException("Cannot save category to db", e);
         }
@@ -107,7 +107,7 @@ public class CategoryServiceImpl implements CategoryService {
         existingCategory.setActive(false);
 
         try {
-            return mappingService.mapEntityToDto(repository.save(existingCategory));
+            return mappingService.toDto(repository.save(existingCategory));
         } catch (Exception e) {
             throw new RuntimeException("Cannot save category to db", e);
         }

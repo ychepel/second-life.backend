@@ -1,9 +1,11 @@
 package de.ait.secondlife.services;
 
-import de.ait.secondlife.domain.dto.NewUserDto;
+import de.ait.secondlife.domain.dto.UserCreationDto;
 import de.ait.secondlife.domain.dto.UserDto;
 import de.ait.secondlife.domain.entity.User;
 import de.ait.secondlife.exception_handling.exceptions.DuplicateUserEmailException;
+import de.ait.secondlife.exception_handling.exceptions.UserIsNotAuthenticatedException;
+import de.ait.secondlife.exception_handling.exceptions.UserIsNotAuthorizedException;
 import de.ait.secondlife.exception_handling.exceptions.UserSavingException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.is_null_exceptions.IdIsNullException;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.LocationNotFoundException;
@@ -11,15 +13,19 @@ import de.ait.secondlife.exception_handling.exceptions.not_found_exception.UserN
 import de.ait.secondlife.repositories.UserRepository;
 import de.ait.secondlife.services.interfaces.ImageService;
 import de.ait.secondlife.services.interfaces.LocationService;
+import de.ait.secondlife.security.Role;
 import de.ait.secondlife.services.interfaces.UserService;
 import de.ait.secondlife.services.mapping.NewUserMappingService;
 import de.ait.secondlife.services.mapping.UserMappingService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.security.auth.login.CredentialException;
 import java.time.LocalDateTime;
 
 @Service
@@ -31,7 +37,6 @@ public class UserServiceImpl implements UserService {
     private final UserMappingService userMappingService;
     private final BCryptPasswordEncoder encoder;
     private final LocationService locationService;
-    private final ImageService imageService;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -43,7 +48,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto register(NewUserDto newUserDto) {
+    public UserDto register(UserCreationDto newUserDto) {
         String userEmail = newUserDto.getEmail();
         if (userRepository.existsByEmail(userEmail)) {
             throw new DuplicateUserEmailException(userEmail);
@@ -100,5 +105,23 @@ public class UserServiceImpl implements UserService {
     public boolean checkEntityExistsById(Long id) {
         if (id == null) throw new IdIsNullException();
         return userRepository.existsByIdAndActiveTrue(id);
+    }
+
+    @Override
+    public User getAuthenticatedUser() throws CredentialException {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication.getPrincipal().equals("anonymousUser")) {
+            throw new UserIsNotAuthenticatedException();
+        }
+        if (!authentication.getAuthorities().contains(Role.ROLE_USER)) {
+            throw new UserIsNotAuthorizedException();
+        }
+        String username = authentication.getName();
+        return (User) loadUserByUsername(username);
+    }
+
+    @Override
+    public UserDto getCurrentUser() throws CredentialException {
+        return userMappingService.toDto(getAuthenticatedUser());
     }
 }

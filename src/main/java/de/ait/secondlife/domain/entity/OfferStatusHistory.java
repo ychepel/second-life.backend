@@ -38,7 +38,7 @@ public class OfferStatusHistory {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "rejection_id")
-    private RejectionReasons rejection;
+    private RejectionReason rejection;
 }
 
 

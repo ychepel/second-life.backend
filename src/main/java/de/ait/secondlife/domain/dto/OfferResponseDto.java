@@ -28,28 +28,31 @@ public class OfferResponseDto {
                     "became the beloved guardian of the magical garden.\n")
     private String description;
 
-    @Schema(description = "Date and time of the end of the auction", example = "2024-05-30T17:11:18.149566")
-    private LocalDateTime endAt;
+    @Schema(description = "Date and time of the start of the auction", example = "2024-05-27T17:11:18.149566")
+    private LocalDateTime auctionStartAt;
 
-    @Schema(description = "Starting offer price", example = "1234.34")
+    @Schema(description = "Date and time of the end of the auction", example = "2024-05-30T17:11:18.149566")
+    private LocalDateTime auctionEndAt;
+
+    @Schema(description = "Starting offer price", example = "123")
     private BigDecimal startPrice;
 
-    @Schema(description = "Bidding step", example = "12.34")
-    private BigDecimal step;
-
-    @Schema(description = "Possible buyout price without bidding", example = "1222.34")
+    @Schema(description = "Possible buyout price without bidding", example = "322")
     private BigDecimal winBid;
 
-    @Schema(description = "Offer is free or not", example = "true")
+    @Schema(description = "Offer is free or not", example = "false")
     private Boolean isFree;
 
     @Schema(description = "User id of the owner of the offer", example = "34")
     private Long ownerId;
 
-    @Schema(description = "Status id", example = "26")
-    private Long statusId;
+    @Schema(description = "Full name of the offer owner", example = "John Smith")
+    private String ownerFullName;
 
-    @Schema(description = "Category id", example = "22")
+    @Schema(description = "Current status", example = "VERIFICATION")
+    private String status;
+
+    @Schema(description = "Category id", example = "2")
     private Long categoryId;
 
     @Schema(description = "Winner bid id", example = "123")
@@ -60,4 +63,7 @@ public class OfferResponseDto {
 
     @Schema(description = "List of image's path")
     private ImagePathsResponseDto images;
+
+    @Schema(description = "Auction duration in days", example = "3")
+    private Integer auctionDurationDays;
 }

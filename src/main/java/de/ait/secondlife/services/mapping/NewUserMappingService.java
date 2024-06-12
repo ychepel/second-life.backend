@@ -1,6 +1,6 @@
 package de.ait.secondlife.services.mapping;
 
-import de.ait.secondlife.domain.dto.NewUserDto;
+import de.ait.secondlife.domain.dto.UserCreationDto;
 import de.ait.secondlife.domain.entity.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -8,8 +8,8 @@ import org.mapstruct.Mapping;
 @Mapper
 public interface NewUserMappingService {
 
-    User toEntity(NewUserDto newUserDto);
+    User toEntity(UserCreationDto newUserDto);
 
     @Mapping(target = "password", ignore = true)
-    NewUserDto toDto(User user);
+    UserCreationDto toDto(User user);
 }

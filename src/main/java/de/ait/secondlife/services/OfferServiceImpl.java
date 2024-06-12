@@ -5,10 +5,11 @@ import de.ait.secondlife.domain.dto.OfferCreationDto;
 import de.ait.secondlife.domain.dto.OfferResponseDto;
 import de.ait.secondlife.domain.dto.OfferResponseWithPaginationDto;
 import de.ait.secondlife.domain.dto.OfferUpdateDto;
+import de.ait.secondlife.domain.constants.OfferStatus;
+import de.ait.secondlife.domain.dto.*;
 import de.ait.secondlife.domain.entity.Offer;
 import de.ait.secondlife.domain.entity.User;
 import de.ait.secondlife.exception_handling.exceptions.NoRightToChangeException;
-import de.ait.secondlife.exception_handling.exceptions.UserIsNotAuthorizedException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.CreateOfferConstraintViolationException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.WrongAuctionParameterException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.is_null_exceptions.IdIsNullException;
@@ -16,18 +17,21 @@ import de.ait.secondlife.exception_handling.exceptions.not_found_exception.Offer
 import de.ait.secondlife.repositories.OfferRepository;
 import de.ait.secondlife.services.interfaces.*;
 import de.ait.secondlife.services.mapping.OfferMappingService;
+import de.ait.secondlife.services.offer_status.OfferContext;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import javax.security.auth.login.CredentialException;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -41,6 +45,14 @@ public class OfferServiceImpl implements OfferService {
     private final UserService userService;
     private final CategoryService categoryService;
     private final LocationService locationService;
+    private final OfferStatusHistoryService offerStatusHistoryService;
+
+    private OfferContext offerContext;
+
+    @Autowired
+    public void setOfferContext(@Lazy OfferContext offerContext) {
+        this.offerContext = offerContext;
+    }
     private final ImageService imageService;
 
     @Override
@@ -54,7 +66,7 @@ public class OfferServiceImpl implements OfferService {
         if (id == null) throw new IdIsNullException();
         Offer offer = offerRepository.findByIdAndIsActiveTrue(id)
                 .orElseThrow(() -> new OfferNotFoundException(id));
-        return mappingService.toRequestDto(offer);
+        return mappingService.toDto(offer);
     }
 
     @Override
@@ -64,24 +76,24 @@ public class OfferServiceImpl implements OfferService {
         return offersToOfferRequestWithPaginationDto(pageOfOffer);
     }
 
+    @Transactional
     @Override
     public OfferResponseDto createOffer(OfferCreationDto dto) {
         User user = getUserFromAuthContext();
+    public OfferResponseDto createOffer(OfferCreationDto dto) throws CredentialException {
+        User user = userService.getAuthenticatedUser();
         try {
-            Offer newOffer = mappingService.toOffer(dto);
+            Offer newOffer = mappingService.toEntity(dto);
             newOffer.setUser(user);
             newOffer.setCategory(categoryService.getCategoryById(dto.getCategoryId()));
             newOffer.setId(null);
-            newOffer.setStatus(statusService.getStatusByName(OfferStatus.DRAFT.name()));
             newOffer.setAuctionDurationDays(newOffer.getAuctionDurationDays() <= 0 ? 3 : newOffer.getAuctionDurationDays());
 
             if (Boolean.TRUE.equals(newOffer.getIsFree())) {
-                checkOfferIfIsFree(dto.getStartPrice(), dto.getStep(), dto.getWinBid());
+                checkOfferIfIsFree(dto.getStartPrice(), dto.getWinBid());
             } else {
                 if (dto.getStartPrice() == null || dto.getStartPrice().compareTo(BigDecimal.ZERO) == 0)
                     throw new WrongAuctionParameterException("start prise");
-                if (dto.getStep() == null || dto.getStep().compareTo(BigDecimal.ZERO) == 0)
-                    throw new WrongAuctionParameterException("step");
                 if (dto.getWinBid() != null && dto.getWinBid().compareTo(BigDecimal.ZERO) == 0) {
                     throw new WrongAuctionParameterException("winBid");
                 }
@@ -89,6 +101,14 @@ public class OfferServiceImpl implements OfferService {
             newOffer = offerRepository.save(newOffer);
             imageService.connectTempImgsToEntity(dto.getBaseNameOfImgs(), newOffer.getId());
             return mappingService.toRequestDto(newOffer);
+
+            if (Boolean.TRUE.equals(dto.getSendToVerification())) {
+                verifyOffer(newOffer);
+            } else {
+                draftOffer(newOffer);
+            }
+
+            return mappingService.toDto(newOffer);
         } catch (ConstraintViolationException | DataIntegrityViolationException e) {
             throw new CreateOfferConstraintViolationException("Constraint violation: " + e.getMessage());
         }
@@ -96,8 +116,8 @@ public class OfferServiceImpl implements OfferService {
 
     @Transactional
     @Override
-    public void updateOffer(OfferUpdateDto dto) {
-        User user = getUserFromAuthContext();
+    public OfferResponseDto updateOffer(OfferUpdateDto dto) throws CredentialException {
+        User user = userService.getAuthenticatedUser();
         Offer offer = offerRepository.findById(dto.getId())
                 .orElseThrow(() -> new OfferNotFoundException(dto.getId()));
         if (!user.equals(offer.getUser()))
@@ -109,15 +129,12 @@ public class OfferServiceImpl implements OfferService {
                 offer.getAuctionDurationDays() : dto.getAuctionDurationDays());
         offer.setIsFree(dto.getIsFree() == null ? offer.getIsFree() : dto.getIsFree());
         if (offer.getIsFree()) {
-            checkOfferIfIsFree(dto.getStartPrice(), dto.getStep(), dto.getWinBid());
+            checkOfferIfIsFree(dto.getStartPrice(), dto.getWinBid());
             offer.setStartPrice(null);
-            offer.setStep(null);
             offer.setWinBid(null);
         } else {
             offer.setStartPrice(dto.getStartPrice() == null || dto.getStartPrice().compareTo(BigDecimal.ZERO) == 0 ?
                     offer.getStartPrice() : dto.getStartPrice());
-            offer.setStep(dto.getStep() == null || dto.getStep().compareTo(BigDecimal.ZERO) == 0 ?
-                    offer.getStep() : dto.getStep());
             offer.setWinBid(dto.getWinBid() == null || dto.getWinBid().compareTo(BigDecimal.ZERO) == 0 ?
                     offer.getWinBid() : dto.getWinBid());
         }
@@ -127,6 +144,15 @@ public class OfferServiceImpl implements OfferService {
         offer.setLocation(dto.getLocationId() == null ?
                 offer.getLocation() :
                 locationService.getLocationById(dto.getLocationId()));
+        offer.setUpdatedAt(LocalDateTime.now());
+
+        if (Boolean.TRUE.equals(dto.getSendToVerification())) {
+            verifyOffer(offer);
+        } else {
+            draftOffer(offer);
+        }
+
+        return mappingService.toDto(offer);
         imageService.connectTempImgsToEntity(dto.getBaseNameOfImgs(), dto.getId());
     }
 
@@ -150,10 +176,103 @@ public class OfferServiceImpl implements OfferService {
         offer.setIsActive(true);
     }
 
+    @Transactional
+    @Override
+    public void draftOffer(Offer offer) {
+        offerContext.setOffer(offer);
+        offerContext.draft();
+    }
+
+    @Transactional
+    @Override
+    public void rejectOffer(Long id, OfferRejectionDto offerRejectionDto) {
+        offerContext.setOffer(getOfferById(id));
+        offerContext.reject(offerRejectionDto.getRejectionReasonId());
+    }
+
+    @Transactional
+    @Override
+    public void verifyOffer(Offer offer) {
+        offerContext.setOffer(offer);
+        offerContext.verify();
+    }
+
+    @Transactional
+    @Override
+    public void startAuction(Long id) {
+        offerContext.setOffer(getOfferById(id));
+        offerContext.startAuction();
+    }
+
+    @Transactional
+    @Override
+    public void finishAuction(Offer offer) {
+        offerContext.setOffer(offer);
+        offerContext.finishAuction();
+    }
+
+    @Transactional
+    @Override
+    public void qualifyAuction(Long id) {
+        offerContext.setOffer(getOfferById(id));
+        offerContext.qualify();
+    }
+
+    @Transactional
+    @Override
+    public OfferResponseDto completeOffer(Long id, OfferCompletionDto offerCompletionDto) {
+        Offer offer = getOfferById(id);
+        offerContext.setOffer(offer);
+        offerContext.complete(offerCompletionDto.getWinnerBidId());
+        return mappingService.toDto(offer);
+    }
+
+    @Transactional
+    @Override
+    public void cancelOffer(Long id) {
+        offerContext.setOffer(getOfferById(id));
+        offerContext.cancel();
+    }
+
+    @Transactional
+    @Override
+    public void blockOfferByAdmin(Long id) {
+        offerContext.setOffer(getOfferById(id));
+        offerContext.blockByAdmin();
+    }
+
+    @Transactional
+    @Override
+    public void setStatus(Offer offer, OfferStatus offerStatus) {
+        offerStatusHistoryService.create(offer, offerStatus);
+        offer.setStatus(statusService.getByOfferStatus(offerStatus));
+        offer.setUpdatedAt(LocalDateTime.now());
+    }
+
+    @Transactional
+    @Override
+    public void setStatus(Offer offer, OfferStatus offerStatus, Long rejectionReasonId) {
+        offerStatusHistoryService.create(offer, offerStatus, rejectionReasonId);
+        offer.setStatus(statusService.getByOfferStatus(offerStatus));
+        offer.setUpdatedAt(LocalDateTime.now());
+    }
+
+    @Override
+    public List<Offer> findUnfinishedAuctions() {
+        return offerRepository.findFinishedActiveAuctions(
+                LocalDateTime.now(),
+                OfferStatus.AUCTION_STARTED
+        );
+    }
+
+    private Offer getOfferById(Long id) {
+        return offerRepository.findById(id).orElseThrow(() -> new OfferNotFoundException(id));
+    }
+
     private OfferResponseWithPaginationDto offersToOfferRequestWithPaginationDto(Page<Offer> pageOfOffer) {
         Set<OfferResponseDto> offers;
         offers = pageOfOffer.stream()
-                .map(mappingService::toRequestDto)
+                .map(mappingService::toDto)
                 .collect(Collectors.toSet());
         return OfferResponseWithPaginationDto.builder()
                 .offers(offers)
@@ -166,11 +285,9 @@ public class OfferServiceImpl implements OfferService {
                 .build();
     }
 
-    private void checkOfferIfIsFree(BigDecimal startPrice, BigDecimal step, BigDecimal winBin) {
+    private void checkOfferIfIsFree(BigDecimal startPrice, BigDecimal winBin) {
         if (startPrice != null && startPrice.compareTo(BigDecimal.ZERO) > 0)
             throw new WrongAuctionParameterException("start prise");
-        if (step != null && step.compareTo(BigDecimal.ZERO) > 0)
-            throw new WrongAuctionParameterException("step");
         if (winBin != null && winBin.compareTo(BigDecimal.ZERO) > 0) {
             throw new WrongAuctionParameterException("winBid");
         }

@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Data;
 import java.math.BigDecimal;
-import java.util.Set;
+
 
 @Data
 @Builder
@@ -31,20 +31,17 @@ public class OfferCreationDto extends BaseNameOfImages{
     @Schema(description = "Auction duration in days", example = "3")
     private Integer auctionDurationDays;
 
-    @Schema(description = "Starting offer price", example = "1234.34")
+    @Schema(description = "Starting offer price", example = "123")
     private BigDecimal startPrice;
 
-    @Schema(description = "Bidding step", example = "12.34")
-    private BigDecimal step;
-
-    @Schema(description = "Possible buyout price without bidding", example = "1222.34")
+    @Schema(description = "Possible buyout price without bidding", example = "222")
     private BigDecimal winBid;
 
-    @Schema(description = "Offer is free or not", example = "true")
+    @Schema(description = "Offer is free or not", example = "false")
     @NotNull(message = "Is free cannot be null")
     private Boolean isFree;
 
-    @Schema(description = "Category id", example = "22")
+    @Schema(description = "Category id", example = "2")
     @NotNull(message = "Category Id cannot be null")
     private Long categoryId;
 
@@ -52,6 +49,8 @@ public class OfferCreationDto extends BaseNameOfImages{
     @NotNull(message = "Location Id cannot be null")
     private Long locationId;
 
+    @Schema(description = "Requirement for Admin verification ", example = "true")
+    private Boolean sendToVerification;
 }
 
 
