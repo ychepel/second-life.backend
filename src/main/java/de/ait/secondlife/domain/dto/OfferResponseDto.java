@@ -57,4 +57,7 @@ public class OfferResponseDto {
 
     @Schema(description = "Location id", example = "1")
     private Long locationId;
+
+    @Schema(description = "Auction duration in days", example = "3")
+    private Integer auctionDurationDays;
 }
