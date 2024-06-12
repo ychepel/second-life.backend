@@ -13,6 +13,7 @@ public interface OfferMappingService {
     @Mapping(source = "status.id", target = "statusId")
     @Mapping(source = "winnerBid.id", target = "winnerBidId")
     @Mapping(source = "category.id", target = "categoryId")
+    @Mapping(source = "location.id", target = "locationId")
     OfferResponseDto toDto(Offer offer);
 
     @Mapping(target = "id", ignore = true)
