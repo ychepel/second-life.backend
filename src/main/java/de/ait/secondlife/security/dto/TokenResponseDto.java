@@ -13,6 +13,9 @@ import lombok.ToString;
 @Schema(name = "JSON Web Tokens")
 public class TokenResponseDto {
 
+    @Schema(description = "User or Admin ID", example = "123")
+    private Long clientId;
+
     private String accessToken;
     private String refreshToken;
 }

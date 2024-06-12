@@ -46,6 +46,9 @@ public class OfferResponseDto {
     @Schema(description = "User id of the owner of the offer", example = "34")
     private Long ownerId;
 
+    @Schema(description = "Full name of the offer owner", example = "John Smith")
+    private String ownerFullName;
+
     @Schema(description = "Current status", example = "VERIFICATION")
     private String status;
 

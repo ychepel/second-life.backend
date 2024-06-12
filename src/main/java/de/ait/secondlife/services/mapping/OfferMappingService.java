@@ -19,6 +19,10 @@ public interface OfferMappingService {
             expression = "java(offer.getAuctionFinishedAt() != null ? offer.getAuctionFinishedAt().minusDays(offer.getAuctionDurationDays()) : null)"
     )
     @Mapping(target = "auctionEndAt", source = "auctionFinishedAt")
+    @Mapping(
+            target = "ownerFullName",
+            expression = "java(offer.getUser().getFirstName() + ' ' + offer.getUser().getLastName())"
+    )
     OfferResponseDto toDto(Offer offer);
 
     @Mapping(target = "id", ignore = true)
