@@ -1,6 +1,7 @@
 package de.ait.secondlife.repositories;
 
-import de.ait.secondlife.domain.constants.OfferStatus;
+
+import de.ait.secondlife.constants.OfferStatus;
 import de.ait.secondlife.domain.entity.Status;
 import org.springframework.data.jpa.repository.JpaRepository;
 

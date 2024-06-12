@@ -37,6 +37,7 @@ public class UserServiceImpl implements UserService {
     private final UserMappingService userMappingService;
     private final BCryptPasswordEncoder encoder;
     private final LocationService locationService;
+    private final ImageService imageService;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

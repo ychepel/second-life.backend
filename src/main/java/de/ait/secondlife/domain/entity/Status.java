@@ -1,6 +1,7 @@
 package de.ait.secondlife.domain.entity;
 
-import de.ait.secondlife.domain.constants.OfferStatus;
+
+import de.ait.secondlife.constants.OfferStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;

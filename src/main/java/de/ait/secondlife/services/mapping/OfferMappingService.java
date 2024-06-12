@@ -10,11 +10,9 @@ import org.mapstruct.Mapping;
 public abstract class OfferMappingService extends EntityWIthImageMappingService {
 
     @Mapping(source = "user.id", target = "ownerId")
-    @Mapping(source = "status.id", target = "statusId")
     @Mapping(source = "winnerBid.id", target = "winnerBidId")
     @Mapping(source = "category.id", target = "categoryId")
     //TODO change the logic after creating the order status processing
-    @Mapping(target = "endAt", expression = "java(offer.getCreatedAt().plusDays(offer.getAuctionDurationDays()))")
     @Mapping(target = "images", expression = "java(getImages(offer))")
     @Mapping(source = "location.id", target = "locationId")
     @Mapping(target = "status", expression = "java(offer.getStatus().getName().toString())")
@@ -28,7 +26,6 @@ public abstract class OfferMappingService extends EntityWIthImageMappingService 
             expression = "java(offer.getUser().getFirstName() + ' ' + offer.getUser().getLastName())"
     )
     public abstract OfferResponseDto toDto(Offer offer);
-
 
 
     @Mapping(target = "id", ignore = true)

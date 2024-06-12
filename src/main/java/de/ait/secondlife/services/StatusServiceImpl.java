@@ -1,6 +1,6 @@
 package de.ait.secondlife.services;
 
-import de.ait.secondlife.domain.constants.OfferStatus;
+import de.ait.secondlife.constants.OfferStatus;
 import de.ait.secondlife.domain.entity.Status;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.is_null_exceptions.IdIsNullException;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.StatusNotFoundException;

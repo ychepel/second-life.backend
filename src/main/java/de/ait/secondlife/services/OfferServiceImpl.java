@@ -5,7 +5,7 @@ import de.ait.secondlife.domain.dto.OfferCreationDto;
 import de.ait.secondlife.domain.dto.OfferResponseDto;
 import de.ait.secondlife.domain.dto.OfferResponseWithPaginationDto;
 import de.ait.secondlife.domain.dto.OfferUpdateDto;
-import de.ait.secondlife.domain.constants.OfferStatus;
+
 import de.ait.secondlife.domain.dto.*;
 import de.ait.secondlife.domain.entity.Offer;
 import de.ait.secondlife.domain.entity.User;
@@ -53,6 +53,7 @@ public class OfferServiceImpl implements OfferService {
     public void setOfferContext(@Lazy OfferContext offerContext) {
         this.offerContext = offerContext;
     }
+
     private final ImageService imageService;
 
     @Override
@@ -78,8 +79,6 @@ public class OfferServiceImpl implements OfferService {
 
     @Transactional
     @Override
-    public OfferResponseDto createOffer(OfferCreationDto dto) {
-        User user = getUserFromAuthContext();
     public OfferResponseDto createOffer(OfferCreationDto dto) throws CredentialException {
         User user = userService.getAuthenticatedUser();
         try {
@@ -98,15 +97,14 @@ public class OfferServiceImpl implements OfferService {
                     throw new WrongAuctionParameterException("winBid");
                 }
             }
-            newOffer = offerRepository.save(newOffer);
-            imageService.connectTempImgsToEntity(dto.getBaseNameOfImgs(), newOffer.getId());
-            return mappingService.toRequestDto(newOffer);
 
             if (Boolean.TRUE.equals(dto.getSendToVerification())) {
                 verifyOffer(newOffer);
             } else {
                 draftOffer(newOffer);
             }
+            newOffer = offerRepository.save(newOffer);
+            imageService.connectTempImgsToEntity(dto.getBaseNameOfImgs(), newOffer.getId());
 
             return mappingService.toDto(newOffer);
         } catch (ConstraintViolationException | DataIntegrityViolationException e) {
@@ -151,9 +149,8 @@ public class OfferServiceImpl implements OfferService {
         } else {
             draftOffer(offer);
         }
-
-        return mappingService.toDto(offer);
         imageService.connectTempImgsToEntity(dto.getBaseNameOfImgs(), dto.getId());
+        return mappingService.toDto(offer);
     }
 
     @Transactional
@@ -291,14 +288,6 @@ public class OfferServiceImpl implements OfferService {
         if (winBin != null && winBin.compareTo(BigDecimal.ZERO) > 0) {
             throw new WrongAuctionParameterException("winBid");
         }
-    }
-
-    @SneakyThrows
-    private User getUserFromAuthContext() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication.getPrincipal().equals("anonymousUser")) throw new UserIsNotAuthorizedException();
-        String username = authentication.getName();
-        return (User) userService.loadUserByUsername(username);
     }
 
     @Override

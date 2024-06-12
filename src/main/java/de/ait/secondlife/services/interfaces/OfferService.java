@@ -1,6 +1,7 @@
 package de.ait.secondlife.services.interfaces;
 
-import de.ait.secondlife.domain.constants.OfferStatus;
+
+import de.ait.secondlife.constants.OfferStatus;
 import de.ait.secondlife.domain.dto.*;
 import de.ait.secondlife.domain.entity.Offer;
 import org.springframework.data.domain.Pageable;
