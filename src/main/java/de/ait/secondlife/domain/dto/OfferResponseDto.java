@@ -31,16 +31,16 @@ public class OfferResponseDto {
     @Schema(description = "Date and time of the end of the auction", example = "2024-05-30T17:11:18.149566")
     private LocalDateTime endAt;
 
-    @Schema(description = "Starting offer price", example = "1234.34")
+    @Schema(description = "Starting offer price", example = "123")
     private BigDecimal startPrice;
 
     @Schema(description = "Bidding step", example = "12.34")
     private BigDecimal step;
 
-    @Schema(description = "Possible buyout price without bidding", example = "1222.34")
+    @Schema(description = "Possible buyout price without bidding", example = "322")
     private BigDecimal winBid;
 
-    @Schema(description = "Offer is free or not", example = "true")
+    @Schema(description = "Offer is free or not", example = "false")
     private Boolean isFree;
 
     @Schema(description = "User id of the owner of the offer", example = "34")
@@ -49,7 +49,7 @@ public class OfferResponseDto {
     @Schema(description = "Current status", example = "VERIFICATION")
     private String status;
 
-    @Schema(description = "Category id", example = "22")
+    @Schema(description = "Category id", example = "2")
     private Long categoryId;
 
     @Schema(description = "Winner bid id", example = "123")

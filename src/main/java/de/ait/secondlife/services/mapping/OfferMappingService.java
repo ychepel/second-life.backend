@@ -9,10 +9,10 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface OfferMappingService {
 
-    @Mapping(source = "user.id", target = "ownerId")
-    @Mapping(source = "winnerBid.id", target = "winnerBidId")
-    @Mapping(source = "category.id", target = "categoryId")
-    @Mapping(source = "location.id", target = "locationId")
+    @Mapping(target = "ownerId", source = "user.id")
+    @Mapping(target = "winnerBidId", source = "winnerBid.id")
+    @Mapping(target = "categoryId", source = "category.id")
+    @Mapping(target = "locationId", source = "location.id")
     @Mapping(target = "status", expression = "java(offer.getStatus().getName().toString())")
     OfferResponseDto toDto(Offer offer);
 
