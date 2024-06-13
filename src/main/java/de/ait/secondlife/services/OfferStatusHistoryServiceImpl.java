@@ -1,6 +1,6 @@
 package de.ait.secondlife.services;
 
-import de.ait.secondlife.domain.constants.OfferStatus;
+import de.ait.secondlife.constants.OfferStatus;
 import de.ait.secondlife.domain.entity.Offer;
 import de.ait.secondlife.domain.entity.OfferStatusHistory;
 import de.ait.secondlife.domain.entity.RejectionReason;

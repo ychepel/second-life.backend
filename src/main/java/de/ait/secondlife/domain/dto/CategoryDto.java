@@ -4,12 +4,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
-import java.util.Objects;
-
 @Data
-@ToString
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 @Schema(name = "Category", description = "Description of the category")
-public class CategoryDto {
+public class CategoryDto extends ImageUploadDetails {
 
     @Schema(description = "category id", example = "1")
     private Long id;

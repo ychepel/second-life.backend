@@ -1,6 +1,12 @@
 package de.ait.secondlife.services;
 
-import de.ait.secondlife.domain.constants.OfferStatus;
+import de.ait.secondlife.constants.EntityTypeWithImages;
+import de.ait.secondlife.constants.OfferStatus;
+import de.ait.secondlife.domain.dto.OfferCreationDto;
+import de.ait.secondlife.domain.dto.OfferResponseDto;
+import de.ait.secondlife.domain.dto.OfferResponseWithPaginationDto;
+import de.ait.secondlife.domain.dto.OfferUpdateDto;
+
 import de.ait.secondlife.domain.dto.*;
 import de.ait.secondlife.domain.entity.Offer;
 import de.ait.secondlife.domain.entity.User;
@@ -10,6 +16,7 @@ import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.Wro
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.is_null_exceptions.IdIsNullException;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.OfferNotFoundException;
 import de.ait.secondlife.repositories.OfferRepository;
+import de.ait.secondlife.repositories.StatusRepository;
 import de.ait.secondlife.services.interfaces.*;
 import de.ait.secondlife.services.mapping.OfferMappingService;
 import de.ait.secondlife.services.offer_status.OfferContext;
@@ -48,6 +55,8 @@ public class OfferServiceImpl implements OfferService {
     public void setOfferContext(@Lazy OfferContext offerContext) {
         this.offerContext = offerContext;
     }
+
+    private final ImageService imageService;
 
     @Override
     public OfferResponseWithPaginationDto findOffers(Pageable pageable) {
@@ -97,13 +106,15 @@ public class OfferServiceImpl implements OfferService {
                 }
             }
             newOffer = offerRepository.save(newOffer);
-
             if (Boolean.TRUE.equals(dto.getSendToVerification())) {
                 verifyOffer(newOffer);
             } else {
                 draftOffer(newOffer);
             }
-
+            imageService.connectTempImagesToEntity(
+                    dto.getBaseNameOfImages(),
+                    EntityTypeWithImages.OFFER.getType(),
+                    newOffer.getId());
             return mappingService.toDto(newOffer);
         } catch (ConstraintViolationException | DataIntegrityViolationException e) {
             throw new CreateOfferConstraintViolationException("Constraint violation: " + e.getMessage());
@@ -147,13 +158,17 @@ public class OfferServiceImpl implements OfferService {
         } else {
             draftOffer(offer);
         }
-
+        imageService.connectTempImagesToEntity(
+                dto.getBaseNameOfImages(),
+                EntityTypeWithImages.OFFER.getType(),
+                dto.getId());
         return mappingService.toDto(offer);
     }
 
     @Transactional
     @Override
     public void removeOffer(Long id) {
+        //TODO   Only the owner and admin has the right to make changes
         if (id == null) throw new IdIsNullException();
         Offer offer = offerRepository.findByIdAndIsActiveTrue(id)
                 .orElseThrow(() -> new OfferNotFoundException(id));
@@ -163,6 +178,7 @@ public class OfferServiceImpl implements OfferService {
     @Transactional
     @Override
     public void recoverOffer(Long id) {
+        //TODO   Only the owner and admin has the right to make changes
         if (id == null) throw new IdIsNullException();
         Offer offer = offerRepository.findById(id)
                 .orElseThrow(() -> new OfferNotFoundException(id));
@@ -284,5 +300,11 @@ public class OfferServiceImpl implements OfferService {
         if (winBin != null && winBin.compareTo(BigDecimal.ZERO) > 0) {
             throw new WrongAuctionParameterException("winBid");
         }
+    }
+
+    @Override
+    public boolean checkEntityExistsById(Long id) {
+        if (id == null) throw new IdIsNullException();
+        return offerRepository.existsByIdAndIsActiveTrue(id);
     }
 }

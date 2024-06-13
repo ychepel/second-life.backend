@@ -1,7 +1,9 @@
 package de.ait.secondlife.services;
 
+import de.ait.secondlife.constants.EntityTypeWithImages;
 import de.ait.secondlife.domain.dto.CategoryDto;
 import de.ait.secondlife.domain.dto.CategoryCreationDto;
+import de.ait.secondlife.domain.dto.CategoryUpdateDto;
 import de.ait.secondlife.domain.entity.Category;
 import de.ait.secondlife.exception_handling.exceptions.DuplicateCategoryException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.CategoryIsNotEmptyException;
@@ -9,6 +11,7 @@ import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.is_
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.CategoryNotFoundException;
 import de.ait.secondlife.repositories.CategoryRepository;
 import de.ait.secondlife.services.interfaces.CategoryService;
+import de.ait.secondlife.services.interfaces.ImageService;
 import de.ait.secondlife.services.mapping.NewCategoryMappingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,6 +25,8 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository repository;
 
     private final NewCategoryMappingService mappingService;
+
+    private final ImageService imageService;
 
     @Override
     public CategoryDto getById(Long id) {
@@ -39,7 +44,7 @@ public class CategoryServiceImpl implements CategoryService {
     public List<CategoryDto> getAll() {
         return repository.findAll()
                 .stream()
-                .filter(x -> x.isActive())
+                .filter(Category::isActive)
                 .map(mappingService::toDto)
                 .toList();
     }
@@ -48,29 +53,36 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryDto save(CategoryCreationDto categoryDto) {
 
         String categoryName = categoryDto.getName();
-        if (repository.existsByName(categoryName)){
+        if (repository.existsByName(categoryName)) {
             throw new DuplicateCategoryException(categoryName);
         }
 
         Category entity = mappingService.toEntity(categoryDto);
 
         try {
-            repository.save(entity);
+            Category newCategory = repository.save(entity);
+            imageService.connectTempImagesToEntity(
+                    categoryDto.getBaseNameOfImages(),
+                    EntityTypeWithImages.CATEGORY.getType(),
+                    newCategory.getId());
         } catch (Exception e) {
             throw new RuntimeException("Cannot save category to db", e);
         }
-
         return mappingService.toDto(entity);
     }
 
     @Override
-    public CategoryDto update(Long id, CategoryDto dto) {
+    public CategoryDto update(Long id, CategoryUpdateDto dto) {
 
         Category existingCategory = repository.findById(id).orElseThrow(() -> new CategoryNotFoundException(id));
 
         existingCategory.setName(dto.getName());
         existingCategory.setDescription(dto.getDescription());
 
+        imageService.connectTempImagesToEntity(
+                dto.getBaseNameOfImages(),
+                EntityTypeWithImages.CATEGORY.getType(),
+                id);
         try {
             return mappingService.toDto(repository.save(existingCategory));
         } catch (Exception e) {
@@ -112,5 +124,11 @@ public class CategoryServiceImpl implements CategoryService {
         if (id == null) throw new IdIsNullException();
         return repository.findById(id)
                 .orElseThrow(() -> new CategoryNotFoundException(id));
+    }
+
+    @Override
+    public boolean checkEntityExistsById(Long id) {
+        if (id == null) throw new IdIsNullException();
+        return repository.existsByIdAndActiveTrue(id);
     }
 }

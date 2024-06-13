@@ -7,12 +7,14 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 @Mapper
-public interface OfferMappingService {
+public abstract class OfferMappingService extends EntityWIthImageMappingService {
 
     @Mapping(target = "ownerId", source = "user.id")
     @Mapping(target = "winnerBidId", source = "winnerBid.id")
     @Mapping(target = "categoryId", source = "category.id")
     @Mapping(target = "locationId", source = "location.id")
+    //TODO change the logic after creating the order status processing
+    @Mapping(target = "images", expression = "java(getImages(offer))")
     @Mapping(target = "status", expression = "java(offer.getOfferStatus().toString())")
     @Mapping(
             target = "auctionStartAt",
@@ -25,7 +27,7 @@ public interface OfferMappingService {
     )
     @Mapping(target = "maxBidValue", expression = "java(offer.getMaxBidValue())")
     @Mapping(target = "bidsCount", expression = "java(offer.getBidsCount())")
-    OfferResponseDto toDto(Offer offer);
+    public abstract OfferResponseDto toDto(Offer offer);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "user", ignore = true)
@@ -34,7 +36,7 @@ public interface OfferMappingService {
     @Mapping(target = "isActive", constant = "true")
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "category", ignore = true)
-    Offer toEntity(OfferCreationDto dto);
+    public abstract Offer toEntity(OfferCreationDto dto);
 
 }
 
