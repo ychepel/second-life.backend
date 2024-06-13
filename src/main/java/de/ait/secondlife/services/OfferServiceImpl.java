@@ -65,10 +65,15 @@ public class OfferServiceImpl implements OfferService {
     }
 
     @Override
-    public OfferResponseDto findOfferById(Long id) {
+    public Offer findById(Long id) {
         if (id == null) throw new IdIsNullException();
-        Offer offer = offerRepository.findByIdAndIsActiveTrue(id)
+        return offerRepository.findByIdAndIsActiveTrue(id)
                 .orElseThrow(() -> new OfferNotFoundException(id));
+    }
+
+    @Override
+    public OfferResponseDto getDto(Long id) {
+        Offer offer = findById(id);
         return mappingService.toDto(offer);
     }
 
@@ -95,7 +100,7 @@ public class OfferServiceImpl implements OfferService {
                 checkOfferIfIsFree(dto.getStartPrice(), dto.getWinBid());
             } else {
                 if (dto.getStartPrice() == null || dto.getStartPrice().compareTo(BigDecimal.ZERO) == 0)
-                    throw new WrongAuctionParameterException("start prise");
+                    throw new WrongAuctionParameterException("start price");
                 if (dto.getWinBid() != null && dto.getWinBid().compareTo(BigDecimal.ZERO) == 0) {
                     throw new WrongAuctionParameterException("winBid");
                 }

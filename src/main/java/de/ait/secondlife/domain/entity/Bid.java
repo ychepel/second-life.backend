@@ -36,12 +36,12 @@ public class Bid {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "offer_id")
-    @NotNull(message="Offer cannot be null" )
+    @NotNull(message = "Offer cannot be null")
     private Offer offer;
 
-    //TODO -add bid to user dependence
-    @Column(name = "user_id")
-    @NotNull(message="User Id cannot be null" )
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    @NotNull(message = "User Id cannot be null")
+    private User user;
 }
 

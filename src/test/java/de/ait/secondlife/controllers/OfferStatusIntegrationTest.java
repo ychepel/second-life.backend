@@ -3,23 +3,18 @@ package de.ait.secondlife.controllers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.ait.secondlife.constants.OfferStatus;
-import de.ait.secondlife.domain.entity.Bid;
-import de.ait.secondlife.domain.entity.Offer;
-import de.ait.secondlife.domain.entity.OfferStatusHistory;
-import de.ait.secondlife.domain.entity.RejectionReason;
-import de.ait.secondlife.repositories.BidRepository;
-import de.ait.secondlife.repositories.OfferRepository;
-import de.ait.secondlife.repositories.OfferStatusHistoryRepository;
-import de.ait.secondlife.repositories.RejectionReasonRepository;
+import de.ait.secondlife.domain.entity.*;
+import de.ait.secondlife.repositories.*;
 import de.ait.secondlife.scheduler.AuctionFinisher;
 import de.ait.secondlife.services.interfaces.StatusService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -27,12 +22,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -50,9 +43,6 @@ class OfferStatusIntegrationTest {
 
     @Autowired
     private OfferStatusHistoryRepository offerStatusHistoryRepository;
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
 
     @Autowired
     private StatusService statusService;
@@ -167,14 +157,6 @@ class OfferStatusIntegrationTest {
                 .build();
         rejectionReasonRepository.save(rejectionReason);
         this.rejectionReasonId = rejectionReason.getId();
-
-//        String sql = "INSERT INTO rejection_reasons (id, name) VALUES (?, ?)";
-//        int result = jdbcTemplate.update(sql, rejectionReasonId, "test rejection reason");
-//        assertEquals(1, result);
-
-//        sql = "INSERT INTO bid (user_id, offer_id, bid_value, created_at) VALUES (?, ?, ?, ?)";
-//        result = jdbcTemplate.update(sql, 1, user1OfferId, 150, LocalDateTime.now());
-//        assertEquals(1, result);
     }
 
     @Nested
@@ -209,12 +191,12 @@ class OfferStatusIntegrationTest {
 
             Offer offerFromDB = offerRepository.findById(offerId).get();
             assertEquals("Test title", offerFromDB.getTitle());
-            assertEquals(OfferStatus.DRAFT, offerFromDB.getStatus().getName());
+            assertEquals(OfferStatus.DRAFT, offerFromDB.getOfferStatus());
 
             Optional<OfferStatusHistory> firstHistory = offerStatusHistoryRepository.findByOfferId(offerId)
                     .stream()
                     .findFirst();
-            assertEquals(OfferStatus.DRAFT, firstHistory.get().getStatus().getName());
+            assertEquals(OfferStatus.DRAFT, firstHistory.get().getOfferStatus());
         }
 
         @Test
@@ -243,7 +225,7 @@ class OfferStatusIntegrationTest {
 
             Offer offerFromDB = offerRepository.findById(offerId).get();
             assertEquals("Test title", offerFromDB.getTitle());
-            assertEquals(OfferStatus.VERIFICATION, offerFromDB.getStatus().getName());
+            assertEquals(OfferStatus.VERIFICATION, offerFromDB.getOfferStatus());
             assertEquals(OfferStatus.VERIFICATION, getLastHistoryStatus(offerId));
         }
     }
@@ -265,7 +247,7 @@ class OfferStatusIntegrationTest {
                     .andExpect(status().isOk());
 
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
-            assertEquals(OfferStatus.DRAFT, offerFromDB.getStatus().getName());
+            assertEquals(OfferStatus.DRAFT, offerFromDB.getOfferStatus());
             assertEquals(OfferStatus.DRAFT, getLastHistoryStatus(user1OfferId));
         }
 
@@ -280,7 +262,7 @@ class OfferStatusIntegrationTest {
                     .andExpect(status().isForbidden());
 
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
-            assertEquals(OfferStatus.DRAFT, offerFromDB.getStatus().getName());
+            assertEquals(OfferStatus.DRAFT, offerFromDB.getOfferStatus());
         }
 
         @Test
@@ -294,7 +276,7 @@ class OfferStatusIntegrationTest {
                     .andExpect(status().isUnauthorized());
 
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
-            assertEquals(OfferStatus.DRAFT, offerFromDB.getStatus().getName());
+            assertEquals(OfferStatus.DRAFT, offerFromDB.getOfferStatus());
         }
 
         @Test
@@ -308,7 +290,7 @@ class OfferStatusIntegrationTest {
                     .andExpect(status().isOk());
 
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
-            assertEquals(OfferStatus.VERIFICATION, offerFromDB.getStatus().getName());
+            assertEquals(OfferStatus.VERIFICATION, offerFromDB.getOfferStatus());
             assertEquals(OfferStatus.VERIFICATION, getLastHistoryStatus(user1OfferId));
         }
     }
@@ -333,13 +315,13 @@ class OfferStatusIntegrationTest {
                     .andExpect(status().isOk());
 
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
-            assertEquals(OfferStatus.REJECTED, offerFromDB.getStatus().getName());
+            assertEquals(OfferStatus.REJECTED, offerFromDB.getOfferStatus());
 
             List<OfferStatusHistory> statusHistory = offerStatusHistoryRepository.findByOfferId(user1OfferId);
             Optional<OfferStatusHistory> lastHistory = statusHistory.stream()
                     .skip(statusHistory.size() - 1)
                     .findFirst();
-            assertEquals(OfferStatus.REJECTED, lastHistory.get().getStatus().getName());
+            assertEquals(OfferStatus.REJECTED, lastHistory.get().getOfferStatus());
             assertEquals(rejectionReasonId, lastHistory.get().getRejection().getId());
         }
 
@@ -357,7 +339,7 @@ class OfferStatusIntegrationTest {
                     .andExpect(status().isForbidden());
 
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
-            assertEquals(OfferStatus.VERIFICATION, offerFromDB.getStatus().getName());
+            assertEquals(OfferStatus.VERIFICATION, offerFromDB.getOfferStatus());
         }
 
         @Test
@@ -374,7 +356,7 @@ class OfferStatusIntegrationTest {
                     .andExpect(status().isInternalServerError());
 
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
-            assertEquals(OfferStatus.AUCTION_STARTED, offerFromDB.getStatus().getName());
+            assertEquals(OfferStatus.AUCTION_STARTED, offerFromDB.getOfferStatus());
         }
 
         @Test
@@ -391,7 +373,7 @@ class OfferStatusIntegrationTest {
                     .andExpect(status().isInternalServerError());
 
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
-            assertEquals(OfferStatus.AUCTION_FINISHED, offerFromDB.getStatus().getName());
+            assertEquals(OfferStatus.AUCTION_FINISHED, offerFromDB.getOfferStatus());
         }
 
         @Test
@@ -408,7 +390,7 @@ class OfferStatusIntegrationTest {
                     .andExpect(status().isInternalServerError());
 
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
-            assertEquals(OfferStatus.QUALIFICATION, offerFromDB.getStatus().getName());
+            assertEquals(OfferStatus.QUALIFICATION, offerFromDB.getOfferStatus());
         }
 
         @Test
@@ -425,7 +407,7 @@ class OfferStatusIntegrationTest {
                     .andExpect(status().isInternalServerError());
 
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
-            assertEquals(OfferStatus.COMPLETED, offerFromDB.getStatus().getName());
+            assertEquals(OfferStatus.COMPLETED, offerFromDB.getOfferStatus());
         }
 
         @Test
@@ -443,7 +425,7 @@ class OfferStatusIntegrationTest {
                     .andExpect(status().isInternalServerError());
 
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
-            assertEquals(OfferStatus.BLOCKED_BY_ADMIN, offerFromDB.getStatus().getName());
+            assertEquals(OfferStatus.BLOCKED_BY_ADMIN, offerFromDB.getOfferStatus());
         }
     }
 
@@ -463,7 +445,7 @@ class OfferStatusIntegrationTest {
                     .andExpect(status().isOk());
 
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
-            assertEquals(OfferStatus.AUCTION_STARTED, offerFromDB.getStatus().getName());
+            assertEquals(OfferStatus.AUCTION_STARTED, offerFromDB.getOfferStatus());
             assertNotNull(offerFromDB.getAuctionFinishedAt());
             assertEquals(OfferStatus.AUCTION_STARTED, getLastHistoryStatus(user1OfferId));
         }
@@ -477,7 +459,7 @@ class OfferStatusIntegrationTest {
                     .andExpect(status().isInternalServerError());
 
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
-            assertEquals(OfferStatus.DRAFT, offerFromDB.getStatus().getName());
+            assertEquals(OfferStatus.DRAFT, offerFromDB.getOfferStatus());
         }
 
         @Test
@@ -489,7 +471,7 @@ class OfferStatusIntegrationTest {
                     .andExpect(status().isInternalServerError());
 
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
-            assertEquals(OfferStatus.REJECTED, offerFromDB.getStatus().getName());
+            assertEquals(OfferStatus.REJECTED, offerFromDB.getOfferStatus());
         }
 
         @Test
@@ -501,7 +483,7 @@ class OfferStatusIntegrationTest {
                     .andExpect(status().isInternalServerError());
 
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
-            assertEquals(OfferStatus.QUALIFICATION, offerFromDB.getStatus().getName());
+            assertEquals(OfferStatus.QUALIFICATION, offerFromDB.getOfferStatus());
         }
 
         @Test
@@ -513,7 +495,7 @@ class OfferStatusIntegrationTest {
                     .andExpect(status().isInternalServerError());
 
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
-            assertEquals(OfferStatus.COMPLETED, offerFromDB.getStatus().getName());
+            assertEquals(OfferStatus.COMPLETED, offerFromDB.getOfferStatus());
         }
 
         @Test
@@ -526,7 +508,7 @@ class OfferStatusIntegrationTest {
                     .andExpect(status().isInternalServerError());
 
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
-            assertEquals(OfferStatus.BLOCKED_BY_ADMIN, offerFromDB.getStatus().getName());
+            assertEquals(OfferStatus.BLOCKED_BY_ADMIN, offerFromDB.getOfferStatus());
         }
 
         @Test
@@ -539,7 +521,7 @@ class OfferStatusIntegrationTest {
                     .andExpect(status().isInternalServerError());
 
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
-            assertEquals(OfferStatus.CANCELED, offerFromDB.getStatus().getName());
+            assertEquals(OfferStatus.CANCELED, offerFromDB.getOfferStatus());
         }
 
         @Test
@@ -551,7 +533,7 @@ class OfferStatusIntegrationTest {
                     .andExpect(status().isForbidden());
 
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
-            assertEquals(OfferStatus.VERIFICATION, offerFromDB.getStatus().getName());
+            assertEquals(OfferStatus.VERIFICATION, offerFromDB.getOfferStatus());
         }
     }
 
@@ -562,7 +544,13 @@ class OfferStatusIntegrationTest {
     public class AuctionFinish {
 
         @Autowired
+        private UserRepository userRepository;
+
+        @Autowired
         private AuctionFinisher auctionFinisher;
+
+        @PersistenceContext
+        private EntityManager entityManager;
 
         @Test
         public void finish_auction_without_bids_by_scheduler() throws Exception {
@@ -574,12 +562,12 @@ class OfferStatusIntegrationTest {
                     .andExpect(status().isOk());
 
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
-            assertEquals(OfferStatus.AUCTION_STARTED, offerFromDB.getStatus().getName());
+            assertEquals(OfferStatus.AUCTION_STARTED, offerFromDB.getOfferStatus());
             offerFromDB.setAuctionFinishedAt(LocalDateTime.now().minusMinutes(5));
 
             auctionFinisher.finishAuction();
             offerFromDB = offerRepository.findById(user1OfferId).get();
-            assertEquals(OfferStatus.COMPLETED, offerFromDB.getStatus().getName());
+            assertEquals(OfferStatus.COMPLETED, offerFromDB.getOfferStatus());
             assertEquals(OfferStatus.COMPLETED, getLastHistoryStatus(user1OfferId));
         }
 
@@ -593,71 +581,68 @@ class OfferStatusIntegrationTest {
                     .andExpect(status().isOk());
 
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
-            assertEquals(OfferStatus.AUCTION_STARTED, offerFromDB.getStatus().getName());
+            assertEquals(OfferStatus.AUCTION_STARTED, offerFromDB.getOfferStatus());
 
             auctionFinisher.finishAuction();
             offerFromDB = offerRepository.findById(user1OfferId).get();
-            assertEquals(OfferStatus.AUCTION_STARTED, offerFromDB.getStatus().getName());
+            assertEquals(OfferStatus.AUCTION_STARTED, offerFromDB.getOfferStatus());
             assertEquals(OfferStatus.AUCTION_STARTED, getLastHistoryStatus(user1OfferId));
         }
 
         @Test
         public void finish_auction_with_one_bid_by_scheduler() throws Exception {
-            //TODO: fix test after implementing logic with bids applying
-//            Offer offer = offerRepository.findById(user1OfferId).get();
-//            offer.setStatus(statusService.getByOfferStatus(OfferStatus.VERIFICATION));
-//
-//            mockMvc.perform(patch("/v1/offers/" + user1OfferId + "/start-auction").cookie(adminCookie))
-//                    .andExpect(status().isOk());
-//
-//            Bid bid = Bid.builder()
-//                    .userId(user2Id)
-//                    .offer(offer)
-//                    .bidValue(BigDecimal.valueOf(150))
-//                    .createdAt(LocalDateTime.now())
-//                    .build();
-//            bidRepository.save(bid);
-//            offerRepository.save(offer);
-//
-//            Offer offerFromDB = offerRepository.findById(user1OfferId).get();
-//            assertEquals(OfferStatus.AUCTION_STARTED, offerFromDB.getStatus().getName());
-//            offerFromDB.setAuctionFinishedAt(LocalDateTime.now().minusMinutes(5));
-//
-//            auctionFinisher.finishAuction();
-//            offerFromDB = offerRepository.findById(user1OfferId).get();
-//            assertEquals(OfferStatus.COMPLETED, offerFromDB.getStatus().getName());
-//            assertEquals(bid.getId(), offerFromDB.getWinnerBid().getId());
-//            assertEquals(OfferStatus.COMPLETED, getLastHistoryStatus(user1OfferId));
+            Offer offer = offerRepository.findById(user1OfferId).get();
+            offer.setStatus(statusService.getByOfferStatus(OfferStatus.AUCTION_STARTED));
+            offer.setAuctionFinishedAt(LocalDateTime.now().minusMinutes(5));
+            offerRepository.saveAndFlush(offer);
+            entityManager.refresh(offer);
+
+            BigDecimal bidValue = BigDecimal.valueOf(110);
+            User user2 = userRepository.findById(user2Id).get();
+            Bid bid = Bid.builder()
+                    .offer(offer)
+                    .user(user2)
+                    .bidValue(bidValue)
+                    .createdAt(LocalDateTime.now())
+                    .build();
+            bidRepository.saveAndFlush(bid);
+
+            auctionFinisher.finishAuction();
+
+            assertEquals(OfferStatus.COMPLETED, offer.getOfferStatus());
+            assertEquals(bidValue, offer.getWinnerBid().getBidValue());
+            assertEquals(OfferStatus.COMPLETED, getLastHistoryStatus(user1OfferId));
         }
 
         @Test
         public void finish_auction_with_many_bids_by_scheduler() throws Exception {
-            //TODO: fix test after implementing logic with bids applying
-//            Offer offer = offerRepository.findById(user1OfferId).get();
-//            offer.setStatus(statusService.getByOfferStatus(OfferStatus.VERIFICATION));
-//
-//            mockMvc.perform(patch("/v1/offers/" + user1OfferId + "/start-auction").cookie(adminCookie))
-//                    .andExpect(status().isOk());
-//
-//            String sql = "INSERT INTO bid (user_id, offer_id, bid_value, created_at) VALUES (?, ?, ?, ?)";
-//            int result = jdbcTemplate.update(sql, offer.getUser().getId(), user1OfferId, 150, LocalDateTime.now());
-//            assertEquals(1, result);
-//            result = jdbcTemplate.update(sql, offer.getUser().getId(), user1OfferId, 155, LocalDateTime.now());
-//            assertEquals(1, result);
-//            result = jdbcTemplate.update(sql, offer.getUser().getId(), user1OfferId, 160, LocalDateTime.now());
-//            assertEquals(1, result);
-//
-//            Offer offerFromDB = offerRepository.findById(user1OfferId).get();
-//            assertEquals(OfferStatus.AUCTION_STARTED, offerFromDB.getStatus().getName());
-//            offerFromDB.setAuctionFinishedAt(LocalDateTime.now().minusMinutes(5));
-//
-//            auctionFinisher.finishAuction();
-//            offerFromDB = offerRepository.findById(user1OfferId).get();
-//
-//            List<Bid> bids = offerFromDB.getBids();
-//
-//            assertEquals(OfferStatus.QUALIFICATION, offerFromDB.getStatus().getName());
-//            assertEquals(OfferStatus.QUALIFICATION, getLastHistoryStatus(user1OfferId));
+            Offer offer = offerRepository.findById(user1OfferId).get();
+            offer.setStatus(statusService.getByOfferStatus(OfferStatus.AUCTION_STARTED));
+            offer.setAuctionFinishedAt(LocalDateTime.now().minusMinutes(5));
+            offerRepository.saveAndFlush(offer);
+            entityManager.refresh(offer);
+
+            User user2 = userRepository.findById(user2Id).get();
+            Bid bid1 = Bid.builder()
+                    .offer(offer)
+                    .user(user2)
+                    .bidValue(BigDecimal.valueOf(110))
+                    .createdAt(LocalDateTime.now())
+                    .build();
+            bidRepository.saveAndFlush(bid1);
+
+            Bid bid2 = Bid.builder()
+                    .offer(offer)
+                    .user(user2)
+                    .bidValue(BigDecimal.valueOf(120))
+                    .createdAt(LocalDateTime.now())
+                    .build();
+            bidRepository.saveAndFlush(bid2);
+
+            auctionFinisher.finishAuction();
+
+            assertEquals(OfferStatus.QUALIFICATION, offer.getOfferStatus());
+            assertEquals(OfferStatus.QUALIFICATION, getLastHistoryStatus(user1OfferId));
         }
     }
 
@@ -673,7 +658,7 @@ class OfferStatusIntegrationTest {
                     .andExpect(status().isInternalServerError());
 
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
-            assertEquals(OfferStatus.DRAFT, offerFromDB.getStatus().getName());
+            assertEquals(OfferStatus.DRAFT, offerFromDB.getOfferStatus());
             assertEquals(OfferStatus.DRAFT, getLastHistoryStatus(user1OfferId));
         }
 
@@ -686,7 +671,7 @@ class OfferStatusIntegrationTest {
                     .andExpect(status().isInternalServerError());
 
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
-            assertEquals(OfferStatus.VERIFICATION, offerFromDB.getStatus().getName());
+            assertEquals(OfferStatus.VERIFICATION, offerFromDB.getOfferStatus());
         }
 
         @Test
@@ -698,7 +683,7 @@ class OfferStatusIntegrationTest {
                     .andExpect(status().isOk());
 
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
-            assertEquals(OfferStatus.BLOCKED_BY_ADMIN, offerFromDB.getStatus().getName());
+            assertEquals(OfferStatus.BLOCKED_BY_ADMIN, offerFromDB.getOfferStatus());
             assertEquals(OfferStatus.BLOCKED_BY_ADMIN, getLastHistoryStatus(user1OfferId));
         }
 
@@ -711,7 +696,7 @@ class OfferStatusIntegrationTest {
                     .andExpect(status().isOk());
 
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
-            assertEquals(OfferStatus.BLOCKED_BY_ADMIN, offerFromDB.getStatus().getName());
+            assertEquals(OfferStatus.BLOCKED_BY_ADMIN, offerFromDB.getOfferStatus());
             assertEquals(OfferStatus.BLOCKED_BY_ADMIN, getLastHistoryStatus(user1OfferId));
         }
 
@@ -724,7 +709,7 @@ class OfferStatusIntegrationTest {
                     .andExpect(status().isInternalServerError());
 
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
-            assertEquals(OfferStatus.COMPLETED, offerFromDB.getStatus().getName());
+            assertEquals(OfferStatus.COMPLETED, offerFromDB.getOfferStatus());
         }
 
         @Test
@@ -736,7 +721,7 @@ class OfferStatusIntegrationTest {
                     .andExpect(status().isForbidden());
 
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
-            assertEquals(OfferStatus.VERIFICATION, offerFromDB.getStatus().getName());
+            assertEquals(OfferStatus.VERIFICATION, offerFromDB.getOfferStatus());
         }
     }
 
@@ -752,7 +737,7 @@ class OfferStatusIntegrationTest {
                     .andExpect(status().isOk());
 
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
-            assertEquals(OfferStatus.CANCELED, offerFromDB.getStatus().getName());
+            assertEquals(OfferStatus.CANCELED, offerFromDB.getOfferStatus());
             assertEquals(OfferStatus.CANCELED, getLastHistoryStatus(user1OfferId));
         }
 
@@ -765,7 +750,7 @@ class OfferStatusIntegrationTest {
                     .andExpect(status().isOk());
 
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
-            assertEquals(OfferStatus.CANCELED, offerFromDB.getStatus().getName());
+            assertEquals(OfferStatus.CANCELED, offerFromDB.getOfferStatus());
             assertEquals(OfferStatus.CANCELED, getLastHistoryStatus(user1OfferId));
         }
 
@@ -778,7 +763,7 @@ class OfferStatusIntegrationTest {
                     .andExpect(status().isOk());
 
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
-            assertEquals(OfferStatus.CANCELED, offerFromDB.getStatus().getName());
+            assertEquals(OfferStatus.CANCELED, offerFromDB.getOfferStatus());
             assertEquals(OfferStatus.CANCELED, getLastHistoryStatus(user1OfferId));
         }
 
@@ -791,7 +776,7 @@ class OfferStatusIntegrationTest {
                     .andExpect(status().isOk());
 
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
-            assertEquals(OfferStatus.CANCELED, offerFromDB.getStatus().getName());
+            assertEquals(OfferStatus.CANCELED, offerFromDB.getOfferStatus());
             assertEquals(OfferStatus.CANCELED, getLastHistoryStatus(user1OfferId));
         }
 
@@ -804,7 +789,7 @@ class OfferStatusIntegrationTest {
                     .andExpect(status().isOk());
 
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
-            assertEquals(OfferStatus.CANCELED, offerFromDB.getStatus().getName());
+            assertEquals(OfferStatus.CANCELED, offerFromDB.getOfferStatus());
             assertEquals(OfferStatus.CANCELED, getLastHistoryStatus(user1OfferId));
         }
 
@@ -817,7 +802,7 @@ class OfferStatusIntegrationTest {
                     .andExpect(status().isInternalServerError());
 
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
-            assertEquals(OfferStatus.COMPLETED, offerFromDB.getStatus().getName());
+            assertEquals(OfferStatus.COMPLETED, offerFromDB.getOfferStatus());
         }
 
         @Test
@@ -829,7 +814,7 @@ class OfferStatusIntegrationTest {
                     .andExpect(status().isForbidden());
 
             Offer offerFromDB = offerRepository.findById(user1OfferId).get();
-            assertEquals(OfferStatus.VERIFICATION, offerFromDB.getStatus().getName());
+            assertEquals(OfferStatus.VERIFICATION, offerFromDB.getOfferStatus());
         }
     }
 
@@ -838,7 +823,7 @@ class OfferStatusIntegrationTest {
         Optional<OfferStatusHistory> lastHistory = statusHistory.stream()
                 .skip(statusHistory.size() - 1)
                 .findFirst();
-        return lastHistory.get().getStatus().getName();
+        return lastHistory.get().getOfferStatus();
     }
 
 }
