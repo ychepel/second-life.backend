@@ -5,6 +5,8 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 
 @Data
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 @Schema(name = "Category", description = "Description of the category")
 public class CategoryDto extends ImageUploadDetails {
 
@@ -20,7 +22,4 @@ public class CategoryDto extends ImageUploadDetails {
 
     @Schema(description = "active or not flag", example = "true")
     private boolean active;
-
-    @Schema(description = "List of image's path")
-    private ImagePathsResponseDto images;
 }

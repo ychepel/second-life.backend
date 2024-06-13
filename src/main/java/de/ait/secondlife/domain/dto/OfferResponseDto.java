@@ -1,14 +1,15 @@
 package de.ait.secondlife.domain.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
-@Builder
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 @Schema(description = "Offer response DTO")
 public class OfferResponseDto extends ImageUploadDetails {
 
@@ -60,9 +61,6 @@ public class OfferResponseDto extends ImageUploadDetails {
 
     @Schema(description = "Location id", example = "1")
     private Long locationId;
-
-    @Schema(description = "List of image's path")
-    private ImagePathsResponseDto images;
 
     @Schema(description = "Auction duration in days", example = "3")
     private Integer auctionDurationDays;

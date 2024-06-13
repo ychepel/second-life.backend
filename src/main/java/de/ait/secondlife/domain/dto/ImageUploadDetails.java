@@ -10,4 +10,6 @@ public abstract class ImageUploadDetails {
             "0fedcba9-8765-4321-0fed-cba987654321> were not uploaded as they had been used previously")
     private String  imageUploadInfo;
 
+    @Schema(description = "List of image's path")
+    private  ImagePathsResponseDto images;
 }

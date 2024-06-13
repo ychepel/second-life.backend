@@ -2,12 +2,14 @@ package de.ait.secondlife.domain.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import java.time.LocalDateTime;
 
 @Data
-@ToString
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 @Schema(name = "Existing user data", description = "User details")
 public class UserDto extends ImageUploadDetails {
 
@@ -31,7 +33,4 @@ public class UserDto extends ImageUploadDetails {
 
     @Schema(description = "User last login")
     private LocalDateTime lastActive;
-
-    @Schema(description = "List of image's path")
-    private ImagePathsResponseDto images;
 }
