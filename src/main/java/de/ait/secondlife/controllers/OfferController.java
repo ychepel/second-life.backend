@@ -64,6 +64,12 @@ public class OfferController {
                     @ExampleObject(name = "Sort by start price", value = "startPrice")
             })
             String sortBy,
+            @RequestParam(defaultValue = "true")
+            @Parameter(description = "Sorting direction.", examples = {
+                    @ExampleObject(name = "Sort direction is ascending(default)", value = "true"),
+                    @ExampleObject(name = "Sort direction is descending", value = "false")
+            })
+            Boolean isAsc,
             @RequestParam(required = false)
             @Parameter(description = "Category id for filtration. Can be null." +
                     " Optional parameter", example = "3")
@@ -76,13 +82,12 @@ public class OfferController {
             @Parameter(description = "Is offer free or not for filtration. Can be null." +
                     " Optional parameter", example = "true, false")
             Boolean free) {
-        Pageable pageable;
-        try {
-            pageable = PageRequest.of(page, size, Sort.by(sortBy).ascending());
-        } catch (IllegalArgumentException e) {
-            throw new PaginationParameterIsWrongException(page, size, sortBy);
-        }
-        return ResponseEntity.ok(service.findOffers(pageable, category_id, status,free));
+
+        return ResponseEntity.ok(service.findOffers(
+                getPageable(page, size, sortBy, isAsc),
+                category_id,
+                status,
+                free));
     }
 
     @GetMapping("/{id}")
@@ -124,6 +129,12 @@ public class OfferController {
             @RequestParam(defaultValue = "createdAt")
             @Parameter(description = "Sorting field. ", example = "createdAt")
             String sortBy,
+            @RequestParam(defaultValue = "true")
+            @Parameter(description = "Sorting direction.", examples = {
+                    @ExampleObject(name = "Sort direction is ascending(default)", value = "true"),
+                    @ExampleObject(name = "Sort direction is descending", value = "false")
+            })
+            Boolean isAsc,
             @RequestParam(required = false)
             @Parameter(description = "Category id for filtration. Can be null." +
                     " Optional parameter", example = "3")
@@ -139,13 +150,12 @@ public class OfferController {
             @PathVariable
             @Parameter(description = "User id in Long format. ", example = "2321")
             Long id) {
-        Pageable pageable;
-        try {
-            pageable = PageRequest.of(page, size, Sort.by(sortBy).ascending());
-        } catch (IllegalArgumentException e) {
-            throw new PaginationParameterIsWrongException(page, size, sortBy);
-        }
-        return ResponseEntity.ok(service.findOffersByUserId(id, pageable, category_id, status,free));
+        return ResponseEntity.ok(service.findOffersByUserId(
+                id,
+                getPageable(page, size, sortBy, isAsc),
+                category_id,
+                status,
+                free));
     }
 
     @PostMapping
@@ -353,5 +363,16 @@ public class OfferController {
     ) {
         ;
         return ResponseEntity.ok(service.completeOffer(id, offerCompletionDto));
+    }
+
+
+    private Pageable getPageable(int page, int size, String sortBy, Boolean isAsc) {
+        try {
+            Sort.Direction direction = isAsc ? Sort.Direction.ASC : Sort.Direction.DESC;
+           var res = PageRequest.of(page, size, Sort.by(direction, sortBy));
+            return res;
+        } catch (IllegalArgumentException e) {
+            throw new PaginationParameterIsWrongException(page, size, sortBy);
+        }
     }
 }
