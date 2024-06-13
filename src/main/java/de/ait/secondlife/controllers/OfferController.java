@@ -63,14 +63,26 @@ public class OfferController {
                     @ExampleObject(name = "Sort by title", value = "title"),
                     @ExampleObject(name = "Sort by start price", value = "startPrice")
             })
-            String sortBy) {
+            String sortBy,
+            @RequestParam(required = false)
+            @Parameter(description = "Category id for filtration. Can be null." +
+                    " Optional parameter", example = "3")
+            Long category_id,
+            @RequestParam(required = false)
+            @Parameter(description = "Offer status for filtration. Can be null." +
+                    " Optional parameter", example = "DrAfT")
+            String status,
+            @RequestParam(required = false)
+            @Parameter(description = "Is offer free or not for filtration. Can be null." +
+                    " Optional parameter", example = "true, false")
+            Boolean free) {
         Pageable pageable;
         try {
             pageable = PageRequest.of(page, size, Sort.by(sortBy).ascending());
         } catch (IllegalArgumentException e) {
             throw new PaginationParameterIsWrongException(page, size, sortBy);
         }
-        return ResponseEntity.ok(service.findOffers(pageable));
+        return ResponseEntity.ok(service.findOffers(pageable, category_id, status,free));
     }
 
     @GetMapping("/{id}")
@@ -112,6 +124,18 @@ public class OfferController {
             @RequestParam(defaultValue = "createdAt")
             @Parameter(description = "Sorting field. ", example = "createdAt")
             String sortBy,
+            @RequestParam(required = false)
+            @Parameter(description = "Category id for filtration. Can be null." +
+                    " Optional parameter", example = "3")
+            Long category_id,
+            @RequestParam(required = false)
+            @Parameter(description = "Offer status for filtration. Can be null." +
+                    " Optional parameter", example = "DrAfT")
+            String status,
+            @RequestParam(required = false)
+            @Parameter(description = "Is offer free or not for filtration. Can be null." +
+                    " Optional parameter", example = "true, false")
+            Boolean free,
             @PathVariable
             @Parameter(description = "User id in Long format. ", example = "2321")
             Long id) {
@@ -121,7 +145,7 @@ public class OfferController {
         } catch (IllegalArgumentException e) {
             throw new PaginationParameterIsWrongException(page, size, sortBy);
         }
-        return ResponseEntity.ok(service.findOffersByUserId(id, pageable));
+        return ResponseEntity.ok(service.findOffersByUserId(id, pageable, category_id, status,free));
     }
 
     @PostMapping

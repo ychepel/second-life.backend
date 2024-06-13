@@ -16,7 +16,6 @@ import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.Wro
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.is_null_exceptions.IdIsNullException;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.OfferNotFoundException;
 import de.ait.secondlife.repositories.OfferRepository;
-import de.ait.secondlife.repositories.StatusRepository;
 import de.ait.secondlife.services.interfaces.*;
 import de.ait.secondlife.services.mapping.OfferMappingService;
 import de.ait.secondlife.services.offer_status.OfferContext;
@@ -59,8 +58,15 @@ public class OfferServiceImpl implements OfferService {
     private final ImageService imageService;
 
     @Override
-    public OfferResponseWithPaginationDto findOffers(Pageable pageable) {
-        Page<Offer> pageOfOffer = offerRepository.findAllByIsActiveTrue(pageable);
+    public OfferResponseWithPaginationDto findOffers(
+            Pageable pageable,
+            Long categoryId,
+            String status,
+            Boolean isFree
+    ) {
+        OfferStatus offerStatus = status != null ? OfferStatus.get(status) : null;
+        Page<Offer> pageOfOffer = offerRepository
+                .findAllActiveWithFiltration(categoryId, offerStatus, isFree, pageable);
         return offersToOfferRequestWithPaginationDto(pageOfOffer);
     }
 
@@ -73,9 +79,15 @@ public class OfferServiceImpl implements OfferService {
     }
 
     @Override
-    public OfferResponseWithPaginationDto findOffersByUserId(Long id, Pageable pageable) {
+    public OfferResponseWithPaginationDto findOffersByUserId(
+            Long id,
+            Pageable pageable,
+            Long categoryId,
+            String status,
+            Boolean isFree) {
         if (id == null) throw new IdIsNullException();
-        Page<Offer> pageOfOffer = offerRepository.findByUserIdAndIsActiveTrue(id, pageable);
+        OfferStatus offerStatus = status != null ? OfferStatus.get(status) : null;
+        Page<Offer> pageOfOffer = offerRepository.findByUserIdAndIsActiveTrue(id, categoryId, offerStatus, isFree,pageable);
         return offersToOfferRequestWithPaginationDto(pageOfOffer);
     }
 
