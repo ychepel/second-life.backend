@@ -58,20 +58,17 @@ public class CategoryServiceImpl implements CategoryService {
         }
 
         Category entity = mappingService.toEntity(categoryDto);
-        String uploadMessage = "";
+
         try {
             Category newCategory = repository.save(entity);
-            uploadMessage = imageService
-                    .connectTempImagesToEntity(
-                            categoryDto.getBaseNameOfImages(),
-                            EntityTypeWithImages.CATEGORY.getType(),
-                            newCategory.getId());
+            imageService.connectTempImagesToEntity(
+                    categoryDto.getBaseNameOfImages(),
+                    EntityTypeWithImages.CATEGORY.getType(),
+                    newCategory.getId());
         } catch (Exception e) {
             throw new RuntimeException("Cannot save category to db", e);
         }
-        CategoryDto dto = mappingService.toDto(entity);
-        dto.setImageUploadInfo(uploadMessage);
-        return dto;
+        return mappingService.toDto(entity);
     }
 
     @Override
@@ -82,15 +79,12 @@ public class CategoryServiceImpl implements CategoryService {
         existingCategory.setName(dto.getName());
         existingCategory.setDescription(dto.getDescription());
 
-        String uploadMessage = imageService
-                .connectTempImagesToEntity(
-                        dto.getBaseNameOfImages(),
-                        EntityTypeWithImages.CATEGORY.getType(),
-                        id);
+        imageService.connectTempImagesToEntity(
+                dto.getBaseNameOfImages(),
+                EntityTypeWithImages.CATEGORY.getType(),
+                id);
         try {
-            CategoryDto categoryDto =mappingService.toDto(repository.save(existingCategory));
-            categoryDto.setImageUploadInfo(uploadMessage);
-            return categoryDto;
+            return mappingService.toDto(repository.save(existingCategory));
         } catch (Exception e) {
             throw new RuntimeException("Cannot save category to db", e);
         }

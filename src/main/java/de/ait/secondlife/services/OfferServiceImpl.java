@@ -106,14 +106,11 @@ public class OfferServiceImpl implements OfferService {
             } else {
                 draftOffer(newOffer);
             }
-            String message = imageService
-                    .connectTempImagesToEntity(
-                            dto.getBaseNameOfImages(),
-                            EntityTypeWithImages.OFFER.getType(),
-                            newOffer.getId());
-            OfferResponseDto offerResponseDto = mappingService.toDto(newOffer);
-            offerResponseDto.setImageUploadInfo(message);
-            return offerResponseDto;
+            imageService.connectTempImagesToEntity(
+                    dto.getBaseNameOfImages(),
+                    EntityTypeWithImages.OFFER.getType(),
+                    newOffer.getId());
+            return mappingService.toDto(newOffer);
         } catch (ConstraintViolationException | DataIntegrityViolationException e) {
             throw new CreateOfferConstraintViolationException("Constraint violation: " + e.getMessage());
         }
@@ -156,14 +153,11 @@ public class OfferServiceImpl implements OfferService {
         } else {
             draftOffer(offer);
         }
-        String message = imageService
-                .connectTempImagesToEntity(
-                        dto.getBaseNameOfImages(),
-                        EntityTypeWithImages.OFFER.getType(),
-                        dto.getId());
-        OfferResponseDto offerResponseDto = mappingService.toDto(offer);
-        offerResponseDto.setImageUploadInfo(message);
-        return offerResponseDto;
+        imageService.connectTempImagesToEntity(
+                dto.getBaseNameOfImages(),
+                EntityTypeWithImages.OFFER.getType(),
+                dto.getId());
+        return mappingService.toDto(offer);
     }
 
     @Transactional

@@ -15,6 +15,7 @@ import de.ait.secondlife.services.interfaces.ImageService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,6 +31,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ImageServiceImpl implements ImageService, ImageConstants {
 
     private final AmazonS3 s3Client;
@@ -100,8 +102,8 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
     }
 
     @Override
-    public String connectTempImagesToEntity(Set<String> baseNames, String entityType, Long entityId) {
-        String message = "";
+    public void connectTempImagesToEntity(Set<String> baseNames, String entityType, Long entityId) {
+
         if (baseNames != null && entityId != null) {
             Set<String> usedBaseNames = new HashSet<>();
             baseNames.forEach(e -> {
@@ -126,12 +128,11 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
                     }
             );
             if (!usedBaseNames.isEmpty())
-                message = "Images with base names <" +
-                        String.join(", ", usedBaseNames) +
-                        "> were not uploaded as they had been used previously " +
-                        "or the type of entity is wrong";
+                log.warn("Images with base names <{}> were not uploaded as they had been used previously " +
+                                "or the type of entity is wrong",
+                        String.join(", ", usedBaseNames));
         }
-        return message;
+
     }
 
     @Transactional
