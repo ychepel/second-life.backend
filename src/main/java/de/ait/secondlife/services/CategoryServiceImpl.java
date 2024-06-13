@@ -50,6 +50,14 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    public List<CategoryDto> getAllPlusHidden() {
+        return repository.findAll()
+                .stream()
+                .map(mappingService::toDto)
+                .toList();
+    }
+
+    @Override
     public CategoryDto save(CategoryCreationDto categoryDto) {
 
         String categoryName = categoryDto.getName();
@@ -125,6 +133,8 @@ public class CategoryServiceImpl implements CategoryService {
         return repository.findById(id)
                 .orElseThrow(() -> new CategoryNotFoundException(id));
     }
+
+
 
     @Override
     public boolean checkEntityExistsById(Long id) {
