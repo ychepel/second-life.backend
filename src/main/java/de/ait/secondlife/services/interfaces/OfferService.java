@@ -14,13 +14,13 @@ public interface OfferService extends CheckEntityExistsService{
 
     OfferResponseDto createOffer(OfferCreationDto dto) throws CredentialException;
 
-    OfferResponseWithPaginationDto findOffers(Pageable pageable);
+    OfferResponseWithPaginationDto findOffers(Pageable pageable, Long categoryId, String status, Boolean isFree);
 
     Offer findById(Long id);
 
     OfferResponseDto getDto(Long id);
 
-    OfferResponseWithPaginationDto findOffersByUserId(Long id, Pageable pageable);
+    OfferResponseWithPaginationDto findOffersByUserId(Long id, Pageable pageable, Long categoryId, String status, Boolean isFree);
 
     OfferResponseDto updateOffer(OfferUpdateDto dto) throws CredentialException;
 

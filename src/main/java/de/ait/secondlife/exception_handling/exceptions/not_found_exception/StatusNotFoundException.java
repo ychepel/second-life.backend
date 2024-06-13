@@ -12,4 +12,8 @@ public class StatusNotFoundException extends ParameterNotFoundException {
     public StatusNotFoundException(OfferStatus offerStatus) {
         super(String.format("Status with name <%s> not found", offerStatus));
     }
+
+    public StatusNotFoundException(String offerStatus) {
+        super(String.format("Status with name <%s> not found", offerStatus));
+    }
 }

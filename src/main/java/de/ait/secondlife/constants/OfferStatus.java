@@ -1,5 +1,7 @@
 package de.ait.secondlife.constants;
 
+import de.ait.secondlife.exception_handling.exceptions.not_found_exception.StatusNotFoundException;
+
 public enum OfferStatus {
     DRAFT,
     REJECTED,
@@ -9,6 +11,14 @@ public enum OfferStatus {
     AUCTION_FINISHED,
     QUALIFICATION,
     COMPLETED,
-    CANCELED
+    CANCELED;
+
+   public static OfferStatus get(String status) {
+       try {
+           return OfferStatus.valueOf(status.toUpperCase());
+       } catch (Exception e) {
+          throw new StatusNotFoundException(status);
+       }
+   }
 }
 
