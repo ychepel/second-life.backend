@@ -1,6 +1,7 @@
 package de.ait.secondlife.exception_handling.exceptions.not_found_exception;
 
-import de.ait.secondlife.domain.constants.OfferStatus;
+
+import de.ait.secondlife.constants.OfferStatus;
 
 public class StatusNotFoundException extends ParameterNotFoundException {
 

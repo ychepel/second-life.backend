@@ -1,6 +1,7 @@
 package de.ait.secondlife.domain.entity;
 
 import de.ait.secondlife.domain.interfaces.AuthenticatedUser;
+import de.ait.secondlife.domain.interfaces.EntityWithImage;
 import de.ait.secondlife.security.Role;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -15,7 +16,7 @@ import java.util.List;
 @Table(name = "user")
 @Data
 @ToString(callSuper = true)
-public class User implements AuthenticatedUser {
+public class User implements AuthenticatedUser, EntityWithImage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

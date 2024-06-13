@@ -2,14 +2,16 @@ package de.ait.secondlife.domain.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import java.time.LocalDateTime;
 
 @Data
-@ToString
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 @Schema(name = "Existing user data", description = "User details")
-public class UserDto {
+public class UserDto extends ImageUploadDetails {
 
     @Schema(description = "User ID", example = "1")
     private Long id;

@@ -1,6 +1,7 @@
 package de.ait.secondlife.services.interfaces;
 
-import de.ait.secondlife.domain.constants.OfferStatus;
+
+import de.ait.secondlife.constants.OfferStatus;
 import de.ait.secondlife.domain.entity.Offer;
 
 public interface OfferStatusHistoryService {

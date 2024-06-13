@@ -1,16 +1,17 @@
 package de.ait.secondlife.domain.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
-@Builder
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 @Schema(description = "Offer response DTO")
-public class OfferResponseDto {
+public class OfferResponseDto extends ImageUploadDetails {
 
     @Schema(description = "Offer id"
             , example = "123",

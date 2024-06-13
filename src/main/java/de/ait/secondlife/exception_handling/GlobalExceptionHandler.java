@@ -88,6 +88,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ResponseMessageDto> handleException(IllegalArgumentException e){
+        log.error("IllegalArgumentException occurred", e);
         return new ResponseEntity<>(new ResponseMessageDto("Invalid value"), HttpStatus.BAD_REQUEST);
     }
 

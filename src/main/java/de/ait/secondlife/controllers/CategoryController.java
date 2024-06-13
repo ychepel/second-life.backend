@@ -2,6 +2,7 @@ package de.ait.secondlife.controllers;
 
 import de.ait.secondlife.domain.dto.CategoryCreationDto;
 import de.ait.secondlife.domain.dto.CategoryDto;
+import de.ait.secondlife.domain.dto.CategoryUpdateDto;
 import de.ait.secondlife.domain.dto.ResponseMessageDto;
 import de.ait.secondlife.exception_handling.dto.ValidationErrorsDto;
 import de.ait.secondlife.services.interfaces.CategoryService;
@@ -91,7 +92,10 @@ public class CategoryController {
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class)))
     }
     )
-    public ResponseEntity<CategoryDto> update(@PathVariable("category-id") Long categoryId, @RequestBody @Valid CategoryDto dto) {
+    public ResponseEntity<CategoryDto> update(
+            @Schema(description = "category id", example = "1")
+            @PathVariable("category-id") Long categoryId,
+            @RequestBody @Valid CategoryUpdateDto dto) {
         return ResponseEntity.ok(service.update(categoryId, dto));
     }
 

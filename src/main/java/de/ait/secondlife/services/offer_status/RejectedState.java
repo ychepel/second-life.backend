@@ -1,6 +1,6 @@
 package de.ait.secondlife.services.offer_status;
 
-import de.ait.secondlife.domain.constants.OfferStatus;
+import de.ait.secondlife.constants.OfferStatus;
 import de.ait.secondlife.domain.entity.Offer;
 import de.ait.secondlife.exception_handling.exceptions.ProhibitedOfferStateChangeException;
 import de.ait.secondlife.services.interfaces.OfferService;
