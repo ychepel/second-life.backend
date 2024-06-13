@@ -2,7 +2,7 @@ package de.ait.secondlife.constants;
 
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.BadEntityTypeException;
 
-public enum EntityTypeWithImgs {
+public enum EntityTypeWithImages {
     OFFER("offer",5),
 
     USER("user",1),
@@ -10,16 +10,16 @@ public enum EntityTypeWithImgs {
     CATEGORY("category",1);
 
     private String type;
-    private int maxCountOfImgs;
+    private int maxCountOfImages;
 
 
-    EntityTypeWithImgs(String type, int maxCountOfImgs) {
+    EntityTypeWithImages(String type, int maxCountOfImages) {
         this.type = type;
-        this.maxCountOfImgs = maxCountOfImgs;
+        this.maxCountOfImages = maxCountOfImages;
     }
 
-    public static EntityTypeWithImgs get(String type) {
-        for (EntityTypeWithImgs entityType : EntityTypeWithImgs.values()) {
+    public static EntityTypeWithImages get(String type) {
+        for (EntityTypeWithImages entityType : EntityTypeWithImages.values()) {
             if (entityType.getType().equalsIgnoreCase(type))
                 return entityType;
         }
@@ -30,7 +30,7 @@ public enum EntityTypeWithImgs {
         return type;
     }
 
-    public int getMaxCountOfImgs() {
-        return maxCountOfImgs;
+    public int getMaxCountOfImages() {
+        return maxCountOfImages;
     }
 }

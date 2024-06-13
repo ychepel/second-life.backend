@@ -2,14 +2,12 @@ package de.ait.secondlife.domain.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Size;
-import lombok.*;
+import lombok.Data;
+import lombok.ToString;
 
 @Data
-@Schema(name = "Category", description = "Description of the category")
-public class CategoryDto extends ImageUploadDetails {
-
-    @Schema(description = "category id", example = "1")
-    private Long id;
+@Schema(name = "Category update dto", description = "Description of the category")
+public class CategoryUpdateDto extends BaseNameOfImages{
 
     @Schema(description = "category name", example = "Electronics and gadgets")
     private String name;
@@ -17,10 +15,4 @@ public class CategoryDto extends ImageUploadDetails {
     @Schema(description = "detailed description of the category", example = "Smartphones,Laptops,Televisions,Peripherals")
     @Size(max = 1000)
     private String description;
-
-    @Schema(description = "active or not flag", example = "true")
-    private boolean active;
-
-    @Schema(description = "List of image's path")
-    private ImagePathsResponseDto images;
 }

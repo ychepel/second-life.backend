@@ -1,7 +1,9 @@
 package de.ait.secondlife.services;
 
+import de.ait.secondlife.constants.EntityTypeWithImages;
 import de.ait.secondlife.domain.dto.CategoryDto;
 import de.ait.secondlife.domain.dto.CategoryCreationDto;
+import de.ait.secondlife.domain.dto.CategoryUpdateDto;
 import de.ait.secondlife.domain.entity.Category;
 import de.ait.secondlife.exception_handling.exceptions.DuplicateCategoryException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.CategoryIsNotEmptyException;
@@ -56,29 +58,39 @@ public class CategoryServiceImpl implements CategoryService {
         }
 
         Category entity = mappingService.toEntity(categoryDto);
-
+        String uploadMessage = "";
         try {
             Category newCategory = repository.save(entity);
-            imageService.connectTempImgsToEntity(categoryDto.getBaseNameOfImgs(), newCategory.getId());
+            uploadMessage = imageService
+                    .connectTempImagesToEntity(
+                            categoryDto.getBaseNameOfImages(),
+                            EntityTypeWithImages.CATEGORY.getType(),
+                            newCategory.getId());
         } catch (Exception e) {
             throw new RuntimeException("Cannot save category to db", e);
         }
-
-        return mappingService.toDto(entity);
+        CategoryDto dto = mappingService.toDto(entity);
+        dto.setImageUploadInfo(uploadMessage);
+        return dto;
     }
 
     @Override
-    public CategoryDto update(Long id, CategoryDto dto) {
+    public CategoryDto update(Long id, CategoryUpdateDto dto) {
 
         Category existingCategory = repository.findById(id).orElseThrow(() -> new CategoryNotFoundException(id));
 
         existingCategory.setName(dto.getName());
         existingCategory.setDescription(dto.getDescription());
 
-        imageService.connectTempImgsToEntity(dto.getBaseNameOfImgs(), id);
-
+        String uploadMessage = imageService
+                .connectTempImagesToEntity(
+                        dto.getBaseNameOfImages(),
+                        EntityTypeWithImages.CATEGORY.getType(),
+                        id);
         try {
-            return mappingService.toDto(repository.save(existingCategory));
+            CategoryDto categoryDto =mappingService.toDto(repository.save(existingCategory));
+            categoryDto.setImageUploadInfo(uploadMessage);
+            return categoryDto;
         } catch (Exception e) {
             throw new RuntimeException("Cannot save category to db", e);
         }

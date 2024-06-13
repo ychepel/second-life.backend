@@ -1,5 +1,6 @@
 package de.ait.secondlife.services;
 
+import de.ait.secondlife.constants.EntityTypeWithImages;
 import de.ait.secondlife.domain.dto.UserCreationDto;
 import de.ait.secondlife.domain.dto.UserDto;
 import de.ait.secondlife.domain.entity.User;
@@ -61,15 +62,20 @@ public class UserServiceImpl implements UserService {
         LocalDateTime now = LocalDateTime.now();
         user.setCreatedAt(now);
         user.setUpdatedAt(now);
-
+        String message = "";
         try {
             User newUser = userRepository.save(user);
-            imageService.connectTempImgsToEntity(newUserDto.getBaseNameOfImgs(),newUser.getId());
+            message = imageService
+                    .connectTempImagesToEntity(
+                            newUserDto.getBaseNameOfImages(),
+                            EntityTypeWithImages.USER.getType(),
+                            newUser.getId());
         } catch (Exception e) {
             throw new UserSavingException("User saving failed", e);
         }
-
-        return userMappingService.toDto(user);
+        UserDto userDto = userMappingService.toDto(user);
+        userDto.setImageUploadInfo(message);
+        return userDto;
     }
 
     @Override

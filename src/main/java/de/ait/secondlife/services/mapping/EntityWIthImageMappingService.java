@@ -1,6 +1,6 @@
 package de.ait.secondlife.services.mapping;
 
-import de.ait.secondlife.constants.EntityTypeWithImgs;
+import de.ait.secondlife.constants.EntityTypeWithImages;
 import de.ait.secondlife.domain.dto.ImagePathsResponseDto;
 import de.ait.secondlife.domain.interfaces.EntityWithImage;
 import de.ait.secondlife.services.interfaces.ImageService;
@@ -15,7 +15,7 @@ abstract public class EntityWIthImageMappingService {
 
     protected ImagePathsResponseDto getImages(EntityWithImage entityWithImage) {
         String entityName = entityWithImage.getClass().getSimpleName().toLowerCase();
-        String entityType = EntityTypeWithImgs.get(entityName).getType();
+        String entityType = EntityTypeWithImages.get(entityName).getType();
         return imageService.findAllImageForEntity(entityType, entityWithImage.getId());
     }
 }

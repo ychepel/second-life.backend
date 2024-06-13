@@ -51,7 +51,7 @@ public class OfferUpdateDto extends BaseNameOfImages{
 
     @Schema(description = "List of base names of picture files that have been previously created",
             example = "[\"d3f1a2b3-c456-789d-012e-3456789abcde\", \"a1b2c3d4-e5f6-7890-1234-56789abcdef0\", \"0fedcba9-8765-4321-0fed-cba987654321\"]")
-    private Set<String> baseNameOfImgs;
+    private Set<String> baseNameOfImages;
 
     @Schema(description = "Requirement for Admin verification ", example = "true")
     private Boolean sendToVerification;

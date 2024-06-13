@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Data
 @Builder
 @Schema(description = "Offer response DTO")
-public class OfferResponseDto {
+public class OfferResponseDto extends ImageUploadDetails {
 
     @Schema(description = "Offer id"
             , example = "123",

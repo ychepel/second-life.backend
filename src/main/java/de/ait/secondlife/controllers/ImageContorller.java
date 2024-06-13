@@ -1,11 +1,10 @@
 package de.ait.secondlife.controllers;
 
-import de.ait.secondlife.constants.EntityTypeWithImgs;
+import de.ait.secondlife.constants.EntityTypeWithImages;
 import de.ait.secondlife.domain.dto.ImageCreationDto;
 import de.ait.secondlife.domain.dto.ImagePathsResponseDto;
 import de.ait.secondlife.domain.dto.ImageRequestDto;
 import de.ait.secondlife.domain.dto.ResponseMessageDto;
-import de.ait.secondlife.exception_handling.exceptions.not_found_exception.BadEntityTypeException;
 import de.ait.secondlife.services.interfaces.ImageService;
 import de.ait.secondlife.services.utilities.EntityUtilities;
 import io.swagger.v3.oas.annotations.Operation;
@@ -50,16 +49,15 @@ public class ImageContorller {
                     schema = @Schema(implementation = ResponseMessageDto.class)
             ))})
     public ResponseEntity<ImagePathsResponseDto> uploadImage(
-                                                           @Valid
-                                                           @Parameter(description = "Dto with image file, entity type and entity id ", schema = @Schema(implementation = ImageCreationDto.class))
-                                                           ImageCreationDto request) {
+            @Valid
+            @Parameter(description = "Dto with image file, entity type and entity id ", schema = @Schema(implementation = ImageCreationDto.class))
+            ImageCreationDto request) {
 
-        String entityType = EntityTypeWithImgs.get(request.getEntityType().toLowerCase()).getType();
+        String entityType = EntityTypeWithImages.get(request.getEntityType().toLowerCase()).getType();
         Long entityId = request.getEntityId();
-        if (!utilities.checkEntityById(entityType, entityId))
-            throw new BadEntityTypeException(entityType, entityId);
+        utilities.isEntityExists(entityType, entityId);
 
-        return ResponseEntity.ok(imageService.saveNewImage(entityType, entityId,request));
+        return ResponseEntity.ok(imageService.saveNewImage(entityType, entityId, request));
     }
 
     @DeleteMapping
@@ -80,6 +78,7 @@ public class ImageContorller {
                     schema = @Schema(implementation = ResponseMessageDto.class)
             ))})
     public ResponseEntity<ResponseMessageDto> deleteImage(
+            @Valid
             @Parameter(description = "Dto with base name of file",
                     schema = @Schema(implementation = ImageRequestDto.class))
             @RequestBody ImageRequestDto dto

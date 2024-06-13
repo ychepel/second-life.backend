@@ -7,6 +7,6 @@ public class ImagesNotFoundException extends ParameterNotFoundException {
     }
 
     public ImagesNotFoundException(String basename) {
-        super(String.format("Images with base name   <%s>  <%d> not found",basename));
+        super(String.format("Images with base name   <%s>  not found",basename));
     }
 }

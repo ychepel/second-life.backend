@@ -1,5 +1,6 @@
 package de.ait.secondlife.services;
 
+import de.ait.secondlife.constants.EntityTypeWithImages;
 import de.ait.secondlife.constants.OfferStatus;
 import de.ait.secondlife.domain.dto.OfferCreationDto;
 import de.ait.secondlife.domain.dto.OfferResponseDto;
@@ -15,6 +16,7 @@ import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.Wro
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.is_null_exceptions.IdIsNullException;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.OfferNotFoundException;
 import de.ait.secondlife.repositories.OfferRepository;
+import de.ait.secondlife.repositories.StatusRepository;
 import de.ait.secondlife.services.interfaces.*;
 import de.ait.secondlife.services.mapping.OfferMappingService;
 import de.ait.secondlife.services.offer_status.OfferContext;
@@ -85,6 +87,7 @@ public class OfferServiceImpl implements OfferService {
             Offer newOffer = mappingService.toEntity(dto);
             newOffer.setUser(user);
             newOffer.setCategory(categoryService.getCategoryById(dto.getCategoryId()));
+            newOffer.setLocation(locationService.getLocationById(dto.getLocationId()));
             newOffer.setId(null);
             newOffer.setAuctionDurationDays(newOffer.getAuctionDurationDays() <= 0 ? 3 : newOffer.getAuctionDurationDays());
 
@@ -97,16 +100,20 @@ public class OfferServiceImpl implements OfferService {
                     throw new WrongAuctionParameterException("winBid");
                 }
             }
-
+            newOffer = offerRepository.save(newOffer);
             if (Boolean.TRUE.equals(dto.getSendToVerification())) {
                 verifyOffer(newOffer);
             } else {
                 draftOffer(newOffer);
             }
-            newOffer = offerRepository.save(newOffer);
-            imageService.connectTempImgsToEntity(dto.getBaseNameOfImgs(), newOffer.getId());
-
-            return mappingService.toDto(newOffer);
+            String message = imageService
+                    .connectTempImagesToEntity(
+                            dto.getBaseNameOfImages(),
+                            EntityTypeWithImages.OFFER.getType(),
+                            newOffer.getId());
+            OfferResponseDto offerResponseDto = mappingService.toDto(newOffer);
+            offerResponseDto.setImageUploadInfo(message);
+            return offerResponseDto;
         } catch (ConstraintViolationException | DataIntegrityViolationException e) {
             throw new CreateOfferConstraintViolationException("Constraint violation: " + e.getMessage());
         }
@@ -149,8 +156,14 @@ public class OfferServiceImpl implements OfferService {
         } else {
             draftOffer(offer);
         }
-        imageService.connectTempImgsToEntity(dto.getBaseNameOfImgs(), dto.getId());
-        return mappingService.toDto(offer);
+        String message = imageService
+                .connectTempImagesToEntity(
+                        dto.getBaseNameOfImages(),
+                        EntityTypeWithImages.OFFER.getType(),
+                        dto.getId());
+        OfferResponseDto offerResponseDto = mappingService.toDto(offer);
+        offerResponseDto.setImageUploadInfo(message);
+        return offerResponseDto;
     }
 
     @Transactional

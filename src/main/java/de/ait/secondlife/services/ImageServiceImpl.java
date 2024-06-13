@@ -3,17 +3,15 @@ package de.ait.secondlife.services;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import de.ait.secondlife.constants.EntityTypeWithImgs;
+import de.ait.secondlife.constants.EntityTypeWithImages;
 import de.ait.secondlife.constants.ImageConstants;
 import de.ait.secondlife.domain.dto.ImageCreationDto;
 import de.ait.secondlife.domain.dto.ImagePathsResponseDto;
 import de.ait.secondlife.domain.entity.ImageEntity;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.*;
-import de.ait.secondlife.exception_handling.exceptions.not_found_exception.BadEntityTypeException;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.ImagesNotFoundException;
 import de.ait.secondlife.repositories.ImageRepository;
 import de.ait.secondlife.services.interfaces.ImageService;
-import de.ait.secondlife.services.utilities.EntityUtilities;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
@@ -65,18 +63,18 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
         UUID baseName = UUID.randomUUID();
         Path path = entityId != null ?
                 Path.of(dirPrefix, entityType, entityId.toString()) :
-                Path.of(TEMP_IMG_DIR, baseName.toString());
+                Path.of(TEMP_IMAGE_DIR, baseName.toString());
         Set<ImageEntity> savedImgEntities = new HashSet<>();
         fileSizes.forEach(e -> {
             String size = e[0] + "x" + e[1];
 
             Path pathForDo = Path.of(path.toString(), makeFileName(size, baseName.toString()));
 
-            String imgPath = toUnixStylePath(pathForDo.toString());
+            String imagePath = toUnixStylePath(pathForDo.toString());
 
             PutObjectRequest request = new PutObjectRequest(
                     bucketName,
-                    imgPath,
+                    imagePath,
                     compressFile(file, e),
                     metadata
             ).withCannedAcl(CannedAccessControlList.PublicReadWrite);
@@ -88,7 +86,7 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
                     .baseName(baseName.toString())
                     .entityType(entityType)
                     .entityId(entityId)
-                    .fullPath(toUnixStylePath(basePath + imgPath))
+                    .fullPath(toUnixStylePath(basePath + imagePath))
                     .build());
             savedImgEntities.add(savedImgEntity);
         });
@@ -97,45 +95,43 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
 
     @Override
     public ImagePathsResponseDto findAllImageForEntity(String entityType, Long entityId) {
-        Set<ImageEntity> imgs = repository.findAllByEntityIdAndEntityType(entityId, entityType);
-        return getImagePathsResponseDto(imgs);
+        Set<ImageEntity> images = repository.findAllByEntityIdAndEntityType(entityId, entityType);
+        return getImagePathsResponseDto(images);
     }
 
     @Override
-    public void connectTempImgsToEntity(Set<String> baseNames, Long entityId) {
+    public String connectTempImagesToEntity(Set<String> baseNames, String entityType, Long entityId) {
+        String message = "";
         if (baseNames != null && entityId != null) {
+            Set<String> usedBaseNames = new HashSet<>();
             baseNames.forEach(e -> {
-                        Set<ImageEntity> imgs = repository.findAllByBaseName(e);
+                        Set<ImageEntity> images = repository.findAllByBaseName(e);
 
-                        imgs.forEach(k -> {
-                            k.setEntityId(entityId);
-                            Path path = Path.of(dirPrefix,
-                                    k.getEntityType(),
-                                    entityId.toString(),
-                                    makeFileName(k.getSize(), e));
+                        images.forEach(k -> {
+                            if (k.getEntityId() == null && k.getEntityType().equals(entityType)) {
+                                k.setEntityId(entityId);
+                                Path path = Path.of(dirPrefix,
+                                        k.getEntityType(),
+                                        entityId.toString(),
+                                        makeFileName(k.getSize(), e));
 
-                            String oldPath = k.getFullPath();
-                            String newPath = toUnixStylePath(basePath + path);
+                                String oldPath = k.getFullPath();
+                                String newPath = toUnixStylePath(basePath + path);
 
-                            k.setFullPath(newPath);
-                            repository.save(k);
-                            relocateImgFile(oldPath, newPath);
+                                k.setFullPath(newPath);
+                                repository.save(k);
+                                relocateImageFile(oldPath, newPath);
+                            } else usedBaseNames.add(k.getBaseName());
                         });
                     }
             );
+            if (!usedBaseNames.isEmpty())
+                message = "Images with base names <" +
+                        String.join(", ", usedBaseNames) +
+                        "> were not uploaded as they had been used previously " +
+                        "or the type of entity is wrong";
         }
-    }
-
-    private void relocateImgFile(String oldPath, String newPath) {
-        String oldDoPath = oldPath.substring(basePath.length());
-        String newDoPath = newPath.substring(basePath.length());
-        s3Client.copyObject(
-                bucketName,
-                oldDoPath,
-                bucketName,
-                newDoPath
-        );
-        s3Client.deleteObject(bucketName, oldDoPath);
+        return message;
     }
 
     @Transactional
@@ -150,25 +146,33 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
             String doFileName = e.getFullPath().substring(basePath.length());
             s3Client.deleteObject(bucketName, doFileName);
         });
-
         repository.deleteAllByBaseName(baseName);
     }
 
-    private ImagePathsResponseDto getImagePathsResponseDto(Set<ImageEntity> imgs) {
+    private void relocateImageFile(String oldPath, String newPath) {
+        String oldDoPath = oldPath.substring(basePath.length());
+        String newDoPath = newPath.substring(basePath.length());
+        s3Client.copyObject(
+                bucketName, oldDoPath,
+                bucketName, newDoPath);
+        s3Client.deleteObject(bucketName, oldDoPath);
+    }
+
+    private ImagePathsResponseDto getImagePathsResponseDto(Set<ImageEntity> imagesSet) {
         Map<String, Map<String, String>> images = new HashMap<>();
 
-        if (!imgs.isEmpty()) {
-            Set<String> imgBaseNames = new HashSet<>();
+        if (!imagesSet.isEmpty()) {
+            Set<String> imageBaseNames = new HashSet<>();
 
-            imgs.forEach(e -> imgBaseNames.add(e.getBaseName()));
+            imagesSet.forEach(e -> imageBaseNames.add(e.getBaseName()));
 
-            for (String baseName : imgBaseNames) {
+            for (String baseName : imageBaseNames) {
                 Map<String, String> files = images.computeIfAbsent(baseName, k -> new HashMap<>());
 
-                Set<ImageEntity> imgsByBaseName = imgs.stream()
+                Set<ImageEntity> imagesByBaseName = imagesSet.stream()
                         .filter(e -> e.getBaseName().equals(baseName))
                         .collect(Collectors.toSet());
-                imgsByBaseName.forEach(e -> files.putIfAbsent(e.getSize(), e.getFullPath()));
+                imagesByBaseName.forEach(e -> files.putIfAbsent(e.getSize(), e.getFullPath()));
             }
         }
         return new ImagePathsResponseDto(images);
@@ -206,7 +210,7 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
             g2d.dispose();
 
             outputStream = new ByteArrayOutputStream();
-            ImageIO.write(resizedImage, IMG_EXP, outputStream);
+            ImageIO.write(resizedImage, IMAGE, outputStream);
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
@@ -223,7 +227,7 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
     private void checkCountOfImageForEntityType(
             ImagePathsResponseDto currentImages,
             String entityType) {
-        int maxCountOfImage = EntityTypeWithImgs.get(entityType.toLowerCase()).getMaxCountOfImgs();
+        int maxCountOfImage = EntityTypeWithImages.get(entityType.toLowerCase()).getMaxCountOfImages();
         if (currentImages.getValues().size() >= maxCountOfImage) {
             throw new MaxImageCountException(entityType, maxCountOfImage);
         }
@@ -242,19 +246,11 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
     }
 
     private Set<int[]> getFileSizesForEntityType(String entityType) {
-        return switch (EntityTypeWithImgs.get(entityType.toLowerCase())) {
-            case OFFER -> Set.of(IMG_1_SIZE, IMG_2_SIZE, IMG_3_SIZE);
-            case USER -> Set.of(IMG_2_SIZE, IMG_3_SIZE);
-            case CATEGORY -> Set.of(IMG_3_SIZE);
+        return switch (EntityTypeWithImages.get(entityType.toLowerCase())) {
+            case OFFER -> Set.of(IMAGE_1_SIZE, IMAGE_2_SIZE, IMAGE_3_SIZE);
+            case USER -> Set.of(IMAGE_2_SIZE, IMAGE_3_SIZE);
+            case CATEGORY -> Set.of(IMAGE_3_SIZE);
         };
-    }
-
-    private String getBaseNameOfImage(String fileNme) {
-        int startIndex = fileNme.indexOf('_') + 1;
-        int endIndex = fileNme.lastIndexOf('.');
-        if (startIndex >= 0 && endIndex >= 0 && startIndex < endIndex)
-            return fileNme.substring(startIndex, endIndex);
-        else throw new FileNameIsWrongException(fileNme);
     }
 
     private String toUnixStylePath(String path) {
@@ -262,6 +258,6 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
     }
 
     private String makeFileName(String size, String baseName) {
-        return String.format("%s_%s.%s", size, baseName, IMG_EXP);
+        return String.format("%s_%s.%s", size, baseName, IMAGE);
     }
 }

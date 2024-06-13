@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Data
 @ToString
 @Schema(name = "Existing user data", description = "User details")
-public class UserDto {
+public class UserDto extends ImageUploadDetails {
 
     @Schema(description = "User ID", example = "1")
     private Long id;

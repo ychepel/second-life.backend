@@ -12,7 +12,7 @@ public interface ImageService {
 
     ImagePathsResponseDto findAllImageForEntity(String entityType, Long entityId);
 
-    void connectTempImgsToEntity(Set<String> baseNames,  Long entityId);
+    String connectTempImagesToEntity(Set<String> baseNames, String entityType,Long entityId);
 
     void deleteImage(String baseName);
 }

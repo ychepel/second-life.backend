@@ -1,6 +1,6 @@
 package de.ait.secondlife.services.utilities;
 
-import de.ait.secondlife.constants.EntityTypeWithImgs;
+import de.ait.secondlife.constants.EntityTypeWithImages;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.BadEntityTypeException;
 import de.ait.secondlife.services.interfaces.*;
 import lombok.RequiredArgsConstructor;
@@ -15,15 +15,15 @@ public class EntityUtilities {
     private final UserService userService;
     private final CategoryService categoryService;
 
-    public boolean checkEntityById(String entityType, Long entityId) {
-        if(entityId==null) return true;
+    public void isEntityExists(String entityType, Long entityId) {
+        if (entityId == null) return;
         CheckEntityExistsService service;
-        switch (EntityTypeWithImgs.get(entityType.toLowerCase())) {
+        switch (EntityTypeWithImages.get(entityType.toLowerCase())) {
             case OFFER -> service = offerService;
             case USER -> service = userService;
             case CATEGORY -> service = categoryService;
             default -> throw new BadEntityTypeException(entityType);
         }
-        return service.checkEntityExistsById(entityId);
+        if (!service.checkEntityExistsById(entityId)) throw new BadEntityTypeException(entityType, entityId);
     }
 }
