@@ -1,5 +1,6 @@
 package de.ait.secondlife.domain.entity;
 
+import de.ait.secondlife.domain.constants.OfferStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -39,6 +40,10 @@ public class OfferStatusHistory {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "rejection_id")
     private RejectionReason rejection;
+
+    public OfferStatus getOfferStatus() {
+        return status.getName();
+    }
 }
 
 

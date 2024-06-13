@@ -6,14 +6,14 @@ import de.ait.secondlife.domain.entity.Offer;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring")
+@Mapper
 public interface OfferMappingService {
 
     @Mapping(target = "ownerId", source = "user.id")
     @Mapping(target = "winnerBidId", source = "winnerBid.id")
     @Mapping(target = "categoryId", source = "category.id")
     @Mapping(target = "locationId", source = "location.id")
-    @Mapping(target = "status", expression = "java(offer.getStatus().getName().toString())")
+    @Mapping(target = "status", expression = "java(offer.getOfferStatus().toString())")
     @Mapping(
             target = "auctionStartAt",
             expression = "java(offer.getAuctionFinishedAt() != null ? offer.getAuctionFinishedAt().minusDays(offer.getAuctionDurationDays()) : null)"
@@ -23,6 +23,8 @@ public interface OfferMappingService {
             target = "ownerFullName",
             expression = "java(offer.getUser().getFirstName() + ' ' + offer.getUser().getLastName())"
     )
+    @Mapping(target = "maxBidValue", expression = "java(offer.getMaxBidValue())")
+    @Mapping(target = "bidsCount", expression = "java(offer.getBidsCount())")
     OfferResponseDto toDto(Offer offer);
 
     @Mapping(target = "id", ignore = true)

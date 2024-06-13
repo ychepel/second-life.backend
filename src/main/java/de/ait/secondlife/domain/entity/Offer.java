@@ -1,5 +1,6 @@
 package de.ait.secondlife.domain.entity;
 
+import de.ait.secondlife.domain.constants.OfferStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 @Entity
@@ -74,6 +76,24 @@ public class Offer {
 
     @OneToMany(mappedBy = "offer", fetch = FetchType.LAZY)
     private List<Bid> bids;
+
+    public OfferStatus getOfferStatus() {
+        return status.getName();
+    }
+
+    public BigDecimal getMaxBidValue() {
+        if (bids == null) {
+            return null;
+        }
+        return bids.stream()
+                .max(Comparator.comparing(Bid::getBidValue))
+                .map(Bid::getBidValue)
+                .orElse(null);
+    }
+
+    public int getBidsCount() {
+        return bids == null ? 0 : bids.size();
+    }
 }
 
 

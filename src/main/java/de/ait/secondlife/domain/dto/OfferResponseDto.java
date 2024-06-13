@@ -63,4 +63,10 @@ public class OfferResponseDto {
 
     @Schema(description = "Auction duration in days", example = "3")
     private Integer auctionDurationDays;
+
+    @Schema(description = "Maximum bid value for auction", example = "47")
+    private BigDecimal maxBidValue;
+
+    @Schema(description = "Quantity of auction bids", example = "8")
+    private int bidsCount;
 }
