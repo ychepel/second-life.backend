@@ -1,14 +1,16 @@
 package de.ait.secondlife.services.mapping;
 
+import de.ait.secondlife.domain.dto.CategoryCreationDto;
 import de.ait.secondlife.domain.dto.CategoryDto;
-import de.ait.secondlife.domain.dto.NewCategoryDto;
 import de.ait.secondlife.domain.entity.Category;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 @Mapper
-public interface NewCategoryMappingService {
+public abstract class NewCategoryMappingService extends EntityWIthImageMappingService {
 
-    CategoryDto mapEntityToDto(Category entity);
+    @Mapping(target = "images", expression = "java(getImages(entity))")
+    public abstract CategoryDto toDto(Category entity);
 
-    Category mapDtoToEntity(NewCategoryDto dto);
+    public abstract Category toEntity(CategoryCreationDto dto);
 }

@@ -1,7 +1,9 @@
 package de.ait.secondlife.controllers;
 
+import de.ait.secondlife.domain.dto.CategoryCreationDto;
 import de.ait.secondlife.domain.dto.CategoryDto;
-import de.ait.secondlife.domain.dto.NewCategoryDto;
+import de.ait.secondlife.domain.dto.CategoryUpdateDto;
+import de.ait.secondlife.domain.dto.ResponseMessageDto;
 import de.ait.secondlife.exception_handling.dto.ValidationErrorsDto;
 import de.ait.secondlife.services.interfaces.CategoryService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,8 +34,11 @@ public class CategoryController {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = CategoryDto.class))),
+            @ApiResponse(responseCode = "404", description = "Successful operation",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ResponseMessageDto.class)))
     })
-    public ResponseEntity<CategoryDto> getById(@PathVariable("category-id")Long categoryId){
+    public ResponseEntity<CategoryDto> getById(@PathVariable("category-id") Long categoryId) {
         return ResponseEntity.ok(service.getById(categoryId));
     }
 
@@ -44,7 +49,7 @@ public class CategoryController {
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = CategoryDto.class))),
     })
-    public ResponseEntity<List<CategoryDto>> getAll(){
+    public ResponseEntity<List<CategoryDto>> getAll() {
         return ResponseEntity.ok(service.getAll());
     }
 
@@ -54,14 +59,17 @@ public class CategoryController {
             @ApiResponse(
                     responseCode = "201",
                     description = "Category created",
-                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = CategoryDto.class))}
-            ),
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = CategoryDto.class))),
             @ApiResponse(
                     responseCode = "400",
                     description = "Invalid input",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorsDto.class))
-            )})
-    public ResponseEntity<CategoryDto> add(@RequestBody @Valid NewCategoryDto dto){
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorsDto.class))),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Conflict, category with this name already exists",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class)))}
+    )
+    public ResponseEntity<CategoryDto> add(@Valid @RequestBody CategoryCreationDto dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.save(dto));
     }
 
@@ -71,32 +79,62 @@ public class CategoryController {
             @ApiResponse(
                     responseCode = "200",
                     description = "Category updated",
-                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = CategoryDto.class))}
-            ),
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = CategoryDto.class))),
             @ApiResponse(
                     responseCode = "400",
                     description = "Invalid input",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorsDto.class))
-            )})
-    public ResponseEntity<CategoryDto> update(@PathVariable("category-id")Long categoryId, @RequestBody @Valid CategoryDto dto){
-        return ResponseEntity.ok(service.update(categoryId,dto));
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorsDto.class))),
+            @ApiResponse(responseCode = "403",
+                    description = "Forbidden",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
+            @ApiResponse(responseCode = "404",
+                    description = "Resource not found",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class)))
+    }
+    )
+    public ResponseEntity<CategoryDto> update(
+            @Schema(description = "category id", example = "1")
+            @PathVariable("category-id") Long categoryId,
+            @RequestBody @Valid CategoryUpdateDto dto) {
+        return ResponseEntity.ok(service.update(categoryId, dto));
     }
 
     @Operation(summary = "Hiding category from the list of the categories", description = "Accessible only by admin, and only if the list of the offers related to this category is empty")
     @DeleteMapping("/{category-id}")
-    public ResponseEntity<CategoryDto> hideCategory(@PathVariable("category-id")Long categoryId){
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Category hided",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = CategoryDto.class))),
+            @ApiResponse(responseCode = "403",
+                    description = "Forbidden",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
+            @ApiResponse(responseCode = "404",
+                    description = "Resource not found",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class)))
+    }
+    )
+    public ResponseEntity<CategoryDto> hideCategory(@PathVariable("category-id") Long categoryId) {
         CategoryDto hiddenCategory = service.hide(categoryId);
         return ResponseEntity.ok(hiddenCategory);
     }
 
     @Operation(summary = "Activating category with id", description = "Accessible only by admin")
     @PatchMapping("/{category-id}/set-active")
-    @ApiResponse(
-            responseCode = "200",
-            description = "Category activated",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = CategoryDto.class))}
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Category activated",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = CategoryDto.class))),
+            @ApiResponse(responseCode = "403",
+                    description = "Forbidden",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
+            @ApiResponse(responseCode = "404",
+                    description = "Resource not found",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class)))
+    }
     )
-    public ResponseEntity<CategoryDto> setActive(@PathVariable("category-id")Long categoryId){
+    public ResponseEntity<CategoryDto> setActive(@PathVariable("category-id") Long categoryId) {
         CategoryDto activeDto = service.setActive(categoryId);
         return ResponseEntity.ok(activeDto);
     }

@@ -56,7 +56,7 @@ class UserIntegrationTest {
                                       "password": "qwerty!123"
                                     }"""))
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.errors[0].message", is("Email is not valid")));
+                    .andExpect(jsonPath("$.errors[0].message", is("Field Email is not valid")));
         }
 
         @Test
@@ -70,7 +70,7 @@ class UserIntegrationTest {
                                       "password": "qwerty!123"
                                     }"""))
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.errors[0].message", is("Last Name cannot be empty")));
+                    .andExpect(jsonPath("$.errors[0].message", is("Field Last Name cannot be empty")));
         }
 
         @Test
@@ -110,7 +110,7 @@ class UserIntegrationTest {
                                       "email": "test.user@test.com",
                                       "password": "qwerty!123"
                                     }"""))
-                    .andExpect(status().isConflict());
+                    .andExpect(status().isUnprocessableEntity());
         }
 
     }

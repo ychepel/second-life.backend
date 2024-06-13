@@ -106,6 +106,18 @@ class AuthIntegrationTest {
     }
 
     @Test
+    public void return_400_for_non_existent_admin_email() throws Exception {
+        mockMvc.perform(post("/v1/auth/admin/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "email": "admintest@test.com",
+                                  "password": "qwerty!123"
+                                }"""))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     public void return_401_for_incorrect_user_password() throws Exception {
         mockMvc.perform(post("/v1/auth/user/login")
                         .contentType(MediaType.APPLICATION_JSON)

@@ -49,7 +49,7 @@ public class AuthService {
                 userService.updateLastActive((User) foundUser);
             }
 
-            return new TokenResponseDto(accessToken, refreshToken);
+            return new TokenResponseDto(foundUser.getId(), accessToken, refreshToken);
         } else {
             throw new CredentialException("Password is incorrect");
         }
@@ -64,7 +64,7 @@ public class AuthService {
             if (inboundRefreshToken.equals(storedRefreshToken)) {
                 AuthenticatedUser user = getAuthenticatedUser(role, userEmail);
                 String accessToken = tokenService.generateAccessToken(user);
-                return new TokenResponseDto(accessToken, inboundRefreshToken);
+                return new TokenResponseDto(user.getId(), accessToken, inboundRefreshToken);
             }
         }
         throw new AuthException("Refresh token is incorrect");

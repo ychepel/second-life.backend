@@ -97,6 +97,7 @@ public class AuthController {
         Cookie cookie = new Cookie(TokenFilter.COOKIE_ACCESS_TOKEN_NAME, accessToken);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
+        cookie.setMaxAge(TokenService.REFRESH_TOKEN_EXPIRATION_DAYS * 86400);
         if (accessToken == null) {
             cookie.setMaxAge(0);
         }

@@ -1,8 +1,9 @@
 package de.ait.secondlife.domain.entity;
 
+
+import de.ait.secondlife.constants.OfferStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,7 +22,8 @@ public class Status {
     @Column(name = "id")
     private Long id;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "name")
     @NotBlank(message = "Status name cannot be empty")
-    private String name;
+    private OfferStatus name;
 }

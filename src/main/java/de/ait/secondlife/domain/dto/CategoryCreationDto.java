@@ -9,10 +9,10 @@ import lombok.ToString;
 @Data
 @ToString
 @Schema(name = "New Category to save into DB")
-public class NewCategoryDto {
+public class CategoryCreationDto  extends BaseNameOfImages{
 
     @Schema(description = "category name", example = "Electronics and gadgets")
-    @NotBlank
+    @NotBlank(message = "Name must not be blank")
     private String name;
 
     @Schema(description = "detailed description of the category", example = "Smartphones,Laptops,Televisions,Peripherals")
