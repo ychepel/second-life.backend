@@ -15,7 +15,7 @@ public class EntityUtilities {
     private final UserService userService;
     private final CategoryService categoryService;
 
-    public void isEntityExists(String entityType, Long entityId) {
+    public void checkEntityExists(String entityType, Long entityId) {
         if (entityId == null) return;
         CheckEntityExistsService service;
         switch (EntityTypeWithImages.get(entityType.toLowerCase())) {

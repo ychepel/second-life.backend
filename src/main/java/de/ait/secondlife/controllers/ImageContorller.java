@@ -55,7 +55,7 @@ public class ImageContorller {
 
         String entityType = EntityTypeWithImages.get(request.getEntityType().toLowerCase()).getType();
         Long entityId = request.getEntityId();
-        utilities.isEntityExists(entityType, entityId);
+        utilities.checkEntityExists(entityType, entityId);
 
         return ResponseEntity.ok(imageService.saveNewImage(entityType, entityId, request));
     }
