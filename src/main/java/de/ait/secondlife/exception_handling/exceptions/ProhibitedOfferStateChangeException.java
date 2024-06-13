@@ -26,7 +26,7 @@ public class ProhibitedOfferStateChangeException extends IllegalStateException {
         return String.format(
                 "Prohibited attempt to change Offer [ID=%d] with status [%s] in %s.%s()",
                 offer.getId(),
-                offer.getStatus() != null ? offer.getStatus().getName() : null,
+                offer.getStatus() != null ? offer.getOfferStatus() : null,
                 caller.getClassName(),
                 caller.getMethodName()
         );

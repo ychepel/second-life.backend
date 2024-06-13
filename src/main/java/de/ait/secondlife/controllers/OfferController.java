@@ -105,7 +105,7 @@ public class OfferController {
             @PathVariable
             @Parameter(description = "Offer id.", example = "123")
             Long id) {
-        return ResponseEntity.ok(service.findOfferById(id));
+        return ResponseEntity.ok(service.getDto(id));
     }
 
     @GetMapping("/user/{id}")

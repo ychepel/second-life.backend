@@ -102,7 +102,7 @@ public class GlobalExceptionHandler {
 
             ValidationErrorDto errorDto = ValidationErrorDto.builder()
                     .field(fieldError.getField())
-                    .message("Field "+fieldError.getDefaultMessage())
+                    .message("Field " + fieldError.getDefaultMessage())
                     .build();
 
             if (fieldError.getRejectedValue() != null) {

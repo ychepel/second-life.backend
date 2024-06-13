@@ -6,6 +6,7 @@ import de.ait.secondlife.domain.entity.Offer;
 import de.ait.secondlife.exception_handling.exceptions.ProhibitedOfferStateChangeException;
 import de.ait.secondlife.services.interfaces.OfferService;
 
+import java.util.Comparator;
 import java.util.List;
 
 public class AuctionFinishedState extends StateStrategy {
@@ -51,6 +52,18 @@ public class AuctionFinishedState extends StateStrategy {
             offer.setWinnerBid(bids.get(0));
             offerService.setStatus(offer, OfferStatus.COMPLETED);
             //TODO: mailing - inform offer owner about finishing auction with winner
+            //TODO: mailing - inform bid owner, that he/she is the winner of the auction
+            context.setStateStrategy(new CompleteState());
+        } else if(offer.getMaxBidValue().compareTo(offer.getWinBid()) == 0) {
+            if (offer.getWinnerBid() != null) {
+                throw new IllegalStateException(String.format("Offer [ID=%d] already has a winner", offer.getId()));
+            }
+            Bid maxBid = bids.stream()
+                    .max(Comparator.comparing(Bid::getBidValue))
+                    .get();
+            offer.setWinnerBid(maxBid);
+            offerService.setStatus(offer, OfferStatus.COMPLETED);
+            //TODO: mailing - inform offer owner about finishing auction with buyout price
             //TODO: mailing - inform bid owner, that he/she is the winner of the auction
             context.setStateStrategy(new CompleteState());
         } else {

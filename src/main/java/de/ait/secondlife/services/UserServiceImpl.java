@@ -4,10 +4,7 @@ import de.ait.secondlife.constants.EntityTypeWithImages;
 import de.ait.secondlife.domain.dto.UserCreationDto;
 import de.ait.secondlife.domain.dto.UserDto;
 import de.ait.secondlife.domain.entity.User;
-import de.ait.secondlife.exception_handling.exceptions.DuplicateUserEmailException;
-import de.ait.secondlife.exception_handling.exceptions.UserIsNotAuthenticatedException;
-import de.ait.secondlife.exception_handling.exceptions.UserIsNotAuthorizedException;
-import de.ait.secondlife.exception_handling.exceptions.UserSavingException;
+import de.ait.secondlife.exception_handling.exceptions.*;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.is_null_exceptions.IdIsNullException;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.LocationNotFoundException;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.UserNotFoundException;
@@ -72,6 +69,7 @@ public class UserServiceImpl implements UserService {
         } catch (Exception e) {
             throw new UserSavingException("User saving failed", e);
         }
+
         return userMappingService.toDto(user);
     }
 
@@ -121,7 +119,11 @@ public class UserServiceImpl implements UserService {
             throw new UserIsNotAuthorizedException();
         }
         String username = authentication.getName();
-        return (User) loadUserByUsername(username);
+        User user = (User) loadUserByUsername(username);
+        if (!user.isActive()) {
+            throw new UserIsNotActiveException();
+        }
+        return user;
     }
 
     @Override
