@@ -117,7 +117,7 @@ public class OfferServiceImpl implements OfferService {
                     throw new WrongAuctionParameterException("winBid");
                 }
             }
-            newOffer = offerRepository.save(newOffer);
+            offerRepository.save(newOffer);
             if (Boolean.TRUE.equals(dto.getSendToVerification())) {
                 verifyOffer(newOffer);
             } else {
