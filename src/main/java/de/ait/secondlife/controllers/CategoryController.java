@@ -54,7 +54,7 @@ public class CategoryController {
     }
 
     @Operation(summary = "Get list of the categories, including hidden categories", description = "Accessible to Admin only")
-    @GetMapping("/get-all-plus-hidden")
+    @GetMapping("/get-all-for-admin")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(mediaType = "application/json",
