@@ -368,7 +368,7 @@ public class OfferController {
     @GetMapping("/search")
     @Operation(
             summary = "Search offers",
-            description = "Searching among all Offers ins status AUCTION_STARTED ..."
+            description = "Searching string <i>pattern</i> among all Offers in status AUCTION_STARTED. The search is carried out using the Offer title and Offer description fields and is not case-sensitive."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -378,6 +378,8 @@ public class OfferController {
             ),
     })
     public ResponseEntity<OfferResponseWithPaginationDto> search(
+            @RequestParam
+            String pattern,
             @RequestParam(defaultValue = PAGE_VALUE)
             @Parameter(description = "Requested page number. ", example = "0")
             int page,
@@ -397,10 +399,11 @@ public class OfferController {
                     @ExampleObject(name = "Sort direction is descending", value = "false")
             })
             Boolean isAsc,
-            @RequestParam
-            String pattern
+            @RequestParam(required = false, name = "location_id")
+            @Parameter(description = "Location id for filtration. Can be null. Optional parameter", example = "3")
+            Long locationId
     ){
-        return ResponseEntity.ok(service.searchOffers(getPageable(page, size, sortBy, isAsc), pattern));
+        return ResponseEntity.ok(service.searchOffers(getPageable(page, size, sortBy, isAsc), locationId, pattern));
     }
 
     private Pageable getPageable(int page, int size, String sortBy, Boolean isAsc) {

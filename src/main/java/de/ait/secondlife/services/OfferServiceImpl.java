@@ -263,8 +263,15 @@ public class OfferServiceImpl implements OfferService {
     }
 
     @Override
-    public OfferResponseWithPaginationDto searchOffers(Pageable pageable, String pattern) {
-        Page<Offer> pageOfOffer = offerRepository.searchAll(OfferStatus.AUCTION_STARTED, pageable, pattern);
+    public OfferResponseWithPaginationDto searchOffers(Pageable pageable, Long locationId, String pattern) {
+        if (locationId != null) {
+            try {
+                User authenticatedUser = userService.getAuthenticatedUser();
+                userService.setLocation(authenticatedUser.getId(), locationId);
+            } catch (CredentialException ignored) {}
+        }
+
+        Page<Offer> pageOfOffer = offerRepository.searchAll(OfferStatus.AUCTION_STARTED, pageable, locationId, pattern);
         return offersToOfferRequestWithPaginationDto(pageOfOffer);
     }
 

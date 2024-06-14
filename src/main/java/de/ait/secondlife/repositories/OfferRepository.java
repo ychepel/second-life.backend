@@ -46,8 +46,9 @@ public interface OfferRepository extends JpaRepository<Offer, Long> {
     boolean existsByIdAndIsActiveTrue(Long id);
 
     @Query("SELECT o FROM Offer o" +
-            " WHERE (o.status.name = :offerStatus) AND o.isActive = true AND" +
-            " (LOWER(o.title) LIKE LOWER(CONCAT('%', :pattern, '%'))" +
+            " WHERE (o.status.name = :offerStatus) AND o.isActive = true" +
+            " AND (:locationId IS NULL OR o.location.id = :locationId)" +
+            " AND (LOWER(o.title) LIKE LOWER(CONCAT('%', :pattern, '%'))" +
             " OR LOWER(o.description) LIKE LOWER(CONCAT('%', :pattern, '%')))")
-    Page<Offer> searchAll(@Param("offerStatus") OfferStatus offerStatus, Pageable pageable, String pattern);
+    Page<Offer> searchAll(OfferStatus offerStatus, Pageable pageable, Long locationId, String pattern);
 }

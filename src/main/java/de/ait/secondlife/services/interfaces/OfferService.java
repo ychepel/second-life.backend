@@ -52,5 +52,5 @@ public interface OfferService extends CheckEntityExistsService{
 
     void blockOfferByAdmin(Long id);
 
-    OfferResponseWithPaginationDto searchOffers(Pageable pageable, String pattern);
+    OfferResponseWithPaginationDto searchOffers(Pageable pageable, Long locationId, String pattern);
 }
