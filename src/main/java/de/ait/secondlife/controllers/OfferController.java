@@ -365,6 +365,43 @@ public class OfferController {
         return ResponseEntity.ok(service.completeOffer(id, offerCompletionDto));
     }
 
+    @GetMapping("/search")
+    @Operation(
+            summary = "Search offers",
+            description = "Searching among all Offers ins status AUCTION_STARTED ..."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successful operation",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = OfferResponseWithPaginationDto.class))
+            ),
+    })
+    public ResponseEntity<OfferResponseWithPaginationDto> search(
+            @RequestParam(defaultValue = PAGE_VALUE)
+            @Parameter(description = "Requested page number. ", example = "0")
+            int page,
+            @RequestParam(defaultValue = SIZE_VALUE)
+            @Parameter(description = "Number of entities per page.", example = "10")
+            int size,
+            @RequestParam(defaultValue = SORT_BY)
+            @Parameter(description = "Sorting field.", examples = {
+                    @ExampleObject(name = "Sort by created time", value = "createdAt"),
+                    @ExampleObject(name = "Sort by title", value = "title"),
+                    @ExampleObject(name = "Sort by start price", value = "startPrice")
+            })
+            String sortBy,
+            @RequestParam(defaultValue = "true")
+            @Parameter(description = "Sorting direction.", examples = {
+                    @ExampleObject(name = "Sort direction is ascending(default)", value = "true"),
+                    @ExampleObject(name = "Sort direction is descending", value = "false")
+            })
+            Boolean isAsc,
+            @RequestParam
+            String pattern
+    ){
+        return ResponseEntity.ok(service.searchOffers(getPageable(page, size, sortBy, isAsc), pattern));
+    }
 
     private Pageable getPageable(int page, int size, String sortBy, Boolean isAsc) {
         try {

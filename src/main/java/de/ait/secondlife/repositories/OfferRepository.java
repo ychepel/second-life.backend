@@ -1,6 +1,5 @@
 package de.ait.secondlife.repositories;
 
-
 import de.ait.secondlife.constants.OfferStatus;
 import de.ait.secondlife.domain.entity.Offer;
 import org.springframework.data.domain.Page;
@@ -45,4 +44,10 @@ public interface OfferRepository extends JpaRepository<Offer, Long> {
     List<Offer> findFinishedActiveAuctions(LocalDateTime currentTime, OfferStatus status);
 
     boolean existsByIdAndIsActiveTrue(Long id);
+
+    @Query("SELECT o FROM Offer o" +
+            " WHERE (o.status.name = :offerStatus) AND o.isActive = true AND" +
+            " (LOWER(o.title) LIKE LOWER(CONCAT('%', :pattern, '%'))" +
+            " OR LOWER(o.description) LIKE LOWER(CONCAT('%', :pattern, '%')))")
+    Page<Offer> searchAll(@Param("offerStatus") OfferStatus offerStatus, Pageable pageable, String pattern);
 }

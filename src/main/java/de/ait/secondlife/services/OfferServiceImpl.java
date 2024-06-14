@@ -262,6 +262,12 @@ public class OfferServiceImpl implements OfferService {
         offerContext.blockByAdmin();
     }
 
+    @Override
+    public OfferResponseWithPaginationDto searchOffers(Pageable pageable, String pattern) {
+        Page<Offer> pageOfOffer = offerRepository.searchAll(OfferStatus.AUCTION_STARTED, pageable, pattern);
+        return offersToOfferRequestWithPaginationDto(pageOfOffer);
+    }
+
     @Transactional
     @Override
     public void setStatus(Offer offer, OfferStatus offerStatus) {
