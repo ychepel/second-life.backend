@@ -17,4 +17,6 @@ public interface UserService extends UserDetailsService,CheckEntityExistsService
     User getAuthenticatedUser() throws CredentialException;
 
     UserDto getCurrentUser() throws CredentialException;
+
+    UserDto setActive(Long userId, String code);
 }

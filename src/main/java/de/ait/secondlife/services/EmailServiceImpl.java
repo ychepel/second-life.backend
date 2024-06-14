@@ -1,8 +1,12 @@
 package de.ait.secondlife.services;
 
+import de.ait.secondlife.constants.NotificationType;
+import de.ait.secondlife.domain.entity.Notification;
 import de.ait.secondlife.domain.entity.User;
+import de.ait.secondlife.repositories.NotificationRepository;
 import de.ait.secondlife.services.interfaces.ConfirmationService;
 import de.ait.secondlife.services.interfaces.EmailService;
+import freemarker.cache.ClassTemplateLoader;
 import freemarker.cache.FileTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -15,7 +19,9 @@ import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -25,16 +31,22 @@ public class EmailServiceImpl implements EmailService {
     private Configuration mailConfig;
     private ConfirmationService confirmationService;
 
+    private NotificationRepository notificationRepository;
+
+    private static final String TEMPLATES_PATH = "/mail/";
+
     @Value("${spring.mail.username}")
     private String senderEmail;
 
-    public EmailServiceImpl(JavaMailSender sender, Configuration mailConfig, ConfirmationService confirmationService) throws IOException {
+    public EmailServiceImpl(JavaMailSender sender, Configuration mailConfig, ConfirmationService confirmationService,NotificationRepository notificationRepository) throws IOException {
         this.sender = sender;
         this.mailConfig = mailConfig;
         this.confirmationService = confirmationService;
+        this.notificationRepository = notificationRepository;
 
         mailConfig.setDefaultEncoding("UTF-8");
-        mailConfig.setTemplateLoader(new FileTemplateLoader(new File("/path/to/templates")));
+        mailConfig.setTemplateLoader(new ClassTemplateLoader(EmailServiceImpl.class, TEMPLATES_PATH));
+
     }
 
     @Override
@@ -55,6 +67,26 @@ public class EmailServiceImpl implements EmailService {
         sender.send(message);
     }
 
+    @Override
+    public void createNotification(User user, NotificationType notificationType) {
+        Notification newNotification =  Notification.builder()
+                .createdAt(LocalDateTime.now())
+                .notificationType(notificationType)
+                .user(user)
+                .build();
+
+        notificationRepository.save(newNotification);
+    }
+
+    @Override
+    public void sendPendingEmail() {
+        List<Notification> pendingEmails = notificationRepository.findAllBySentAtIsNull();
+
+        for(Notification pendingEmail:pendingEmails){
+            //
+        }
+    }
+
 
     private String generateConfirmationEmail(User user){
         try {
@@ -72,4 +104,22 @@ public class EmailServiceImpl implements EmailService {
             throw new RuntimeException(e);
         }
     }
+
+    //Написать метод универсальный для формирования email.
+    // Разбить типы имейлов на классы.
+    // Сделать абстрактный класс и найти способ вызвать нужный класс. Написать фабрику
+    // MimeMessage message = sender.createMimeMessage();
+    //        MimeMessageHelper helper = new MimeMessageHelper(message, "UTF-8");
+    //        String text = generateConfirmationEmail(user);
+    //
+    //        try {
+    //            helper.setFrom(senderEmail);
+    //            helper.setTo(user.getEmail());
+    //            helper.setSubject("Registration: We need you to confirm your e-mail address");
+    //            helper.setText(text,true);
+    //        }catch (Exception e){
+    //            throw new RuntimeException("Failed to send confirmation email", e);
+    //        }
+    //
+    //        sender.send(message);
 }

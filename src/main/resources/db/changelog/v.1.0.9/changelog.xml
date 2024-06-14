@@ -5,10 +5,12 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
 
-    <changeSet id="add_tag_1.0.6" author="rslan">
-        <tagDatabase tag="v.1.0.6"/>
+
+    <changeSet id="add_tag_1.0.9" author="Kirill">
+        <tagDatabase tag="v.1.0.9"/>
     </changeSet>
 
-    <include file="create-table-image.xml" relativeToChangelogFile="true"/>
+    <include file="../v.1.0.9/create-table-confirmation-code.xml" relativeToChangelogFile="true"/>
+    <include file="../v.1.0.9/create-foreign-key-offer-confirmation-code-to-user.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

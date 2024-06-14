@@ -1,6 +1,7 @@
 package de.ait.secondlife.services;
 
 import de.ait.secondlife.constants.EntityTypeWithImages;
+import de.ait.secondlife.constants.NotificationType;
 import de.ait.secondlife.domain.dto.UserCreationDto;
 import de.ait.secondlife.domain.dto.UserDto;
 import de.ait.secondlife.domain.entity.User;
@@ -11,7 +12,6 @@ import de.ait.secondlife.exception_handling.exceptions.not_found_exception.UserN
 import de.ait.secondlife.exception_handling.exceptions.ConfirmationEmailCodeNotValidException;
 import de.ait.secondlife.exception_handling.exceptions.DuplicateUserEmailException;
 import de.ait.secondlife.exception_handling.exceptions.UserSavingException;
-import de.ait.secondlife.exception_handling.exceptions.not_found_exception.UserNotFoundException;
 import de.ait.secondlife.repositories.UserRepository;
 import de.ait.secondlife.services.interfaces.ImageService;
 import de.ait.secondlife.services.interfaces.LocationService;
@@ -69,8 +69,9 @@ public class UserServiceImpl implements UserService {
         user.setCreatedAt(now);
         user.setUpdatedAt(now);
 
+        User newUser;
         try {
-            User newUser = userRepository.save(user);
+            newUser = userRepository.save(user);
             imageService.connectTempImagesToEntity(
                     newUserDto.getBaseNameOfImages(),
                     EntityTypeWithImages.USER.getType(),
@@ -78,7 +79,8 @@ public class UserServiceImpl implements UserService {
         } catch (Exception e) {
             throw new UserSavingException("User saving failed", e);
         }
-        emailService.sendConfirmationEmailToFinishRegistration(user);
+
+        emailService.createNotification(newUser, NotificationType.REGISTRATION_EMAIL);
         return userMappingService.toDto(user);
     }
 
@@ -154,10 +156,10 @@ public class UserServiceImpl implements UserService {
         String codeFromDB = confirmationService.getConfirmationCodeByUserId(userId);
 
         if (code.equals(codeFromDB)){
-            User user = repository.getReferenceById(userId);
+            User user = userRepository.getReferenceById(userId);
             user.setActive(true);
             try {
-                repository.save(user);
+                userRepository.save(user);
             } catch (Exception e) {
                 throw new UserSavingException("User saving failed", e);
             }
