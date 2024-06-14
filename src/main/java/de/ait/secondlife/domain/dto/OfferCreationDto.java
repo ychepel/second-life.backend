@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 @Data
 @Builder
 @Schema(description = "Offer create DTO")
-public class OfferCreationDto extends BaseNameOfImages{
+public class OfferCreationDto extends BaseNameOfImages {
 
     @Schema(description = "Title of a offer", example = "Upholstered chair")
     @NotBlank(message = "Offer title cannot be empty")

@@ -12,7 +12,7 @@ import java.util.Set;
 @Data
 @Builder
 @Schema(description = "Offer update DTO")
-public class OfferUpdateDto extends BaseNameOfImages{
+public class OfferUpdateDto extends BaseNameOfImages {
 
     @Schema(description = "Offer id "
             , example = "123")
