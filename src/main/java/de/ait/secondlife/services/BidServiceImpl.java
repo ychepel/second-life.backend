@@ -37,14 +37,48 @@ public class BidServiceImpl implements BidService {
     @Override
     public void save(BidCreationDto dto) throws CredentialException {
         Offer offer = offerService.findById(dto.getOfferId());
+        BigDecimal newBidValue = dto.getBidValue();
+
         if (offer.getIsFree()) {
-            throw new BidCreationException("Bid cannot be created for free offer");
+            checkFreeAuction(newBidValue);
+        } else {
+            checkNotFreeAuction(offer, newBidValue);
         }
+
+        checkOfferStatus(offer);
+
+        User user = userService.getAuthenticatedUser();
+        checkAuthentication(offer, user);
+
+        Bid newBid = mappingService.toEntity(dto);
+        newBid.setUser(user);
+        newBid.setOffer(offer);
+        bidRepository.save(newBid);
+
+        if (!offer.getIsFree() && newBidValue.compareTo(offer.getWinBid()) == 0) {
+            offerService.finishAuction(offer);
+        }
+    }
+
+    private void checkAuthentication(Offer offer, User user) {
+        if (Objects.equals(offer.getUser().getId(), user.getId())) {
+            throw new BidCreationException("Bid cannot be created by offer owner");
+        }
+    }
+
+    private void checkOfferStatus(Offer offer) {
         if (offer.getOfferStatus() != OfferStatus.AUCTION_STARTED) {
             throw new BidCreationException("Bid cannot be created for offer not in status AUCTION_STARTED");
         }
+    }
 
-        BigDecimal newBidValue = dto.getBidValue();
+    private void checkFreeAuction(BigDecimal newBidValue) {
+        if (newBidValue.compareTo(BigDecimal.ZERO) > 0) {
+            throw new BidCreationException("Bid with value greater than 0 cannot be created for the free offer");
+        }
+    }
+
+    private void checkNotFreeAuction(Offer offer, BigDecimal newBidValue) {
         BigDecimal existingMaxBidValue = offer.getMaxBidValue();
         if (existingMaxBidValue == null) {
             if (newBidValue.compareTo(offer.getStartPrice()) < 0) {
@@ -56,20 +90,6 @@ public class BidServiceImpl implements BidService {
 
         if (newBidValue.compareTo(offer.getWinBid()) > 0) {
             throw new BidCreationException("Bid cannot be greater than buyout price (win bid value)");
-        }
-
-        User user = userService.getAuthenticatedUser();
-        if (Objects.equals(offer.getUser().getId(), user.getId())) {
-            throw new BidCreationException("Bid cannot be created by offer owner");
-        }
-
-        Bid newBid = mappingService.toEntity(dto);
-        newBid.setUser(user);
-        newBid.setOffer(offer);
-        bidRepository.save(newBid);
-
-        if (newBidValue.compareTo(offer.getWinBid()) == 0) {
-            offerService.finishAuction(offer);
         }
     }
 }
