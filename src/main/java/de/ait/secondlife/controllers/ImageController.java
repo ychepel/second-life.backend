@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/v1/images")
 @RequiredArgsConstructor
 @Tag(name = "Image controller", description = "Controller for some operations with images")
-public class ImageContorller {
+public class ImageController {
 
     private final ImageService imageService;
     private final EntityUtilities utilities;
