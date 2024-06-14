@@ -54,7 +54,7 @@ public class AuctionFinishedState extends StateStrategy {
             //TODO: mailing - inform offer owner about finishing auction with winner
             //TODO: mailing - inform bid owner, that he/she is the winner of the auction
             context.setStateStrategy(new CompleteState());
-        } else if(offer.getMaxBidValue().compareTo(offer.getWinBid()) == 0) {
+        } else if(!offer.getIsFree() && offer.getMaxBidValue().compareTo(offer.getWinBid()) == 0) {
             if (offer.getWinnerBid() != null) {
                 throw new IllegalStateException(String.format("Offer [ID=%d] already has a winner", offer.getId()));
             }
