@@ -1,7 +1,7 @@
 package de.ait.secondlife.services;
 
 import de.ait.secondlife.constants.EntityTypeWithImages;
-import de.ait.secondlife.constants.NotificationType;
+import de.ait.secondlife.mailing.NotificationType;
 import de.ait.secondlife.domain.dto.UserCreationDto;
 import de.ait.secondlife.domain.dto.UserDto;
 import de.ait.secondlife.domain.entity.User;

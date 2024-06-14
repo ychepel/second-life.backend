@@ -1,6 +1,7 @@
 package de.ait.secondlife.services.interfaces;
 
-import de.ait.secondlife.constants.NotificationType;
+import de.ait.secondlife.domain.entity.Offer;
+import de.ait.secondlife.mailing.NotificationType;
 import de.ait.secondlife.domain.entity.User;
 
 public interface EmailService {
@@ -10,4 +11,6 @@ public interface EmailService {
     void createNotification(User user, NotificationType notificationType);
 
     void sendPendingEmail();
+
+    void sendEmail(User user, NotificationType notificationType, Offer offer);
 }

@@ -1,6 +1,6 @@
-package de.ait.secondlife.domain.entity;
+package de.ait.secondlife.mailing;
 
-import de.ait.secondlife.constants.NotificationType;
+import de.ait.secondlife.domain.entity.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
