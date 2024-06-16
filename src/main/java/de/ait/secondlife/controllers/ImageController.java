@@ -57,7 +57,7 @@ public class ImageController {
         Long entityId = request.getEntityId();
         utilities.checkEntityExists(entityType, entityId);
 
-        return ResponseEntity.ok(imageService.saveNewImage(entityType, entityId, request));
+        return ResponseEntity.ok(imageService.saveNewImage(entityType, entityId, request,utilities.getCurrentUserId()));
     }
 
     @DeleteMapping

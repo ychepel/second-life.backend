@@ -8,10 +8,12 @@ import de.ait.secondlife.constants.ImageConstants;
 import de.ait.secondlife.domain.dto.ImageCreationDto;
 import de.ait.secondlife.domain.dto.ImagePathsResponseDto;
 import de.ait.secondlife.domain.entity.ImageEntity;
+import de.ait.secondlife.domain.entity.User;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.*;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.ImagesNotFoundException;
 import de.ait.secondlife.repositories.ImageRepository;
 import de.ait.secondlife.services.interfaces.ImageService;
+import de.ait.secondlife.services.interfaces.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
+import javax.security.auth.login.CredentialException;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -38,6 +41,7 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
     private final ImageRepository repository;
 
 
+
     @Value("${do.buket.name}")
     private String bucketName;
 
@@ -48,7 +52,7 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
     private String basePath;
 
     @Override
-    public ImagePathsResponseDto saveNewImage(String entityType, Long entityId, ImageCreationDto dto) {
+    public ImagePathsResponseDto saveNewImage(String entityType, Long entityId, ImageCreationDto dto, Long UserId) {
         MultipartFile file = dto.getFile();
         checkFile(file);
 
@@ -65,7 +69,7 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
         UUID baseName = UUID.randomUUID();
         Path path = entityId != null ?
                 Path.of(dirPrefix, entityType, entityId.toString()) :
-                Path.of(TEMP_IMAGE_DIR, baseName.toString());
+                Path.of(TEMP_IMAGE_DIR, UserId.toString(), baseName.toString());
         Set<ImageEntity> savedImgEntities = new HashSet<>();
         fileSizes.forEach(e -> {
             String size = e[0] + "x" + e[1];
