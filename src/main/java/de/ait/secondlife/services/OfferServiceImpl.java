@@ -15,7 +15,9 @@ import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.Cre
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.WrongAuctionParameterException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.is_null_exceptions.IdIsNullException;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.OfferNotFoundException;
+import de.ait.secondlife.exception_handling.exceptions.not_found_exception.UserNotFoundException;
 import de.ait.secondlife.repositories.OfferRepository;
+import de.ait.secondlife.security.Role;
 import de.ait.secondlife.services.interfaces.*;
 import de.ait.secondlife.services.mapping.OfferMappingService;
 import de.ait.secondlife.services.offer_status.OfferContext;
@@ -90,9 +92,9 @@ public class OfferServiceImpl implements OfferService {
             Long categoryId,
             String status,
             Boolean isFree) {
-        if (id == null) throw new IdIsNullException();
+        checkUserId(id);
         OfferStatus offerStatus = status != null ? OfferStatus.get(status) : null;
-        Page<Offer> pageOfOffer = offerRepository.findByUserIdAndIsActiveTrue(id, categoryId, offerStatus, isFree,pageable);
+        Page<Offer> pageOfOffer = offerRepository.findAllActiveByUserIdWithFiltration(id, categoryId, offerStatus, isFree, pageable);
         return offersToOfferRequestWithPaginationDto(pageOfOffer);
     }
 
@@ -268,10 +270,31 @@ public class OfferServiceImpl implements OfferService {
             try {
                 User authenticatedUser = userService.getAuthenticatedUser();
                 userService.setLocation(authenticatedUser.getId(), locationId);
-            } catch (CredentialException ignored) {}
+            } catch (CredentialException ignored) {
+            }
         }
 
         Page<Offer> pageOfOffer = offerRepository.searchAll(OfferStatus.AUCTION_STARTED, pageable, locationId, pattern);
+        return offersToOfferRequestWithPaginationDto(pageOfOffer);
+    }
+
+    @Override
+    public OfferResponseWithPaginationDto findAllByUserBidByUserId(
+            Long id,
+            Pageable pageable,
+            Long categoryId,
+            String status,
+            Boolean isFree,
+            Set<OfferStatus> statuses) {
+
+        checkUserId(id);
+        checkUserCredentials(id);
+        OfferStatus offerStatus = status != null ? OfferStatus.get(status) : null;
+
+        Page<Offer> pageOfOffer = offerRepository.findAllActiveByUserBidByUserIddWithFiltration(
+                id, categoryId, offerStatus, isFree,
+                statuses, pageable);
+
         return offersToOfferRequestWithPaginationDto(pageOfOffer);
     }
 
@@ -327,9 +350,24 @@ public class OfferServiceImpl implements OfferService {
         }
     }
 
+    private void checkUserId(Long id) {
+        if (id == null) throw new IdIsNullException();
+        if (!userService.checkEntityExistsById(id)) throw new UserNotFoundException(id);
+    }
+
     @Override
     public boolean checkEntityExistsById(Long id) {
         if (id == null) throw new IdIsNullException();
         return offerRepository.existsByIdAndIsActiveTrue(id);
+    }
+
+    private void checkUserCredentials(Long id) {
+        try {
+            User user = userService.getAuthenticatedUser();
+            if (!user.getId().equals(id))
+                if (!user.getAuthorities().contains(Role.ROLE_ADMIN))
+                    throw new NoRightToChangeException("User  is not authorised for this operation");
+        } catch (CredentialException ignored) {
+        }
     }
 }

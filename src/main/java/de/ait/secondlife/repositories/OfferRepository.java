@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface OfferRepository extends JpaRepository<Offer, Long> {
 
@@ -33,7 +34,7 @@ public interface OfferRepository extends JpaRepository<Offer, Long> {
             "AND (:isFree IS NULL OR o.isFree = :isFree ) " +
             "AND o.user.id =:id"+
             " AND o.isActive = true")
-    Page<Offer> findByUserIdAndIsActiveTrue(
+    Page<Offer> findAllActiveByUserIdWithFiltration(
             @Param("id") Long id,
             @Param("categoryId") Long categoryId,
             @Param("offerStatus") OfferStatus offerStatus,
@@ -51,4 +52,21 @@ public interface OfferRepository extends JpaRepository<Offer, Long> {
             " AND (LOWER(o.title) LIKE LOWER(CONCAT('%', :pattern, '%'))" +
             " OR LOWER(o.description) LIKE LOWER(CONCAT('%', :pattern, '%')))")
     Page<Offer> searchAll(OfferStatus offerStatus, Pageable pageable, Long locationId, String pattern);
+
+    @Query("SELECT o FROM Offer o " +
+            "JOIN o.bids b " +
+            "WHERE " +
+            "(:categoryId IS NULL OR o.category.id = :categoryId) " +
+            "AND (:offerStatus IS NULL OR o.status.name = :offerStatus) " +
+            "AND (:isFree IS NULL OR o.isFree = :isFree) " +
+            "AND o.status.name IN :statuses " +
+            "AND b.user.id = :id " +
+            "AND o.isActive = true")
+    Page<Offer> findAllActiveByUserBidByUserIddWithFiltration(
+            @Param("id") Long id,
+            @Param("categoryId") Long categoryId,
+            @Param("offerStatus") OfferStatus offerStatus,
+            @Param("isFree") Boolean isFree,
+            @Param("statuses") Set<OfferStatus> statuses,
+            Pageable pageable);
 }
