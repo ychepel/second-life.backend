@@ -33,7 +33,6 @@ public abstract class OfferMappingService extends EntityWIthImageMappingService 
     @Mapping(target = "user", ignore = true)
     @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())")
-    @Mapping(target = "isActive", constant = "true")
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "category", ignore = true)
     public abstract Offer toEntity(OfferCreationDto dto);

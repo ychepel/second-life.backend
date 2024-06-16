@@ -53,7 +53,6 @@ public class RejectedState extends StateStrategy {
         Offer offer = getOfferAllowedForCurrentUser(context);
         OfferService offerService = context.getOfferService();
         offerService.setStatus(offer, OfferStatus.CANCELED);
-        offer.setIsActive(false);
         context.setStateStrategy(new CancelState());
     }
 
