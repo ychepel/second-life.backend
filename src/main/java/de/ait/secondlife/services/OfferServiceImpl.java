@@ -13,6 +13,7 @@ import de.ait.secondlife.domain.entity.User;
 import de.ait.secondlife.exception_handling.exceptions.NoRightToChangeException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.CreateOfferConstraintViolationException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.WrongAuctionParameterException;
+import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.WrongAuctionPriceParameterException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.is_null_exceptions.IdIsNullException;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.OfferNotFoundException;
 import de.ait.secondlife.repositories.OfferRepository;
@@ -116,6 +117,9 @@ public class OfferServiceImpl implements OfferService {
                 if (dto.getWinBid() != null && dto.getWinBid().compareTo(BigDecimal.ZERO) == 0) {
                     throw new WrongAuctionParameterException("winBid");
                 }
+                if (dto.getWinBid() != null && dto.getWinBid().compareTo(dto.getStartPrice()) <= 0) {
+                    throw new WrongAuctionPriceParameterException();
+                }
             }
             offerRepository.save(newOffer);
             if (Boolean.TRUE.equals(dto.getSendToVerification())) {
@@ -154,6 +158,9 @@ public class OfferServiceImpl implements OfferService {
         } else {
             offer.setStartPrice(dto.getStartPrice() == null || dto.getStartPrice().compareTo(BigDecimal.ZERO) == 0 ?
                     offer.getStartPrice() : dto.getStartPrice());
+            if (dto.getWinBid() != null && dto.getWinBid().compareTo(offer.getStartPrice()) <= 0) {
+                throw new WrongAuctionPriceParameterException();
+            }
             offer.setWinBid(dto.getWinBid() == null || dto.getWinBid().compareTo(BigDecimal.ZERO) == 0 ?
                     offer.getWinBid() : dto.getWinBid());
         }
