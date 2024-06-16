@@ -16,6 +16,7 @@ import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.Wro
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.is_null_exceptions.IdIsNullException;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.OfferNotFoundException;
 import de.ait.secondlife.repositories.OfferRepository;
+
 import de.ait.secondlife.services.interfaces.*;
 import de.ait.secondlife.services.mapping.OfferMappingService;
 import de.ait.secondlife.services.offer_status.OfferContext;
@@ -275,6 +276,11 @@ public class OfferServiceImpl implements OfferService {
         return offersToOfferRequestWithPaginationDto(pageOfOffer);
     }
 
+    @Override
+    public Long findOwnerIdByOfferId(Long id) {
+        return findById(id).getUser().getId();
+    }
+
     @Transactional
     @Override
     public void setStatus(Offer offer, OfferStatus offerStatus) {
@@ -332,4 +338,5 @@ public class OfferServiceImpl implements OfferService {
         if (id == null) throw new IdIsNullException();
         return offerRepository.existsByIdAndIsActiveTrue(id);
     }
+
 }

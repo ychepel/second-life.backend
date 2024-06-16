@@ -8,12 +8,10 @@ import de.ait.secondlife.constants.ImageConstants;
 import de.ait.secondlife.domain.dto.ImageCreationDto;
 import de.ait.secondlife.domain.dto.ImagePathsResponseDto;
 import de.ait.secondlife.domain.entity.ImageEntity;
-import de.ait.secondlife.domain.entity.User;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.*;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.ImagesNotFoundException;
 import de.ait.secondlife.repositories.ImageRepository;
 import de.ait.secondlife.services.interfaces.ImageService;
-import de.ait.secondlife.services.interfaces.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
@@ -23,7 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
-import javax.security.auth.login.CredentialException;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -40,8 +38,6 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
     private final AmazonS3 s3Client;
     private final ImageRepository repository;
 
-
-
     @Value("${do.buket.name}")
     private String bucketName;
 
@@ -55,8 +51,6 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
     public ImagePathsResponseDto saveNewImage(String entityType, Long entityId, ImageCreationDto dto, Long UserId) {
         MultipartFile file = dto.getFile();
         checkFile(file);
-
-        //TODO: add checking authority rights for attaching images to a requested entity
 
         ImagePathsResponseDto currentImages = findAllImageForEntity(entityType, entityId);
 
@@ -111,10 +105,11 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
         if (baseNames != null && entityId != null) {
             Set<String> usedBaseNames = new HashSet<>();
             baseNames.forEach(e -> {
-                        Set<ImageEntity> images = repository.findAllByBaseName(e);
+                        Set<ImageEntity> images = findAllImagesByBaseName(e);
 
                         images.forEach(k -> {
                             if (k.getEntityId() == null && k.getEntityType().equals(entityType)) {
+
                                 k.setEntityId(entityId);
                                 Path path = Path.of(dirPrefix,
                                         k.getEntityType(),
@@ -136,15 +131,13 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
                                 "or the type of entity is wrong",
                         String.join(", ", usedBaseNames));
         }
-
     }
 
     @Transactional
     @Override
     public void deleteImage(String baseName) {
-//TODO   Only the owner and admin has the right to make changes
 
-        Set<ImageEntity> images = repository.findAllByBaseName(baseName);
+        Set<ImageEntity> images = findAllImagesByBaseName(baseName);
         if (images.isEmpty()) throw new ImagesNotFoundException(baseName);
 
         images.forEach(e -> {
@@ -152,6 +145,11 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
             s3Client.deleteObject(bucketName, doFileName);
         });
         repository.deleteAllByBaseName(baseName);
+    }
+
+    @Override
+    public Set<ImageEntity> findAllImagesByBaseName(String baseName) {
+        return repository.findAllByBaseName(baseName);
     }
 
     private void relocateImageFile(String oldPath, String newPath) {

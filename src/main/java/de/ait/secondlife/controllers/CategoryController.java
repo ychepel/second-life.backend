@@ -6,6 +6,7 @@ import de.ait.secondlife.domain.dto.CategoryUpdateDto;
 import de.ait.secondlife.domain.dto.ResponseMessageDto;
 import de.ait.secondlife.exception_handling.dto.ValidationErrorsDto;
 import de.ait.secondlife.services.interfaces.CategoryService;
+import de.ait.secondlife.services.utilities.EntityUtilities;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -18,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+
 import java.util.List;
 
 @RestController
@@ -27,6 +29,7 @@ import java.util.List;
 public class CategoryController {
 
     private final CategoryService service;
+    private final EntityUtilities utilities;
 
     @Operation(summary = "Get category by id", description = "Accessible to all users")
     @GetMapping("/{category-id}")
@@ -84,6 +87,7 @@ public class CategoryController {
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class)))}
     )
     public ResponseEntity<CategoryDto> add(@Valid @RequestBody CategoryCreationDto dto) {
+        utilities.checkCredentialsToConnectImageToEntity(dto.getBaseNameOfImages());
         return ResponseEntity.status(HttpStatus.CREATED).body(service.save(dto));
     }
 
@@ -110,6 +114,7 @@ public class CategoryController {
             @Schema(description = "category id", example = "1")
             @PathVariable("category-id") Long categoryId,
             @RequestBody @Valid CategoryUpdateDto dto) {
+        utilities.checkCredentialsToConnectImageToEntity(dto.getBaseNameOfImages());
         return ResponseEntity.ok(service.update(categoryId, dto));
     }
 

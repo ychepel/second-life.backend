@@ -10,6 +10,7 @@ import de.ait.secondlife.domain.dto.*;
 import de.ait.secondlife.exception_handling.dto.ValidationErrorsDto;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.PaginationParameterIsWrongException;
 import de.ait.secondlife.services.interfaces.OfferService;
+import de.ait.secondlife.services.utilities.EntityUtilities;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -36,6 +37,7 @@ import javax.security.auth.login.CredentialException;
 public class OfferController {
 
     private final OfferService service;
+    private final EntityUtilities utilities;
 
     private final String PAGE_VALUE = "0";
     private final String SIZE_VALUE = "10";
@@ -178,6 +180,7 @@ public class OfferController {
             @RequestBody
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Offer create DTO ")
             OfferCreationDto dto) throws CredentialException {
+        utilities.checkCredentialsToConnectImageToEntity(dto.getBaseNameOfImages());
         return ResponseEntity.status(HttpStatus.CREATED).body(service.createOffer(dto));
     }
 
@@ -206,6 +209,7 @@ public class OfferController {
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Offer update DTO ")
             OfferUpdateDto dto
     ) throws CredentialException {
+        utilities.checkCredentialsToConnectImageToEntity(dto.getBaseNameOfImages());
         return ResponseEntity.ok(service.updateOffer(dto));
     }
 

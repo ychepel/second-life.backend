@@ -56,8 +56,8 @@ public class ImageController {
         String entityType = EntityTypeWithImages.get(request.getEntityType().toLowerCase()).getType();
         Long entityId = request.getEntityId();
         utilities.checkEntityExists(entityType, entityId);
-
-        return ResponseEntity.ok(imageService.saveNewImage(entityType, entityId, request,utilities.getCurrentUserId()));
+        utilities.checkCredentials(entityType, entityId);
+        return ResponseEntity.ok(imageService.saveNewImage(entityType, entityId, request, utilities.getCurrentUserId()));
     }
 
     @DeleteMapping
@@ -83,7 +83,9 @@ public class ImageController {
                     schema = @Schema(implementation = ImageRequestDto.class))
             @RequestBody ImageRequestDto dto
     ) {
+        utilities.checkCredentials(dto.getBaseName());
         imageService.deleteImage(dto.getBaseName());
+
         return ResponseEntity.ok(new ResponseMessageDto("Image deleted successfully"));
     }
 }

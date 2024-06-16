@@ -5,6 +5,7 @@ import de.ait.secondlife.domain.dto.ResponseMessageDto;
 import de.ait.secondlife.domain.dto.UserDto;
 import de.ait.secondlife.exception_handling.dto.ValidationErrorsDto;
 import de.ait.secondlife.services.interfaces.UserService;
+import de.ait.secondlife.services.utilities.EntityUtilities;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -26,6 +27,7 @@ import javax.security.auth.login.CredentialException;
 public class UserController {
 
     private final UserService userService;
+    private final EntityUtilities utilities;
 
     @PostMapping("/register")
     @Operation(
@@ -59,6 +61,7 @@ public class UserController {
             @RequestBody
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "User date to register")
             UserCreationDto newUserDto) {
+        utilities.checkCredentialsToConnectImageToEntity(newUserDto.getBaseNameOfImages());
         UserDto userDto = userService.register(newUserDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(userDto);
     }
