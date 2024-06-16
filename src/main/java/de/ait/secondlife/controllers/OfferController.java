@@ -365,6 +365,46 @@ public class OfferController {
         return ResponseEntity.ok(service.completeOffer(id, offerCompletionDto));
     }
 
+    @GetMapping("/search")
+    @Operation(
+            summary = "Search offers",
+            description = "Searching string <i>pattern</i> among all Offers in status AUCTION_STARTED. The search is carried out using the Offer title and Offer description fields and is not case-sensitive."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successful operation",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = OfferResponseWithPaginationDto.class))
+            ),
+    })
+    public ResponseEntity<OfferResponseWithPaginationDto> search(
+            @RequestParam
+            String pattern,
+            @RequestParam(defaultValue = PAGE_VALUE)
+            @Parameter(description = "Requested page number. ", example = "0")
+            int page,
+            @RequestParam(defaultValue = SIZE_VALUE)
+            @Parameter(description = "Number of entities per page.", example = "10")
+            int size,
+            @RequestParam(defaultValue = SORT_BY)
+            @Parameter(description = "Sorting field.", examples = {
+                    @ExampleObject(name = "Sort by created time", value = "createdAt"),
+                    @ExampleObject(name = "Sort by title", value = "title"),
+                    @ExampleObject(name = "Sort by start price", value = "startPrice")
+            })
+            String sortBy,
+            @RequestParam(defaultValue = "true")
+            @Parameter(description = "Sorting direction.", examples = {
+                    @ExampleObject(name = "Sort direction is ascending(default)", value = "true"),
+                    @ExampleObject(name = "Sort direction is descending", value = "false")
+            })
+            Boolean isAsc,
+            @RequestParam(required = false, name = "location_id")
+            @Parameter(description = "Location id for filtration. Can be null. Optional parameter", example = "3")
+            Long locationId
+    ){
+        return ResponseEntity.ok(service.searchOffers(getPageable(page, size, sortBy, isAsc), locationId, pattern));
+    }
 
     private Pageable getPageable(int page, int size, String sortBy, Boolean isAsc) {
         try {

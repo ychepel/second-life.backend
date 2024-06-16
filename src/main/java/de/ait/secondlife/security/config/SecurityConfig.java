@@ -52,7 +52,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/v1/categories/{category-id}").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/v1/categories/{category-id}/set-active").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/v1/categories/{category-id}").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/v1/offers/all", "/v1/offers/{id}").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/v1/offers/all", "/v1/offers/{id}", "/v1/offers/search").permitAll()
                         .requestMatchers(HttpMethod.GET, "/v1/offers/user/{id}").authenticated()
                         .requestMatchers(HttpMethod.POST, "/v1/offers").hasRole("USER")
                         .requestMatchers(HttpMethod.PUT, "/v1/offers", "/v1/offers/recover/{id}").authenticated()
