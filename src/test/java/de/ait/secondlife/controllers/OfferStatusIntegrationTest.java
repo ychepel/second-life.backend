@@ -414,7 +414,6 @@ class OfferStatusIntegrationTest {
         public void return_500_on_reject_offer_from_blocked_status_by_admin() throws Exception {
             Offer offer = offerRepository.findById(user1OfferId).get();
             offer.setStatus(statusService.getByOfferStatus(OfferStatus.BLOCKED_BY_ADMIN));
-            offer.setIsActive(false);
 
             mockMvc.perform(patch("/v1/offers/" + user1OfferId + "/reject")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -502,7 +501,6 @@ class OfferStatusIntegrationTest {
         public void return_500_on_start_auction_from_blocked_status_by_admin() throws Exception {
             Offer offer = offerRepository.findById(user1OfferId).get();
             offer.setStatus(statusService.getByOfferStatus(OfferStatus.BLOCKED_BY_ADMIN));
-            offer.setIsActive(false);
 
             mockMvc.perform(patch("/v1/offers/" + user1OfferId + "/start-auction").cookie(adminCookie))
                     .andExpect(status().isInternalServerError());
@@ -515,7 +513,6 @@ class OfferStatusIntegrationTest {
         public void return_500_on_start_auction_from_canceled_status_by_admin() throws Exception {
             Offer offer = offerRepository.findById(user1OfferId).get();
             offer.setStatus(statusService.getByOfferStatus(OfferStatus.CANCELED));
-            offer.setIsActive(false);
 
             mockMvc.perform(patch("/v1/offers/" + user1OfferId + "/start-auction").cookie(adminCookie))
                     .andExpect(status().isInternalServerError());
