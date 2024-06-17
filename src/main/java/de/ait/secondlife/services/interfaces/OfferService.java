@@ -24,10 +24,6 @@ public interface OfferService extends CheckEntityExistsService{
 
     OfferResponseDto updateOffer(OfferUpdateDto dto) throws CredentialException;
 
-    void removeOffer(Long id);
-
-    void recoverOffer(Long id);
-
     void setStatus(Offer offer, OfferStatus offerStatus);
 
     void setStatus(Offer offer, OfferStatus offerStatus, Long rejectionReasonId);

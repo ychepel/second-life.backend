@@ -67,14 +67,14 @@ public class OfferServiceImpl implements OfferService {
     ) {
         OfferStatus offerStatus = status != null ? OfferStatus.get(status) : null;
         Page<Offer> pageOfOffer = offerRepository
-                .findAllActiveWithFiltration(categoryId, offerStatus, isFree, pageable);
+                .findAllWithFiltration(categoryId, offerStatus, isFree, pageable);
         return offersToOfferRequestWithPaginationDto(pageOfOffer);
     }
 
     @Override
     public Offer findById(Long id) {
         if (id == null) throw new IdIsNullException();
-        return offerRepository.findByIdAndIsActiveTrue(id)
+        return offerRepository.findById(id)
                 .orElseThrow(() -> new OfferNotFoundException(id));
     }
 
@@ -93,7 +93,7 @@ public class OfferServiceImpl implements OfferService {
             Boolean isFree) {
         if (id == null) throw new IdIsNullException();
         OfferStatus offerStatus = status != null ? OfferStatus.get(status) : null;
-        Page<Offer> pageOfOffer = offerRepository.findByUserIdAndIsActiveTrue(id, categoryId, offerStatus, isFree,pageable);
+        Page<Offer> pageOfOffer = offerRepository.findByUserId(id, categoryId, offerStatus, isFree, pageable);
         return offersToOfferRequestWithPaginationDto(pageOfOffer);
     }
 
@@ -186,26 +186,6 @@ public class OfferServiceImpl implements OfferService {
 
     @Transactional
     @Override
-    public void removeOffer(Long id) {
-        //TODO   Only the owner and admin has the right to make changes
-        if (id == null) throw new IdIsNullException();
-        Offer offer = offerRepository.findByIdAndIsActiveTrue(id)
-                .orElseThrow(() -> new OfferNotFoundException(id));
-        offer.setIsActive(false);
-    }
-
-    @Transactional
-    @Override
-    public void recoverOffer(Long id) {
-        //TODO   Only the owner and admin has the right to make changes
-        if (id == null) throw new IdIsNullException();
-        Offer offer = offerRepository.findById(id)
-                .orElseThrow(() -> new OfferNotFoundException(id));
-        offer.setIsActive(true);
-    }
-
-    @Transactional
-    @Override
     public void draftOffer(Offer offer) {
         offerContext.setOffer(offer);
         offerContext.draft();
@@ -239,6 +219,7 @@ public class OfferServiceImpl implements OfferService {
         offerContext.finishAuction();
     }
 
+    //TODO method no usages
     @Transactional
     @Override
     public void qualifyAuction(Long id) {
@@ -275,7 +256,8 @@ public class OfferServiceImpl implements OfferService {
             try {
                 User authenticatedUser = userService.getAuthenticatedUser();
                 userService.setLocation(authenticatedUser.getId(), locationId);
-            } catch (CredentialException ignored) {}
+            } catch (CredentialException ignored) {
+            }
         }
 
         Page<Offer> pageOfOffer = offerRepository.searchAll(OfferStatus.AUCTION_STARTED, pageable, locationId, pattern);
@@ -300,7 +282,7 @@ public class OfferServiceImpl implements OfferService {
 
     @Override
     public List<Offer> findUnfinishedAuctions() {
-        return offerRepository.findFinishedActiveAuctions(
+        return offerRepository.findFinishedAuctions(
                 LocalDateTime.now(),
                 OfferStatus.AUCTION_STARTED
         );
@@ -337,6 +319,6 @@ public class OfferServiceImpl implements OfferService {
     @Override
     public boolean checkEntityExistsById(Long id) {
         if (id == null) throw new IdIsNullException();
-        return offerRepository.existsByIdAndIsActiveTrue(id);
+        return offerRepository.existsById(id);
     }
 }
