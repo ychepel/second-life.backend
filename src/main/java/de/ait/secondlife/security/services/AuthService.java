@@ -12,6 +12,8 @@ import io.jsonwebtoken.Claims;
 import jakarta.security.auth.message.AuthException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.lang.NonNull;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -29,10 +31,16 @@ import java.util.Map;
 public class AuthService {
 
     private final AdminService adminService;
-    private final UserService userService;
     private final TokenService tokenService;
     private final TokenFilter tokenFilter;
     private final BCryptPasswordEncoder encoder;
+
+    private UserService userService;
+
+    @Autowired
+    public void setUserService(@Lazy UserService userService) {
+        this.userService = userService;
+    }
 
     private final Map<String, String> refreshStorage = new HashMap<>();
 
@@ -68,6 +76,17 @@ public class AuthService {
             }
         }
         throw new AuthException("Refresh token is incorrect");
+    }
+
+    public AuthenticatedUser getAuthenticatedUser(Role role, Long userId) throws AuthException {
+        if (role == Role.ROLE_ADMIN) {
+            return adminService.findById(userId);
+        }
+        if (role == Role.ROLE_USER) {
+            return userService.findById(userId);
+        }
+
+        throw new AuthException("Undefined role");
     }
 
     private AuthenticatedUser getAuthenticatedUser(Role role, String userEmail) throws LoginException {

@@ -66,4 +66,13 @@ public class User implements AuthenticatedUser, EntityWithImage {
     public boolean isEnabled() {
         return this.active;
     }
+
+    @Override
+    public Role getRole() {
+        return Role.ROLE_USER;
+    }
+
+    public String getFullName() {
+        return this.getFirstName() + ' ' + this.getLastName();
+    }
 }

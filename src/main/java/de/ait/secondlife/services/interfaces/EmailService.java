@@ -1,16 +1,13 @@
 package de.ait.secondlife.services.interfaces;
 
-import de.ait.secondlife.domain.entity.Offer;
-import de.ait.secondlife.mailing.NotificationType;
-import de.ait.secondlife.domain.entity.User;
+import de.ait.secondlife.constants.NotificationType;
+import de.ait.secondlife.domain.interfaces.AuthenticatedUser;
 
 public interface EmailService {
 
-    void sendConfirmationEmailToFinishRegistration(User user);
+    void createNotification(AuthenticatedUser authenticatedUser, NotificationType notificationType);
 
-    void createNotification(User user, NotificationType notificationType);
+    void createNotification(AuthenticatedUser authenticatedUser, NotificationType notificationType, Long contextId) ;
 
-    void sendPendingEmail();
-
-    void sendEmail(User user, NotificationType notificationType, Offer offer);
+    void sendPendingEmails();
 }

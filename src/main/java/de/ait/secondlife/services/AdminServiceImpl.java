@@ -1,8 +1,10 @@
 package de.ait.secondlife.services;
 
 import de.ait.secondlife.domain.entity.Admin;
+import de.ait.secondlife.domain.interfaces.AuthenticatedUser;
 import de.ait.secondlife.exception_handling.exceptions.UserIsNotAuthenticatedException;
 import de.ait.secondlife.exception_handling.exceptions.UserIsNotAuthorizedException;
+import de.ait.secondlife.exception_handling.exceptions.not_found_exception.AdminNotFoundException;
 import de.ait.secondlife.repositories.AdminRepository;
 import de.ait.secondlife.security.Role;
 import de.ait.secondlife.services.interfaces.AdminService;
@@ -20,6 +22,7 @@ import javax.security.auth.login.CredentialException;
 public class AdminServiceImpl implements AdminService {
 
     private final AdminRepository repository;
+    private final AdminRepository adminRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -41,5 +44,15 @@ public class AdminServiceImpl implements AdminService {
         }
         String username = authentication.getName();
         return (Admin) loadUserByUsername(username);
+    }
+
+    @Override
+    public Admin getDefaultAdmin() {
+        return adminRepository.findAll().get(0);
+    }
+
+    @Override
+    public AuthenticatedUser findById(Long id) {
+        return adminRepository.findById(id).orElseThrow(() -> new AdminNotFoundException(id));
     }
 }

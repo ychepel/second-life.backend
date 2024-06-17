@@ -3,10 +3,7 @@ package de.ait.secondlife.services.offer_status;
 import de.ait.secondlife.constants.OfferStatus;
 import de.ait.secondlife.domain.entity.Offer;
 import de.ait.secondlife.domain.entity.Status;
-import de.ait.secondlife.services.interfaces.AdminService;
-import de.ait.secondlife.services.interfaces.BidService;
-import de.ait.secondlife.services.interfaces.OfferService;
-import de.ait.secondlife.services.interfaces.UserService;
+import de.ait.secondlife.services.interfaces.*;
 import de.ait.secondlife.services.mapping.OfferMappingService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +20,7 @@ public class OfferContext {
     private final AdminService adminService;
     private final BidService bidService;
     private final OfferMappingService offerMappingService;
+    private final EmailService emailService;
 
     private Offer offer;
 

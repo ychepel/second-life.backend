@@ -12,5 +12,6 @@
 
     <include file="../v.1.0.9/create-table-confirmation-code.xml" relativeToChangelogFile="true"/>
     <include file="../v.1.0.9/create-foreign-key-offer-confirmation-code-to-user.xml" relativeToChangelogFile="true"/>
+    <include file="create-table-notification.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

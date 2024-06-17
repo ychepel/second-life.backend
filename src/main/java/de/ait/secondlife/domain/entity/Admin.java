@@ -52,4 +52,9 @@ public class Admin implements AuthenticatedUser {
     public boolean isEnabled() {
         return true;
     }
+
+    @Override
+    public Role getRole() {
+        return Role.ROLE_ADMIN;
+    }
 }

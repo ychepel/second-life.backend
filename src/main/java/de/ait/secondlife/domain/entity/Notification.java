@@ -1,9 +1,8 @@
-package de.ait.secondlife.mailing;
+package de.ait.secondlife.domain.entity;
 
-import de.ait.secondlife.domain.entity.User;
+import de.ait.secondlife.constants.NotificationType;
+import de.ait.secondlife.security.Role;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -22,10 +21,15 @@ public class Notification {
     @Column(name = "id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    @NotNull(message = "User Id cannot be null")
-    private User user;
+    @Column(name = "authenticated_user_id")
+    private Long authenticatedUserId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "receiver_role")
+    private Role receiverRole;
+
+    @Column(name = "context_id")
+    private Long contextId;
 
     @Column(name="created_at")
     private LocalDateTime createdAt;
@@ -35,6 +39,5 @@ public class Notification {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "notification_type")
-    @NotBlank(message = "Notification_type name cannot be empty")
     private NotificationType notificationType;
 }

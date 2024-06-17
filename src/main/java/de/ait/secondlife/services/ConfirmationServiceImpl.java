@@ -16,6 +16,7 @@ import java.util.UUID;
 public class ConfirmationServiceImpl implements ConfirmationService {
 
     private final ConfirmationCodeRepository repository;
+
     @Override
     public String generateConfirmationCode(User user) {
         LocalDateTime expired = LocalDateTime.now().plusMinutes(10);

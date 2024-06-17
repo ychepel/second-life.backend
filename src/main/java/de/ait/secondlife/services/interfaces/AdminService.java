@@ -7,4 +7,5 @@ import javax.security.auth.login.CredentialException;
 public interface AdminService extends AuthenticatedUserService {
 
     Admin getAuthenticatedAdmin() throws CredentialException;
+    Admin getDefaultAdmin();
 }

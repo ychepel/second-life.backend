@@ -9,12 +9,12 @@ import org.springframework.stereotype.Component;
 @Component
 @EnableScheduling
 @RequiredArgsConstructor
-public class EmailScheduler {
+public class EmailSender {
 
     private final EmailService emailService;
 
     @Scheduled(fixedRate = 60000)
     public void sendEmail(){
-        emailService.sendPendingEmail();
+        emailService.sendPendingEmails();
     }
 }

@@ -1,8 +1,10 @@
 package de.ait.secondlife.services.offer_status;
 
+import de.ait.secondlife.constants.NotificationType;
 import de.ait.secondlife.constants.OfferStatus;
 import de.ait.secondlife.domain.entity.Offer;
 import de.ait.secondlife.exception_handling.exceptions.ProhibitedOfferStateChangeException;
+import de.ait.secondlife.services.interfaces.EmailService;
 import de.ait.secondlife.services.interfaces.OfferService;
 
 import java.time.LocalDateTime;
@@ -19,8 +21,14 @@ public class VerificationState extends StateStrategy {
         Offer offer = getOfferAllowedForCurrentAdmin(context);
         OfferService offerService = context.getOfferService();
         offerService.setStatus(offer, OfferStatus.REJECTED, rejectionReasonId);
-        //TODO: mailing - inform offer owner about rejection
         context.setStateStrategy(new RejectedState());
+
+        EmailService emailService = context.getEmailService();
+        emailService.createNotification(
+                offer.getUser(),
+                NotificationType.REJECTED_OFFER_EMAIL,
+                offer.getId()
+        );
     }
 
     @Override

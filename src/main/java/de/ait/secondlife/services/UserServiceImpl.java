@@ -1,10 +1,11 @@
 package de.ait.secondlife.services;
 
 import de.ait.secondlife.constants.EntityTypeWithImages;
-import de.ait.secondlife.mailing.NotificationType;
+import de.ait.secondlife.constants.NotificationType;
 import de.ait.secondlife.domain.dto.UserCreationDto;
 import de.ait.secondlife.domain.dto.UserDto;
 import de.ait.secondlife.domain.entity.User;
+import de.ait.secondlife.domain.interfaces.AuthenticatedUser;
 import de.ait.secondlife.exception_handling.exceptions.*;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.is_null_exceptions.IdIsNullException;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.LocationNotFoundException;
@@ -167,5 +168,10 @@ public class UserServiceImpl implements UserService {
         }else {
             throw new ConfirmationEmailCodeNotValidException(code);
         }
+    }
+
+    @Override
+    public AuthenticatedUser findById(Long id) {
+        return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
     }
 }

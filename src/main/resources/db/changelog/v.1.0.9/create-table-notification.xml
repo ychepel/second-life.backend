@@ -11,9 +11,15 @@
                 <constraints primaryKey="true" nullable="false"/>
             </column>
 
-            <column name="user_id" type="bigint" >
+            <column name="authenticated_user_id" type="bigint" >
                 <constraints nullable="false"/>
             </column>
+
+            <column name="receiver_role" type="varchar(20)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="context_id" type="bigint"/>
 
             <column name="notification_type" type="varchar(255)" >
                 <constraints nullable="false"/>

@@ -1,8 +1,11 @@
 package de.ait.secondlife.services.offer_status;
 
+import de.ait.secondlife.constants.NotificationType;
 import de.ait.secondlife.constants.OfferStatus;
 import de.ait.secondlife.domain.entity.Offer;
 import de.ait.secondlife.exception_handling.exceptions.ProhibitedOfferStateChangeException;
+import de.ait.secondlife.services.interfaces.AdminService;
+import de.ait.secondlife.services.interfaces.EmailService;
 import de.ait.secondlife.services.interfaces.OfferService;
 
 public class DraftState extends StateStrategy {
@@ -26,6 +29,14 @@ public class DraftState extends StateStrategy {
         OfferService offerService = context.getOfferService();
         offerService.setStatus(offer, OfferStatus.VERIFICATION);
         context.setStateStrategy(new VerificationState());
+
+        EmailService emailService = context.getEmailService();
+        AdminService adminService = context.getAdminService();
+        emailService.createNotification(
+                adminService.getDefaultAdmin(),
+                NotificationType.OFFER_VERIFICATION_EMAIL,
+                offer.getId()
+        );
     }
 
     @Override
