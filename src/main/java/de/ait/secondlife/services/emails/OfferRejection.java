@@ -15,7 +15,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-public class RejectedOffer extends TemplateService {
+public class OfferRejection extends TemplateService {
 
     private final OfferService offerService;
     private final AuthService authService;
@@ -48,6 +48,6 @@ public class RejectedOffer extends TemplateService {
     }
 
     private String composeEndpointUrl(Offer offer) {
-        return applicationHost + "/#/offers/" + offer.getId();
+        return applicationHost + "/#/offers/users/" + offer.getId();
     }
 }

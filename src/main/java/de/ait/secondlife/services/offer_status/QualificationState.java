@@ -1,10 +1,12 @@
 package de.ait.secondlife.services.offer_status;
 
+import de.ait.secondlife.constants.NotificationType;
 import de.ait.secondlife.constants.OfferStatus;
 import de.ait.secondlife.domain.entity.Bid;
 import de.ait.secondlife.domain.entity.Offer;
 import de.ait.secondlife.exception_handling.exceptions.ProhibitedOfferStateChangeException;
 import de.ait.secondlife.services.interfaces.BidService;
+import de.ait.secondlife.services.interfaces.EmailService;
 import de.ait.secondlife.services.interfaces.OfferService;
 
 import java.util.List;
@@ -70,6 +72,15 @@ public class QualificationState extends StateStrategy {
         offer.setWinnerBid(bid);
         OfferService offerService = context.getOfferService();
         offerService.setStatus(offer, OfferStatus.COMPLETED);
+
+        EmailService emailService = context.getEmailService();
+        emailService.createNotification(
+                offer.getWinnerBid().getUser(),
+                NotificationType.PARTICIPANT_IS_WINNER_EMAIL,
+                offer.getId()
+        );
+
+
         context.setStateStrategy(new CompleteState());
     }
 
