@@ -1,6 +1,5 @@
 package de.ait.secondlife.controllers;
 
-import de.ait.secondlife.constants.OfferStatus;
 import de.ait.secondlife.domain.dto.ResponseMessageDto;
 import de.ait.secondlife.domain.dto.OfferCreationDto;
 import de.ait.secondlife.domain.dto.OfferResponseDto;
@@ -29,7 +28,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.security.auth.login.CredentialException;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/v1/offers")
@@ -42,12 +40,6 @@ public class OfferController {
     private final String PAGE_VALUE = "0";
     private final String SIZE_VALUE = "10";
     private final String SORT_BY = "createdAt";
-    private Set<OfferStatus> STATUSES_FOR_BID_SEARCH = Set.of(
-            OfferStatus.AUCTION_STARTED,
-            OfferStatus.QUALIFICATION,
-            OfferStatus.COMPLETED,
-            OfferStatus.CANCELED,
-            OfferStatus.BLOCKED_BY_ADMIN);
 
     @GetMapping("/all")
     @Operation(
@@ -368,7 +360,7 @@ public class OfferController {
         return ResponseEntity.ok(service.searchOffers(getPageable(page, size, sortBy, isAsc), locationId, pattern));
     }
 
-    @GetMapping("/user/{id}/bid")
+    @GetMapping("/participations/user/{id}")
     @Operation(
             summary = "Get all offers by user id in which the user has placed a bid",
             description = "Receiving all offers by user id available in the database with pagination" +
@@ -379,7 +371,7 @@ public class OfferController {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = OfferResponseWithPaginationDto.class))),
     })
-    public ResponseEntity<OfferResponseWithPaginationDto> getAllByUserBidByUserId(
+    public ResponseEntity<OfferResponseWithPaginationDto> getUserAuctionParticipations(
             @RequestParam(defaultValue = PAGE_VALUE)
             @Parameter(description = "Requested page number. ", example = "0")
             int page,
@@ -410,13 +402,12 @@ public class OfferController {
             @PathVariable
             @Parameter(description = "User id in Long format. ", example = "2321")
             Long id) {
-        return ResponseEntity.ok(service.findAllByUserBidByUserId(
+        return ResponseEntity.ok(service.findUserAuctionParticipations(
                 id,
                 getPageable(page, size, sortBy, isAsc),
                 category_id,
                 status,
-                free,
-                STATUSES_FOR_BID_SEARCH));
+                free));
     }
 
     private Pageable getPageable(int page, int size, String sortBy, Boolean isAsc) {

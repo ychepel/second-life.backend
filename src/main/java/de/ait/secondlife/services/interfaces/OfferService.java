@@ -8,7 +8,6 @@ import org.springframework.data.domain.Pageable;
 
 import javax.security.auth.login.CredentialException;
 import java.util.List;
-import java.util.Set;
 
 
 public interface OfferService extends CheckEntityExistsService{
@@ -51,5 +50,5 @@ public interface OfferService extends CheckEntityExistsService{
 
     OfferResponseWithPaginationDto searchOffers(Pageable pageable, Long locationId, String pattern);
 
-    OfferResponseWithPaginationDto findAllByUserBidByUserId(Long id, Pageable pageable, Long categoryId, String status, Boolean isFree, Set<OfferStatus> statuses);
+    OfferResponseWithPaginationDto findUserAuctionParticipations(Long id, Pageable pageable, Long categoryId, String status, Boolean isFree);
 }

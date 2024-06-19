@@ -51,6 +51,13 @@ public class OfferServiceImpl implements OfferService {
     private final LocationService locationService;
     private final OfferStatusHistoryService offerStatusHistoryService;
 
+    private Set<OfferStatus> STATUSES_FOR_BID_SEARCH = Set.of(
+            OfferStatus.AUCTION_STARTED,
+            OfferStatus.QUALIFICATION,
+            OfferStatus.COMPLETED,
+            OfferStatus.CANCELED,
+            OfferStatus.BLOCKED_BY_ADMIN);
+
     private OfferContext offerContext;
 
     @Autowired
@@ -69,7 +76,7 @@ public class OfferServiceImpl implements OfferService {
     ) {
         OfferStatus offerStatus = status != null ? OfferStatus.get(status) : null;
         Page<Offer> pageOfOffer = offerRepository
-                .findAllWithFiltration(categoryId, offerStatus, isFree, pageable);
+                .findAll(categoryId, offerStatus, isFree, pageable);
         return offersToOfferRequestWithPaginationDto(pageOfOffer);
     }
 
@@ -266,21 +273,20 @@ public class OfferServiceImpl implements OfferService {
     }
 
     @Override
-    public OfferResponseWithPaginationDto findAllByUserBidByUserId(
+    public OfferResponseWithPaginationDto findUserAuctionParticipations(
             Long id,
             Pageable pageable,
             Long categoryId,
             String status,
-            Boolean isFree,
-            Set<OfferStatus> statuses) {
+            Boolean isFree) {
 
         checkUserId(id);
         checkUserCredentials(id);
         OfferStatus offerStatus = status != null ? OfferStatus.get(status) : null;
 
-        Page<Offer> pageOfOffer = offerRepository.findAllActiveByUserBidByUserIddWithFiltration(
+        Page<Offer> pageOfOffer = offerRepository.findUserAuctionParticipations(
                 id, categoryId, offerStatus, isFree,
-                statuses, pageable);
+                STATUSES_FOR_BID_SEARCH, pageable);
 
         return offersToOfferRequestWithPaginationDto(pageOfOffer);
     }
