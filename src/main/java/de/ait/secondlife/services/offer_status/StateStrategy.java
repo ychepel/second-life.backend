@@ -3,6 +3,7 @@ package de.ait.secondlife.services.offer_status;
 import de.ait.secondlife.domain.entity.Offer;
 import de.ait.secondlife.domain.entity.User;
 import de.ait.secondlife.services.interfaces.AdminService;
+import de.ait.secondlife.services.interfaces.OfferContext;
 import de.ait.secondlife.services.interfaces.UserService;
 
 import javax.security.auth.login.CredentialException;

@@ -5,6 +5,7 @@ import de.ait.secondlife.domain.entity.Bid;
 import de.ait.secondlife.domain.entity.Offer;
 import de.ait.secondlife.exception_handling.exceptions.ProhibitedOfferStateChangeException;
 import de.ait.secondlife.services.interfaces.BidService;
+import de.ait.secondlife.services.interfaces.OfferContext;
 import de.ait.secondlife.services.interfaces.OfferService;
 
 import java.util.List;

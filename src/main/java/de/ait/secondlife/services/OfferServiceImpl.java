@@ -19,7 +19,6 @@ import de.ait.secondlife.exception_handling.exceptions.not_found_exception.Offer
 import de.ait.secondlife.repositories.OfferRepository;
 import de.ait.secondlife.services.interfaces.*;
 import de.ait.secondlife.services.mapping.OfferMappingService;
-import de.ait.secondlife.services.offer_status.OfferContext;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
@@ -48,15 +47,14 @@ public class OfferServiceImpl implements OfferService {
     private final CategoryService categoryService;
     private final LocationService locationService;
     private final OfferStatusHistoryService offerStatusHistoryService;
-
-    private OfferContext offerContext;
-
-    @Autowired
-    public void setOfferContext(@Lazy OfferContext offerContext) {
-        this.offerContext = offerContext;
-    }
-
     private final ImageService imageService;
+
+    private final OfferContext offerContext;
+
+//    @Autowired
+//    public void setOfferContext(@Lazy OfferContext offerContext) {
+//        this.offerContext = offerContext;
+//    }
 
     @Override
     public OfferResponseWithPaginationDto findOffers(

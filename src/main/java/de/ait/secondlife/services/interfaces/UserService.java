@@ -7,7 +7,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 
 import javax.security.auth.login.CredentialException;
 
-public interface UserService extends UserDetailsService,CheckEntityExistsService {
+public interface UserService extends UserDetailsService, CheckEntityExistsService {
+
     UserDto register(UserCreationDto userDto);
 
     void updateLastActive(User user);
