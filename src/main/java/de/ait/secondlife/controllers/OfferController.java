@@ -215,50 +215,6 @@ public class OfferController {
         return ResponseEntity.ok(service.updateOffer(dto));
     }
 
-    @DeleteMapping("/{id}")
-    @Operation(
-            summary = "Deactivate offer by id",
-            description = "Deactivating the existing offer by id. This offer won't be available when searching the database"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
-            @ApiResponse(responseCode = "403", description = "Forbidden",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
-            @ApiResponse(responseCode = "404", description = "Offer not found",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class)))
-    })
-    public ResponseEntity<ResponseMessageDto> remove(
-            @PathVariable
-            @Parameter(description = "Offer id.", example = "123")
-            Long id) {
-        service.removeOffer(id);
-        return ResponseEntity.ok(
-                new ResponseMessageDto(String.format("Offer with id <%s> removed successful", id)));
-    }
-
-    @PutMapping("/recover/{id}")
-    @Operation(
-            summary = "Activate offer by id",
-            description = "Activating the existing offer by id. This offer will be available when searching the database"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
-            @ApiResponse(responseCode = "403", description = "Forbidden",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
-            @ApiResponse(responseCode = "404", description = "Offer not found",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
-    })
-    public ResponseEntity<ResponseMessageDto> recover(
-            @PathVariable
-            @Parameter(description = "Offer id.", example = "123")
-            Long id) {
-        service.recoverOffer(id);
-        return ResponseEntity.ok(
-                new ResponseMessageDto(String.format("Offer with id <%s> recovered successful", id)));
-    }
-
     @PatchMapping("/{id}/reject")
     @Operation(
             summary = "Change offer status to Rejected",

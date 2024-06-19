@@ -55,9 +55,21 @@ public class BidServiceImpl implements BidService {
         newBid.setOffer(offer);
         bidRepository.save(newBid);
 
-        if (!offer.getIsFree() && newBidValue.compareTo(offer.getWinBid()) == 0) {
+        if (isWinningBid(offer, newBidValue)) {
             offerService.finishAuction(offer);
         }
+    }
+
+    private boolean isWinningBid(Offer offer, BigDecimal newBidValue) {
+        if (offer.getIsFree()) {
+            return false;
+        }
+
+        BigDecimal offerWinBid = offer.getWinBid();
+        if (offerWinBid == null) {
+            return false;
+        }
+        return newBidValue.compareTo(offerWinBid) == 0;
     }
 
     private void checkAuthentication(Offer offer, User user) {
@@ -88,7 +100,8 @@ public class BidServiceImpl implements BidService {
             throw new BidCreationException("Bid cannot be less or equal to current maximum bid value");
         }
 
-        if (newBidValue.compareTo(offer.getWinBid()) > 0) {
+        BigDecimal winBid = offer.getWinBid();
+        if (winBid != null && newBidValue.compareTo(winBid) > 0) {
             throw new BidCreationException("Bid cannot be greater than buyout price (win bid value)");
         }
     }

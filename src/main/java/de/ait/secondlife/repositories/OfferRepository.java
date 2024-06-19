@@ -18,36 +18,30 @@ public interface OfferRepository extends JpaRepository<Offer, Long> {
     @Query("SELECT o FROM Offer o WHERE" +
             " (:categoryId IS NULL OR o.category.id = :categoryId) " +
             "AND (:offerStatus IS NULL OR o.status.name = :offerStatus ) " +
-            "AND (:isFree IS NULL OR o.isFree = :isFree ) " +
-            " AND o.isActive = true")
-    Page<Offer> findAllActiveWithFiltration(
+            "AND (:isFree IS NULL OR o.isFree = :isFree )")
+    Page<Offer> findAllWithFiltration(
             @Param("categoryId") Long categoryId,
             @Param("offerStatus") OfferStatus offerStatus,
             @Param("isFree") Boolean isFree,
             Pageable pageable);
 
-    Optional<Offer> findByIdAndIsActiveTrue(Long offerId);
-
     @Query("SELECT o FROM Offer o WHERE" +
             " (:categoryId IS NULL OR o.category.id = :categoryId) " +
             "AND (:offerStatus IS NULL OR o.status.name = :offerStatus ) " +
             "AND (:isFree IS NULL OR o.isFree = :isFree ) " +
-            "AND o.user.id =:id"+
-            " AND o.isActive = true")
-    Page<Offer> findAllActiveByUserIdWithFiltration(
+            "AND o.user.id =:id")
+    Page<Offer> findByUserId(
             @Param("id") Long id,
             @Param("categoryId") Long categoryId,
             @Param("offerStatus") OfferStatus offerStatus,
             @Param("isFree") Boolean isFree,
             Pageable pageable);
 
-    @Query("SELECT o FROM Offer o WHERE o.auctionFinishedAt <= :currentTime AND o.status.name = :status AND o.isActive = TRUE")
-    List<Offer> findFinishedActiveAuctions(LocalDateTime currentTime, OfferStatus status);
-
-    boolean existsByIdAndIsActiveTrue(Long id);
+    @Query("SELECT o FROM Offer o WHERE o.auctionFinishedAt <= :currentTime AND o.status.name = :status")
+    List<Offer> findFinishedAuctions(LocalDateTime currentTime, OfferStatus status);
 
     @Query("SELECT o FROM Offer o" +
-            " WHERE (o.status.name = :offerStatus) AND o.isActive = true" +
+            " WHERE (o.status.name = :offerStatus)" +
             " AND (:locationId IS NULL OR o.location.id = :locationId)" +
             " AND (LOWER(o.title) LIKE LOWER(CONCAT('%', :pattern, '%'))" +
             " OR LOWER(o.description) LIKE LOWER(CONCAT('%', :pattern, '%')))")
@@ -60,8 +54,7 @@ public interface OfferRepository extends JpaRepository<Offer, Long> {
             "AND (:offerStatus IS NULL OR o.status.name = :offerStatus) " +
             "AND (:isFree IS NULL OR o.isFree = :isFree) " +
             "AND o.status.name IN :statuses " +
-            "AND b.user.id = :id " +
-            "AND o.isActive = true")
+            "AND b.user.id = :id " )
     Page<Offer> findAllActiveByUserBidByUserIddWithFiltration(
             @Param("id") Long id,
             @Param("categoryId") Long categoryId,

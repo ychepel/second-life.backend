@@ -84,7 +84,6 @@ public class QualificationState extends StateStrategy {
         Offer offer = getOfferAllowedForCurrentUser(context);
         OfferService offerService = context.getOfferService();
         offerService.setStatus(offer, OfferStatus.CANCELED);
-        offer.setIsActive(false);
         context.setStateStrategy(new CancelState());
     }
 
@@ -94,7 +93,6 @@ public class QualificationState extends StateStrategy {
         Offer offer = getOfferAllowedForCurrentAdmin(context);
         OfferService offerService = context.getOfferService();
         offerService.setStatus(offer, OfferStatus.BLOCKED_BY_ADMIN);
-        offer.setIsActive(false);
         //TODO: mailing - inform offer owner about blocking offer
         context.setStateStrategy(new BlockByAdminState());
     }

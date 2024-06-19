@@ -52,9 +52,6 @@ public class Offer implements EntityWithImage {
     @Column(name = "is_free")
     private Boolean isFree;
 
-    @Column(name = "is_active")
-    private Boolean isActive;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
