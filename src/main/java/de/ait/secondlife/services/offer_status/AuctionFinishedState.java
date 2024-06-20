@@ -4,6 +4,7 @@ import de.ait.secondlife.constants.OfferStatus;
 import de.ait.secondlife.domain.entity.Bid;
 import de.ait.secondlife.domain.entity.Offer;
 import de.ait.secondlife.exception_handling.exceptions.ProhibitedOfferStateChangeException;
+import de.ait.secondlife.services.interfaces.OfferContext;
 import de.ait.secondlife.services.interfaces.OfferService;
 
 import java.util.Comparator;
@@ -91,7 +92,6 @@ public class AuctionFinishedState extends StateStrategy {
         Offer offer = getOfferAllowedForCurrentUser(context);
         OfferService offerService = context.getOfferService();
         offerService.setStatus(offer, OfferStatus.CANCELED);
-        offer.setIsActive(false);
         //TODO: mailing - inform all participants that auction was canceled
         context.setStateStrategy(new CancelState());
     }

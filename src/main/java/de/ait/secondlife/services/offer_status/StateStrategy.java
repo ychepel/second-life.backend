@@ -2,8 +2,8 @@ package de.ait.secondlife.services.offer_status;
 
 import de.ait.secondlife.domain.entity.Offer;
 import de.ait.secondlife.domain.entity.User;
-import de.ait.secondlife.services.interfaces.AdminService;
-import de.ait.secondlife.services.interfaces.UserService;
+import de.ait.secondlife.security.services.AuthService;
+import de.ait.secondlife.services.interfaces.OfferContext;
 
 import javax.security.auth.login.CredentialException;
 import java.util.Objects;
@@ -29,10 +29,9 @@ public abstract class StateStrategy {
     abstract void blockByAdmin(OfferContext context);
 
     protected Offer getOfferAllowedForCurrentUser(OfferContext context) {
-        UserService userService = context.getUserService();
         User currentUser;
         try {
-            currentUser = userService.getAuthenticatedUser();
+            currentUser = AuthService.getCurrentUser();
         } catch (CredentialException e) {
             throw new IllegalStateException(
                     String.format("Attempt to change Offer [ID=%d] status by not authenticated user", context.getOffer().getId()), e
@@ -55,9 +54,8 @@ public abstract class StateStrategy {
     }
 
     protected Offer getOfferAllowedForCurrentAdmin(OfferContext context) {
-        AdminService adminService = context.getAdminService();
         try {
-            adminService.getAuthenticatedAdmin();
+            AuthService.getCurrentAdmin();
         } catch (CredentialException e) {
             throw new IllegalStateException(
                     String.format("Attempt to change Offer [ID=%d] status by not authenticated admin", context.getOffer().getId()), e

@@ -24,10 +24,6 @@ public interface OfferService extends CheckEntityExistsService{
 
     OfferResponseDto updateOffer(OfferUpdateDto dto) throws CredentialException;
 
-    void removeOffer(Long id);
-
-    void recoverOffer(Long id);
-
     void setStatus(Offer offer, OfferStatus offerStatus);
 
     void setStatus(Offer offer, OfferStatus offerStatus, Long rejectionReasonId);
@@ -53,6 +49,10 @@ public interface OfferService extends CheckEntityExistsService{
     void blockOfferByAdmin(Long id);
 
     OfferResponseWithPaginationDto searchOffers(Pageable pageable, Long locationId, String pattern);
+
+    OfferResponseWithPaginationDto findUserAuctionParticipations(Long id, Pageable pageable, Long categoryId, String status, Boolean isFree);
+
+    boolean isCurrentUserAuctionParticipant(Offer offer);
 
     Long findOwnerIdByOfferId(Long id);
 }

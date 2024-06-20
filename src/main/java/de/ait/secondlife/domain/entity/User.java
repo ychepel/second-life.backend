@@ -39,7 +39,7 @@ public class User implements AuthenticatedUser, EntityWithImage {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(Role.ROLE_USER);
+        return List.of(getRole());
     }
 
     @Override
@@ -65,5 +65,10 @@ public class User implements AuthenticatedUser, EntityWithImage {
     @Override
     public boolean isEnabled() {
         return this.active;
+    }
+
+    @Override
+    public Role getRole() {
+        return Role.ROLE_USER;
     }
 }

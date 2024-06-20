@@ -25,7 +25,7 @@ public class Admin implements AuthenticatedUser {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(Role.ROLE_ADMIN);
+        return List.of(getRole());
     }
 
     @Override
@@ -51,5 +51,10 @@ public class Admin implements AuthenticatedUser {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    @Override
+    public Role getRole() {
+        return Role.ROLE_ADMIN;
     }
 }
