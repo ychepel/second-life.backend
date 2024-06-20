@@ -11,6 +11,7 @@ import de.ait.secondlife.domain.dto.*;
 import de.ait.secondlife.domain.entity.Offer;
 import de.ait.secondlife.domain.entity.User;
 import de.ait.secondlife.exception_handling.exceptions.NoRightToChangeException;
+import de.ait.secondlife.exception_handling.exceptions.UserIsNotAuthorizedException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.CreateOfferConstraintViolationException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.WrongAuctionParameterException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.WrongAuctionPriceParameterException;
@@ -57,7 +58,6 @@ public class OfferServiceImpl implements OfferService {
             OfferStatus.COMPLETED,
             OfferStatus.CANCELED,
             OfferStatus.BLOCKED_BY_ADMIN);
-
 
     @Override
     public OfferResponseWithPaginationDto findOffers(
@@ -307,6 +307,12 @@ public class OfferServiceImpl implements OfferService {
         );
     }
 
+    @Override
+    public boolean checkEntityExistsById(Long id) {
+        if (id == null) throw new IdIsNullException();
+        return offerRepository.existsById(id);
+    }
+
     private Offer getOfferById(Long id) {
         return offerRepository.findById(id).orElseThrow(() -> new OfferNotFoundException(id));
     }
@@ -340,19 +346,18 @@ public class OfferServiceImpl implements OfferService {
         if (!userService.checkEntityExistsById(id)) throw new UserNotFoundException(id);
     }
 
-    @Override
-    public boolean checkEntityExistsById(Long id) {
-        if (id == null) throw new IdIsNullException();
-        return offerRepository.existsById(id);
-    }
-
     private void checkUserCredentials(Long id) {
         try {
-            User user = userService.getAuthenticatedUser();
-            if (!user.getId().equals(id))
-                if (!user.getAuthorities().contains(Role.ROLE_ADMIN))
-                    throw new NoRightToChangeException("User  is not authorised for this operation");
-        } catch (CredentialException ignored) {
-        }
+            Role role = AuthService.getCurrentRole();
+            if (role == Role.ROLE_ADMIN) {
+                return;
+            }
+            if (role == Role.ROLE_USER) {
+                User user = AuthService.getCurrentUser();
+                if (!user.getId().equals(id)) {
+                    throw new UserIsNotAuthorizedException();
+                }
+            }
+        } catch (CredentialException ignored) {}
     }
 }

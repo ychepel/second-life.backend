@@ -70,6 +70,14 @@ public class AuthService {
         return (Admin) authenticatedUser;
     }
 
+    public static Role getCurrentRole() throws CredentialException {
+        AuthenticatedUser authenticatedUser = getAuthenticatedUser();
+        if (authenticatedUser == null) {
+            throw new UserIsNotAuthenticatedException();
+        }
+        return authenticatedUser.getRole();
+    }
+
     private static AuthenticatedUser getAuthenticatedUser() throws CredentialException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Object principal = authentication.getPrincipal();
