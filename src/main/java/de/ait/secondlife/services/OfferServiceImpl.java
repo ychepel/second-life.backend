@@ -35,7 +35,9 @@ import org.springframework.stereotype.Service;
 import javax.security.auth.login.CredentialException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -258,7 +260,8 @@ public class OfferServiceImpl implements OfferService {
             try {
                 User authenticatedUser = AuthService.getCurrentUser();
                 userService.setLocation(authenticatedUser.getId(), locationId);
-            } catch (CredentialException ignored) {}
+            } catch (CredentialException ignored) {
+            }
         }
 
         Page<Offer> pageOfOffer = offerRepository.searchAll(OfferStatus.AUCTION_STARTED, pageable, locationId, pattern);
@@ -332,6 +335,23 @@ public class OfferServiceImpl implements OfferService {
         }
     }
 
+    @Override
+    public List<User> getNotWinners(Offer offer) {
+
+        List<Bid> bidList = offer.getBids();
+
+        if (bidList != null){
+            return offer.getBids()
+                    .stream()
+                    .filter(bid -> !Objects.equals(bid.getId(), offer.getWinnerBid().getId()))
+                    .map(Bid::getUser)
+                    .toList();
+        }else {
+            return new ArrayList<>();
+        }
+
+    }
+
     private Offer getOfferById(Long id) {
         return offerRepository.findById(id).orElseThrow(() -> new OfferNotFoundException(id));
     }
@@ -377,6 +397,7 @@ public class OfferServiceImpl implements OfferService {
                     throw new UserIsNotAuthorizedException();
                 }
             }
-        } catch (CredentialException ignored) {}
+        } catch (CredentialException ignored) {
+        }
     }
 }

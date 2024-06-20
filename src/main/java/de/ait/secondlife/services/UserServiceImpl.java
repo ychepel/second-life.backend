@@ -6,21 +6,15 @@ import de.ait.secondlife.domain.dto.UserCreationDto;
 import de.ait.secondlife.domain.dto.UserDto;
 import de.ait.secondlife.domain.entity.User;
 import de.ait.secondlife.domain.interfaces.AuthenticatedUser;
-import de.ait.secondlife.exception_handling.exceptions.*;
-import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.is_null_exceptions.IdIsNullException;
-import de.ait.secondlife.exception_handling.exceptions.not_found_exception.LocationNotFoundException;
-import de.ait.secondlife.exception_handling.exceptions.not_found_exception.UserNotFoundException;
 import de.ait.secondlife.exception_handling.exceptions.ConfirmationEmailCodeNotValidException;
 import de.ait.secondlife.exception_handling.exceptions.DuplicateUserEmailException;
 import de.ait.secondlife.exception_handling.exceptions.UserSavingException;
+import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.is_null_exceptions.IdIsNullException;
+import de.ait.secondlife.exception_handling.exceptions.not_found_exception.LocationNotFoundException;
+import de.ait.secondlife.exception_handling.exceptions.not_found_exception.UserNotFoundException;
 import de.ait.secondlife.repositories.UserRepository;
 import de.ait.secondlife.security.services.AuthService;
-import de.ait.secondlife.services.interfaces.ImageService;
-import de.ait.secondlife.services.interfaces.LocationService;
-import de.ait.secondlife.security.Role;
-import de.ait.secondlife.services.interfaces.ConfirmationService;
-import de.ait.secondlife.services.interfaces.EmailService;
-import de.ait.secondlife.services.interfaces.UserService;
+import de.ait.secondlife.services.interfaces.*;
 import de.ait.secondlife.services.mapping.NewUserMappingService;
 import de.ait.secondlife.services.mapping.UserMappingService;
 import jakarta.transaction.Transactional;
@@ -142,7 +136,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public AuthenticatedUser findById(Long id) {
-        return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
+    public AuthenticatedUser findById(Long userId) {
+        return userRepository.findById(userId).orElseThrow(()-> new UserNotFoundException(userId));
     }
 }

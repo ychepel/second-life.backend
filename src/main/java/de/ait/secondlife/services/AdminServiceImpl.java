@@ -39,7 +39,8 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public AuthenticatedUser findById(Long id) {
-        return adminRepository.findById(id).orElseThrow(() -> new AdminNotFoundException(id));
+    public AuthenticatedUser findById(Long adminId) {
+        return adminRepository.findById(adminId).orElseThrow(()-> new AdminNotFoundException(adminId));
     }
+
 }

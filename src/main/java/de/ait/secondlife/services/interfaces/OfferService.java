@@ -4,6 +4,7 @@ package de.ait.secondlife.services.interfaces;
 import de.ait.secondlife.constants.OfferStatus;
 import de.ait.secondlife.domain.dto.*;
 import de.ait.secondlife.domain.entity.Offer;
+import de.ait.secondlife.domain.entity.User;
 import org.springframework.data.domain.Pageable;
 
 import javax.security.auth.login.CredentialException;
@@ -53,4 +54,6 @@ public interface OfferService extends CheckEntityExistsService{
     OfferResponseWithPaginationDto findUserAuctionParticipations(Long id, Pageable pageable, Long categoryId, String status, Boolean isFree);
 
     boolean isCurrentUserAuctionParticipant(Offer offer);
+
+    List<User> getNotWinners(Offer offer);
 }
