@@ -1,5 +1,7 @@
 package de.ait.secondlife.security;
 
+import de.ait.secondlife.domain.interfaces.AuthenticatedUser;
+import lombok.Setter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -11,6 +13,9 @@ public class AuthInfo implements Authentication {
     private boolean authenticated;
     private final String userEmail;
     private final Set<Role> roles;
+
+    @Setter
+    private AuthenticatedUser authenticatedUser;
 
     public AuthInfo(String username, Set<Role> roles) {
         this.userEmail = username;
@@ -34,7 +39,7 @@ public class AuthInfo implements Authentication {
 
     @Override
     public Object getPrincipal() {
-        return userEmail;
+        return authenticatedUser;
     }
 
     @Override

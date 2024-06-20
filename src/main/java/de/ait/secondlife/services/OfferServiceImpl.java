@@ -11,6 +11,7 @@ import de.ait.secondlife.domain.dto.*;
 import de.ait.secondlife.domain.entity.Offer;
 import de.ait.secondlife.domain.entity.User;
 import de.ait.secondlife.exception_handling.exceptions.NoRightToChangeException;
+import de.ait.secondlife.exception_handling.exceptions.UserIsNotAuthorizedException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.CreateOfferConstraintViolationException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.WrongAuctionParameterException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.WrongAuctionPriceParameterException;
@@ -18,15 +19,13 @@ import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.is_
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.OfferNotFoundException;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.UserNotFoundException;
 import de.ait.secondlife.repositories.OfferRepository;
+import de.ait.secondlife.security.services.AuthService;
 import de.ait.secondlife.security.Role;
 import de.ait.secondlife.services.interfaces.*;
 import de.ait.secondlife.services.mapping.OfferMappingService;
-import de.ait.secondlife.services.offer_status.OfferContext;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -50,6 +49,8 @@ public class OfferServiceImpl implements OfferService {
     private final CategoryService categoryService;
     private final LocationService locationService;
     private final OfferStatusHistoryService offerStatusHistoryService;
+    private final ImageService imageService;
+    private final OfferContext offerContext;
 
     private Set<OfferStatus> STATUSES_FOR_BID_SEARCH = Set.of(
             OfferStatus.AUCTION_STARTED,
@@ -57,15 +58,6 @@ public class OfferServiceImpl implements OfferService {
             OfferStatus.COMPLETED,
             OfferStatus.CANCELED,
             OfferStatus.BLOCKED_BY_ADMIN);
-
-    private OfferContext offerContext;
-
-    @Autowired
-    public void setOfferContext(@Lazy OfferContext offerContext) {
-        this.offerContext = offerContext;
-    }
-
-    private final ImageService imageService;
 
     @Override
     public OfferResponseWithPaginationDto findOffers(
@@ -109,7 +101,7 @@ public class OfferServiceImpl implements OfferService {
     @Transactional
     @Override
     public OfferResponseDto createOffer(OfferCreationDto dto) throws CredentialException {
-        User user = userService.getAuthenticatedUser();
+        User user = AuthService.getCurrentUser();
         try {
             Offer newOffer = mappingService.toEntity(dto);
             newOffer.setUser(user);
@@ -149,7 +141,7 @@ public class OfferServiceImpl implements OfferService {
     @Transactional
     @Override
     public OfferResponseDto updateOffer(OfferUpdateDto dto) throws CredentialException {
-        User user = userService.getAuthenticatedUser();
+        User user = AuthService.getCurrentUser();
         Offer offer = offerRepository.findById(dto.getId())
                 .orElseThrow(() -> new OfferNotFoundException(dto.getId()));
         if (!user.equals(offer.getUser()))
@@ -263,7 +255,7 @@ public class OfferServiceImpl implements OfferService {
     public OfferResponseWithPaginationDto searchOffers(Pageable pageable, Long locationId, String pattern) {
         if (locationId != null) {
             try {
-                User authenticatedUser = userService.getAuthenticatedUser();
+                User authenticatedUser = AuthService.getCurrentUser();
                 userService.setLocation(authenticatedUser.getId(), locationId);
             } catch (CredentialException ignored) {}
         }
@@ -315,6 +307,12 @@ public class OfferServiceImpl implements OfferService {
         );
     }
 
+    @Override
+    public boolean checkEntityExistsById(Long id) {
+        if (id == null) throw new IdIsNullException();
+        return offerRepository.existsById(id);
+    }
+
     private Offer getOfferById(Long id) {
         return offerRepository.findById(id).orElseThrow(() -> new OfferNotFoundException(id));
     }
@@ -348,19 +346,18 @@ public class OfferServiceImpl implements OfferService {
         if (!userService.checkEntityExistsById(id)) throw new UserNotFoundException(id);
     }
 
-    @Override
-    public boolean checkEntityExistsById(Long id) {
-        if (id == null) throw new IdIsNullException();
-        return offerRepository.existsById(id);
-    }
-
     private void checkUserCredentials(Long id) {
         try {
-            User user = userService.getAuthenticatedUser();
-            if (!user.getId().equals(id))
-                if (!user.getAuthorities().contains(Role.ROLE_ADMIN))
-                    throw new NoRightToChangeException("User  is not authorised for this operation");
-        } catch (CredentialException ignored) {
-        }
+            Role role = AuthService.getCurrentRole();
+            if (role == Role.ROLE_ADMIN) {
+                return;
+            }
+            if (role == Role.ROLE_USER) {
+                User user = AuthService.getCurrentUser();
+                if (!user.getId().equals(id)) {
+                    throw new UserIsNotAuthorizedException();
+                }
+            }
+        } catch (CredentialException ignored) {}
     }
 }
