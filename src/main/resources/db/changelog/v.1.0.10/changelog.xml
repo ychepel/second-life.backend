@@ -6,12 +6,12 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
 
 
-    <changeSet id="add_tag_1.0.9" author="Kirill">
-        <tagDatabase tag="v.1.0.9"/>
+    <changeSet id="add_tag_1.0.10" author="Kirill">
+        <tagDatabase tag="v.1.0.10"/>
     </changeSet>
 
-    <include file="../v.1.0.9/create-table-confirmation-code.xml" relativeToChangelogFile="true"/>
-    <include file="../v.1.0.9/create-foreign-key-offer-confirmation-code-to-user.xml" relativeToChangelogFile="true"/>
+    <include file="/create-table-confirmation-code.xml" relativeToChangelogFile="true"/>
+    <include file="/create-foreign-key-offer-confirmation-code-to-user.xml" relativeToChangelogFile="true"/>
     <include file="create-table-notification.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>
