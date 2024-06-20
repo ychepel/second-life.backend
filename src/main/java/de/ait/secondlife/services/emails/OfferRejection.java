@@ -30,7 +30,7 @@ public class OfferRejection extends TemplateService {
 
     @Override
     protected String getTemplateName() {
-        return "rejected_offer_mail.ftlh";
+        return "offer_rejected_mail.ftlh";
     }
 
     @Override

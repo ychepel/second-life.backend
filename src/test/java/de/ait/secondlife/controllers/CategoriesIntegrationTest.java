@@ -27,7 +27,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @DisplayName("Endpoint /categories works:")
 @DisplayNameGeneration(value = DisplayNameGenerator.ReplaceUnderscores.class)
-@ActiveProfiles("test")
 class CategoriesIntegrationTest {
 
     @Autowired
