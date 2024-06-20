@@ -51,4 +51,6 @@ public interface OfferService extends CheckEntityExistsService{
     OfferResponseWithPaginationDto searchOffers(Pageable pageable, Long locationId, String pattern);
 
     OfferResponseWithPaginationDto findUserAuctionParticipations(Long id, Pageable pageable, Long categoryId, String status, Boolean isFree);
+
+    boolean isCurrentUserAuctionParticipant(Offer offer);
 }
