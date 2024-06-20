@@ -9,7 +9,7 @@ import java.util.Set;
 
 public interface ImageService {
 
-    ImagePathsResponseDto saveNewImage(String entityType, Long entityId, ImageCreationDto dto, Long currectUserId) ;
+    ImagePathsResponseDto saveNewImage(String entityType, Long entityId, ImageCreationDto dto) ;
 
     ImagePathsResponseDto findAllImageForEntity(String entityType, Long entityId);
 

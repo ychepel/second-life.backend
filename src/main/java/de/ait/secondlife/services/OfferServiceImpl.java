@@ -11,8 +11,7 @@ import de.ait.secondlife.domain.dto.*;
 import de.ait.secondlife.domain.entity.Bid;
 import de.ait.secondlife.domain.entity.Offer;
 import de.ait.secondlife.domain.entity.User;
-import de.ait.secondlife.exception_handling.exceptions.NoRightToChangeException;
-import de.ait.secondlife.exception_handling.exceptions.UserIsNotAuthorizedException;
+import de.ait.secondlife.exception_handling.exceptions.NoRightsException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.CreateOfferConstraintViolationException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.WrongAuctionParameterException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.WrongAuctionPriceParameterException;
@@ -21,12 +20,14 @@ import de.ait.secondlife.exception_handling.exceptions.not_found_exception.Offer
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.UserNotFoundException;
 import de.ait.secondlife.repositories.OfferRepository;
 import de.ait.secondlife.security.services.AuthService;
-import de.ait.secondlife.security.Role;
 import de.ait.secondlife.services.interfaces.*;
 import de.ait.secondlife.services.mapping.OfferMappingService;
+import de.ait.secondlife.services.utilities.UserCredentialsUtilities;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -50,7 +51,10 @@ public class OfferServiceImpl implements OfferService {
     private final CategoryService categoryService;
     private final LocationService locationService;
     private final OfferStatusHistoryService offerStatusHistoryService;
-    private final ImageService imageService;
+    private final UserCredentialsUtilities utilities;
+    @Lazy
+    @Autowired
+    private  ImageService imageService;
     private final OfferContext offerContext;
 
     private Set<OfferStatus> STATUSES_FOR_BID_SEARCH = Set.of(
@@ -102,6 +106,8 @@ public class OfferServiceImpl implements OfferService {
     @Transactional
     @Override
     public OfferResponseDto createOffer(OfferCreationDto dto) throws CredentialException {
+        utilities.checkUserCredentials(dto.getBaseNameOfImages());
+
         User user = AuthService.getCurrentUser();
         try {
             Offer newOffer = mappingService.toEntity(dto);
@@ -142,11 +148,12 @@ public class OfferServiceImpl implements OfferService {
     @Transactional
     @Override
     public OfferResponseDto updateOffer(OfferUpdateDto dto) throws CredentialException {
+        utilities.checkUserCredentials(dto.getBaseNameOfImages());
         User user = AuthService.getCurrentUser();
         Offer offer = offerRepository.findById(dto.getId())
                 .orElseThrow(() -> new OfferNotFoundException(dto.getId()));
         if (!user.equals(offer.getUser()))
-            throw new NoRightToChangeException(String.format("User <%d> can't change this offer", user.getId()));
+            throw new NoRightsException(String.format("User <%d> can't change this offer", user.getId()));
 
         offer.setTitle(dto.getTitle() == null ? offer.getTitle() : dto.getTitle());
         offer.setDescription(dto.getDescription() == null ? offer.getDescription() : dto.getDescription());
@@ -274,7 +281,7 @@ public class OfferServiceImpl implements OfferService {
             Boolean isFree) {
 
         checkUserId(id);
-        checkUserCredentials(id);
+        utilities.checkUserCredentials(id);
         OfferStatus offerStatus = status != null ? OfferStatus.get(status) : null;
 
         Page<Offer> pageOfOffer = offerRepository.findUserAuctionParticipations(
@@ -368,20 +375,5 @@ public class OfferServiceImpl implements OfferService {
     private void checkUserId(Long id) {
         if (id == null) throw new IdIsNullException();
         if (!userService.checkEntityExistsById(id)) throw new UserNotFoundException(id);
-    }
-
-    private void checkUserCredentials(Long id) {
-        try {
-            Role role = AuthService.getCurrentRole();
-            if (role == Role.ROLE_ADMIN) {
-                return;
-            }
-            if (role == Role.ROLE_USER) {
-                User user = AuthService.getCurrentUser();
-                if (!user.getId().equals(id)) {
-                    throw new UserIsNotAuthorizedException();
-                }
-            }
-        } catch (CredentialException ignored) {}
     }
 }

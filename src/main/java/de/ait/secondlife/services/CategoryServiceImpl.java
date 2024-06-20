@@ -13,7 +13,10 @@ import de.ait.secondlife.repositories.CategoryRepository;
 import de.ait.secondlife.services.interfaces.CategoryService;
 import de.ait.secondlife.services.interfaces.ImageService;
 import de.ait.secondlife.services.mapping.NewCategoryMappingService;
+import de.ait.secondlife.services.utilities.UserCredentialsUtilities;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,7 +29,10 @@ public class CategoryServiceImpl implements CategoryService {
 
     private final NewCategoryMappingService mappingService;
 
-    private final ImageService imageService;
+    private final UserCredentialsUtilities utilities;
+    @Lazy
+    @Autowired
+    private  ImageService imageService;
 
     @Override
     public CategoryDto getById(Long id) {
@@ -60,6 +66,8 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryDto save(CategoryCreationDto categoryDto) {
 
+        utilities.checkUserCredentials(categoryDto.getBaseNameOfImages());
+
         String categoryName = categoryDto.getName();
         if (repository.existsByName(categoryName)) {
             throw new DuplicateCategoryException(categoryName);
@@ -86,7 +94,7 @@ public class CategoryServiceImpl implements CategoryService {
 
         existingCategory.setName(dto.getName());
         existingCategory.setDescription(dto.getDescription());
-
+        utilities.checkUserCredentials(dto.getBaseNameOfImages());
         imageService.connectTempImagesToEntity(
                 dto.getBaseNameOfImages(),
                 EntityTypeWithImages.CATEGORY.getType(),
