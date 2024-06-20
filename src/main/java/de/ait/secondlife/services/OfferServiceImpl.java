@@ -17,13 +17,12 @@ import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.Wro
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.is_null_exceptions.IdIsNullException;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.OfferNotFoundException;
 import de.ait.secondlife.repositories.OfferRepository;
+import de.ait.secondlife.security.services.AuthService;
 import de.ait.secondlife.services.interfaces.*;
 import de.ait.secondlife.services.mapping.OfferMappingService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -48,13 +47,7 @@ public class OfferServiceImpl implements OfferService {
     private final LocationService locationService;
     private final OfferStatusHistoryService offerStatusHistoryService;
     private final ImageService imageService;
-
     private final OfferContext offerContext;
-
-//    @Autowired
-//    public void setOfferContext(@Lazy OfferContext offerContext) {
-//        this.offerContext = offerContext;
-//    }
 
     @Override
     public OfferResponseWithPaginationDto findOffers(
@@ -98,7 +91,7 @@ public class OfferServiceImpl implements OfferService {
     @Transactional
     @Override
     public OfferResponseDto createOffer(OfferCreationDto dto) throws CredentialException {
-        User user = userService.getAuthenticatedUser();
+        User user = AuthService.getCurrentUser();
         try {
             Offer newOffer = mappingService.toEntity(dto);
             newOffer.setUser(user);
@@ -138,7 +131,7 @@ public class OfferServiceImpl implements OfferService {
     @Transactional
     @Override
     public OfferResponseDto updateOffer(OfferUpdateDto dto) throws CredentialException {
-        User user = userService.getAuthenticatedUser();
+        User user = AuthService.getCurrentUser();
         Offer offer = offerRepository.findById(dto.getId())
                 .orElseThrow(() -> new OfferNotFoundException(dto.getId()));
         if (!user.equals(offer.getUser()))
@@ -252,7 +245,7 @@ public class OfferServiceImpl implements OfferService {
     public OfferResponseWithPaginationDto searchOffers(Pageable pageable, Long locationId, String pattern) {
         if (locationId != null) {
             try {
-                User authenticatedUser = userService.getAuthenticatedUser();
+                User authenticatedUser = AuthService.getCurrentUser();
                 userService.setLocation(authenticatedUser.getId(), locationId);
             } catch (CredentialException ignored) {
             }

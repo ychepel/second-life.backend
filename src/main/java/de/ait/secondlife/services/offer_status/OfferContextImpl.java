@@ -16,9 +16,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class OfferContextImpl implements OfferContext {
 
-    private final UserService userService;
-    private final AdminService adminService;
-
     private OfferService offerService;
     private BidService bidService;
     private Offer offer;

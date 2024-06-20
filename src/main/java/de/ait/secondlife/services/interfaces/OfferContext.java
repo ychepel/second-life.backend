@@ -7,10 +7,6 @@ public interface OfferContext {
 
     OfferService getOfferService();
 
-    UserService getUserService();
-
-    AdminService getAdminService();
-
     BidService getBidService();
 
     void setStateStrategy(StateStrategy stateStrategy);

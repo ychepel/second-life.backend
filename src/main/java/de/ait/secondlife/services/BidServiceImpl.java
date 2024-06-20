@@ -7,9 +7,9 @@ import de.ait.secondlife.domain.entity.Offer;
 import de.ait.secondlife.domain.entity.User;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.BidCreationException;
 import de.ait.secondlife.repositories.BidRepository;
+import de.ait.secondlife.security.services.AuthService;
 import de.ait.secondlife.services.interfaces.BidService;
 import de.ait.secondlife.services.interfaces.OfferService;
-import de.ait.secondlife.services.interfaces.UserService;
 import de.ait.secondlife.services.mapping.BidMappingService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +24,6 @@ import java.util.Objects;
 public class BidServiceImpl implements BidService {
 
     private final BidRepository bidRepository;
-    private final UserService userService;
     private final BidMappingService mappingService;
     private final OfferService offerService;
 
@@ -47,7 +46,7 @@ public class BidServiceImpl implements BidService {
 
         checkOfferStatus(offer);
 
-        User user = userService.getAuthenticatedUser();
+        User user = AuthService.getCurrentUser();
         checkAuthentication(offer, user);
 
         Bid newBid = mappingService.toEntity(dto);
