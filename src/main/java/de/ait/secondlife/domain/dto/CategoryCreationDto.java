@@ -9,7 +9,7 @@ import lombok.ToString;
 @Data
 @ToString
 @Schema(name = "New Category to save into DB")
-public class CategoryCreationDto  extends BaseNameOfImages{
+public class CategoryCreationDto  extends BaseNameOfImages {
 
     @Schema(description = "category name", example = "Electronics and gadgets")
     @NotBlank(message = "Name must not be blank")

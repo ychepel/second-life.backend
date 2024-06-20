@@ -16,4 +16,6 @@ public interface CategoryService extends CheckEntityExistsService{
     CategoryDto setActive(Long categoryId);
     CategoryDto hide(Long categoryId);
     Category getCategoryById(Long id);
+
+    List<CategoryDto> getAllPlusHidden();
 }

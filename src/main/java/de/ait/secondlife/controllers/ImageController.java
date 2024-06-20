@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/v1/images")
 @RequiredArgsConstructor
 @Tag(name = "Image controller", description = "Controller for some operations with images")
-public class ImageContorller {
+public class ImageController {
 
     private final ImageService imageService;
     private final EntityUtilities utilities;
@@ -34,7 +34,8 @@ public class ImageContorller {
             description = "Create new image for entity by entity id. " +
                     "The maximum allowable image upload size is 8MB. " +
                     "The maximum number of images for the Offer entity is 5. " +
-                    "For Category and User - 1."
+                    "For Category and User - 1.<br>" +
+                    "The image can be returned in 3 sizes: 1024x1024, 320x320, 64x64"
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",

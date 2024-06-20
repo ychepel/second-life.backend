@@ -7,5 +7,5 @@ import lombok.Data;
 public abstract class ImageUploadDetails {
 
     @Schema(description = "List of image's path")
-    private  ImagePathsResponseDto images;
+    private ImagePathsResponseDto images;
 }

@@ -6,6 +6,7 @@ import de.ait.secondlife.domain.entity.Bid;
 import de.ait.secondlife.domain.entity.Offer;
 import de.ait.secondlife.exception_handling.exceptions.ProhibitedOfferStateChangeException;
 import de.ait.secondlife.services.interfaces.EmailService;
+import de.ait.secondlife.services.interfaces.OfferContext;
 import de.ait.secondlife.services.interfaces.OfferService;
 
 import java.util.Comparator;
@@ -75,7 +76,7 @@ public class AuctionFinishedState extends StateStrategy {
             );
 
             context.setStateStrategy(new CompleteState());
-        } else if(offer.getMaxBidValue().compareTo(offer.getWinBid()) == 0) {
+        } else if(!offer.getIsFree() && offer.getMaxBidValue().compareTo(offer.getWinBid()) == 0) {
             if (offer.getWinnerBid() != null) {
                 throw new IllegalStateException(String.format("Offer [ID=%d] already has a winner", offer.getId()));
             }
@@ -125,7 +126,6 @@ public class AuctionFinishedState extends StateStrategy {
         Offer offer = getOfferAllowedForCurrentUser(context);
         OfferService offerService = context.getOfferService();
         offerService.setStatus(offer, OfferStatus.CANCELED);
-        offer.setIsActive(false);
         //TODO: mailing - inform all participants that auction was canceled
         context.setStateStrategy(new CancelState());
     }

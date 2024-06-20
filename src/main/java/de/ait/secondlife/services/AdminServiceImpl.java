@@ -34,19 +34,6 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public Admin getAuthenticatedAdmin() throws CredentialException {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication.getPrincipal().equals("anonymousUser")) {
-            throw new UserIsNotAuthenticatedException();
-        }
-        if (!authentication.getAuthorities().contains(Role.ROLE_ADMIN)) {
-            throw new UserIsNotAuthorizedException();
-        }
-        String username = authentication.getName();
-        return (Admin) loadUserByUsername(username);
-    }
-
-    @Override
     public Admin getDefaultAdmin() {
         return adminRepository.findAll().get(0);
     }

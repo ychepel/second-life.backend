@@ -1,7 +1,5 @@
 package de.ait.secondlife.domain.dto;
 
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -11,12 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Schema(description = "Image create dto")
 public class ImageCreationDto {
 
-    @Parameter(description = "Type of entity",
-            examples = {
-                    @ExampleObject(value = "offer"),
-                    @ExampleObject(value = "user"),
-                    @ExampleObject(value = "category")
-            })
+    @Schema(description = "Type of entity", allowableValues = {"offer", "user", "category"}, example = "offer")
     @NotNull(message = "Entity type cannot be null")
     private String entityType;
 

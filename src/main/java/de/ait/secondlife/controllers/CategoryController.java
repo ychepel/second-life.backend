@@ -53,6 +53,20 @@ public class CategoryController {
         return ResponseEntity.ok(service.getAll());
     }
 
+    @Operation(summary = "Get list of the categories, including hidden categories", description = "Accessible to Admin only")
+    @GetMapping("/get-all-for-admin")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = CategoryDto.class))),
+            @ApiResponse(responseCode = "403",
+                    description = "Forbidden",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class)))
+    })
+    public ResponseEntity<List<CategoryDto>> getAllPlusHidden() {
+        return ResponseEntity.ok(service.getAllPlusHidden());
+    }
+
     @Operation(summary = "Add category", description = "Accessible only by admin")
     @PostMapping
     @ApiResponses(value = {

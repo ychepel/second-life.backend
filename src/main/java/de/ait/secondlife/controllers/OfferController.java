@@ -116,17 +116,15 @@ public class OfferController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = OfferResponseWithPaginationDto.class))),
-            @ApiResponse(responseCode = "404", description = "Offers not found",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class)))
     })
     public ResponseEntity<OfferResponseWithPaginationDto> getByUserId(
-            @RequestParam(defaultValue = "0")
+            @RequestParam(defaultValue = PAGE_VALUE)
             @Parameter(description = "Requested page number. ", example = "0")
             int page,
-            @RequestParam(defaultValue = "10")
-            @Parameter(description = "Number of entities per page. ", example = "0")
+            @RequestParam(defaultValue = SIZE_VALUE)
+            @Parameter(description = "Number of entities per page.", example = "10")
             int size,
-            @RequestParam(defaultValue = "createdAt")
+            @RequestParam(defaultValue = SORT_BY)
             @Parameter(description = "Sorting field. ", example = "createdAt")
             String sortBy,
             @RequestParam(defaultValue = "true")
@@ -207,50 +205,6 @@ public class OfferController {
             OfferUpdateDto dto
     ) throws CredentialException {
         return ResponseEntity.ok(service.updateOffer(dto));
-    }
-
-    @DeleteMapping("/{id}")
-    @Operation(
-            summary = "Deactivate offer by id",
-            description = "Deactivating the existing offer by id. This offer won't be available when searching the database"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
-            @ApiResponse(responseCode = "403", description = "Forbidden",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
-            @ApiResponse(responseCode = "404", description = "Offer not found",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class)))
-    })
-    public ResponseEntity<ResponseMessageDto> remove(
-            @PathVariable
-            @Parameter(description = "Offer id.", example = "123")
-            Long id) {
-        service.removeOffer(id);
-        return ResponseEntity.ok(
-                new ResponseMessageDto(String.format("Offer with id <%s> removed successful", id)));
-    }
-
-    @PutMapping("/recover/{id}")
-    @Operation(
-            summary = "Activate offer by id",
-            description = "Activating the existing offer by id. This offer will be available when searching the database"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
-            @ApiResponse(responseCode = "403", description = "Forbidden",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
-            @ApiResponse(responseCode = "404", description = "Offer not found",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class))),
-    })
-    public ResponseEntity<ResponseMessageDto> recover(
-            @PathVariable
-            @Parameter(description = "Offer id.", example = "123")
-            Long id) {
-        service.recoverOffer(id);
-        return ResponseEntity.ok(
-                new ResponseMessageDto(String.format("Offer with id <%s> recovered successful", id)));
     }
 
     @PatchMapping("/{id}/reject")
@@ -365,6 +319,96 @@ public class OfferController {
         return ResponseEntity.ok(service.completeOffer(id, offerCompletionDto));
     }
 
+    @GetMapping("/search")
+    @Operation(
+            summary = "Search offers",
+            description = "Searching string <i>pattern</i> among all Offers in status AUCTION_STARTED. The search is carried out using the Offer title and Offer description fields and is not case-sensitive."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successful operation",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = OfferResponseWithPaginationDto.class))
+            ),
+    })
+    public ResponseEntity<OfferResponseWithPaginationDto> search(
+            @RequestParam
+            String pattern,
+            @RequestParam(defaultValue = PAGE_VALUE)
+            @Parameter(description = "Requested page number. ", example = "0")
+            int page,
+            @RequestParam(defaultValue = SIZE_VALUE)
+            @Parameter(description = "Number of entities per page.", example = "10")
+            int size,
+            @RequestParam(defaultValue = SORT_BY)
+            @Parameter(description = "Sorting field.", examples = {
+                    @ExampleObject(name = "Sort by created time", value = "createdAt"),
+                    @ExampleObject(name = "Sort by title", value = "title"),
+                    @ExampleObject(name = "Sort by start price", value = "startPrice")
+            })
+            String sortBy,
+            @RequestParam(defaultValue = "true")
+            @Parameter(description = "Sorting direction.", examples = {
+                    @ExampleObject(name = "Sort direction is ascending(default)", value = "true"),
+                    @ExampleObject(name = "Sort direction is descending", value = "false")
+            })
+            Boolean isAsc,
+            @RequestParam(required = false, name = "location_id")
+            @Parameter(description = "Location id for filtration. Can be null. Optional parameter", example = "3")
+            Long locationId
+    ){
+        return ResponseEntity.ok(service.searchOffers(getPageable(page, size, sortBy, isAsc), locationId, pattern));
+    }
+
+    @GetMapping("/participations/user/{id}")
+    @Operation(
+            summary = "Get all offers by user id in which the user has placed a bid",
+            description = "Receiving all offers by user id available in the database with pagination" +
+                    " in which the user has placed and the offers have statuses : " +
+                    "AUCTION_STARTED, QUALIFICATION, COMPLETED, CANCELED, BLOCKED_BY_ADMIN"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = OfferResponseWithPaginationDto.class))),
+    })
+    public ResponseEntity<OfferResponseWithPaginationDto> getUserAuctionParticipations(
+            @RequestParam(defaultValue = PAGE_VALUE)
+            @Parameter(description = "Requested page number. ", example = "0")
+            int page,
+            @RequestParam(defaultValue = SIZE_VALUE)
+            @Parameter(description = "Number of entities per page.", example = "10")
+            int size,
+            @RequestParam(defaultValue = SORT_BY)
+            @Parameter(description = "Sorting field. ", example = "createdAt")
+            String sortBy,
+            @RequestParam(defaultValue = "true")
+            @Parameter(description = "Sorting direction.", examples = {
+                    @ExampleObject(name = "Sort direction is ascending(default)", value = "true"),
+                    @ExampleObject(name = "Sort direction is descending", value = "false")
+            })
+            Boolean isAsc,
+            @RequestParam(required = false)
+            @Parameter(description = "Category id for filtration. Can be null." +
+                    " Optional parameter", example = "3")
+            Long category_id,
+            @RequestParam(required = false)
+            @Parameter(description = "Offer status for filtration. Can be null." +
+                    " Optional parameter", example = "DrAfT")
+            String status,
+            @RequestParam(required = false)
+            @Parameter(description = "Is offer free or not for filtration. Can be null." +
+                    " Optional parameter", example = "true, false")
+            Boolean free,
+            @PathVariable
+            @Parameter(description = "User id in Long format. ", example = "2321")
+            Long id) {
+        return ResponseEntity.ok(service.findUserAuctionParticipations(
+                id,
+                getPageable(page, size, sortBy, isAsc),
+                category_id,
+                status,
+                free));
+    }
 
     private Pageable getPageable(int page, int size, String sortBy, Boolean isAsc) {
         try {

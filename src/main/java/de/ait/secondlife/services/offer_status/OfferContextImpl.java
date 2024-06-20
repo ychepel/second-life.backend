@@ -8,21 +8,30 @@ import de.ait.secondlife.services.mapping.OfferMappingService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 @Getter
 @Component
 @RequiredArgsConstructor
-public class OfferContext {
+public class OfferContextImpl implements OfferContext {
 
-    private final OfferService offerService;
-    private final UserService userService;
-    private final AdminService adminService;
-    private final BidService bidService;
-    private final OfferMappingService offerMappingService;
+    private OfferService offerService;
+    private BidService bidService;
     private final EmailService emailService;
 
     private Offer offer;
+
+    @Autowired
+    public void setOfferContext(@Lazy OfferService offerService) {
+        this.offerService = offerService;
+    }
+
+    @Autowired
+    public void setBidService(@Lazy BidService bidService) {
+        this.bidService = bidService;
+    }
 
     @Setter
     private StateStrategy stateStrategy;

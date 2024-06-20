@@ -2,7 +2,6 @@ package de.ait.secondlife.domain.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -70,4 +69,7 @@ public class OfferResponseDto extends ImageUploadDetails {
 
     @Schema(description = "Quantity of auction bids", example = "8")
     private int bidsCount;
+
+    @Schema(description = "Is the current user a participant in the auction", example = "false")
+    private Boolean isCurrentUserAuctionParticipant;
 }

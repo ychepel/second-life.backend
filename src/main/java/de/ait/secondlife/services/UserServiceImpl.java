@@ -14,6 +14,7 @@ import de.ait.secondlife.exception_handling.exceptions.ConfirmationEmailCodeNotV
 import de.ait.secondlife.exception_handling.exceptions.DuplicateUserEmailException;
 import de.ait.secondlife.exception_handling.exceptions.UserSavingException;
 import de.ait.secondlife.repositories.UserRepository;
+import de.ait.secondlife.security.services.AuthService;
 import de.ait.secondlife.services.interfaces.ImageService;
 import de.ait.secondlife.services.interfaces.LocationService;
 import de.ait.secondlife.security.Role;
@@ -24,10 +25,6 @@ import de.ait.secondlife.services.mapping.NewUserMappingService;
 import de.ait.secondlife.services.mapping.UserMappingService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -46,15 +43,6 @@ public class UserServiceImpl implements UserService {
     private final ImageService imageService;
     private final EmailService emailService;
     private final ConfirmationService confirmationService;
-
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(username);
-        if (user == null) {
-            throw new UsernameNotFoundException("User not found");
-        }
-        return user;
-    }
 
     @Override
     public UserDto register(UserCreationDto newUserDto) {
@@ -122,25 +110,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User getAuthenticatedUser() throws CredentialException {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication.getPrincipal().equals("anonymousUser")) {
-            throw new UserIsNotAuthenticatedException();
-        }
-        if (!authentication.getAuthorities().contains(Role.ROLE_USER)) {
-            throw new UserIsNotAuthorizedException();
-        }
-        String username = authentication.getName();
-        User user = (User) loadUserByUsername(username);
-        if (!user.isActive()) {
-            throw new UserIsNotActiveException();
-        }
-        return user;
-    }
-
-    @Override
     public UserDto getCurrentUser() throws CredentialException {
-        return userMappingService.toDto(getAuthenticatedUser());
+        return userMappingService.toDto(AuthService.getCurrentUser());
     }
 
     @Override

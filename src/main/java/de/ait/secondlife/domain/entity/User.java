@@ -39,7 +39,7 @@ public class User implements AuthenticatedUser, EntityWithImage {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(Role.ROLE_USER);
+        return List.of(getRole());
     }
 
     @Override
