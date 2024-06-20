@@ -2,12 +2,14 @@ package de.ait.secondlife.domain.entity;
 
 import de.ait.secondlife.domain.interfaces.EntityWithImage;
 import de.ait.secondlife.constants.OfferStatus;
+import de.ait.secondlife.security.services.AuthService;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.security.auth.login.CredentialException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -91,6 +93,19 @@ public class Offer implements EntityWithImage {
 
     public int getBidsCount() {
         return bids == null ? 0 : bids.size();
+    }
+
+    public boolean isCurrentUserAuctionParticipant() {
+        try {
+            User user = AuthService.getCurrentUser();
+            List<Long> participantIds = bids.stream()
+                    .map(Bid::getUser)
+                    .map(User::getId)
+                    .toList();
+            return participantIds.contains(user.getId());
+        } catch (CredentialException e) {
+            return false;
+        }
     }
 }
 
