@@ -11,6 +11,7 @@ import de.ait.secondlife.security.services.AuthService;
 import de.ait.secondlife.services.interfaces.BidService;
 import de.ait.secondlife.services.interfaces.OfferService;
 import de.ait.secondlife.services.mapping.BidMappingService;
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,7 @@ public class BidServiceImpl implements BidService {
     private final BidRepository bidRepository;
     private final BidMappingService mappingService;
     private final OfferService offerService;
+    private final EntityManager entityManager;
 
     @Override
     public Bid getById(Long id) {
@@ -55,6 +57,7 @@ public class BidServiceImpl implements BidService {
         bidRepository.save(newBid);
 
         if (isWinningBid(offer, newBidValue)) {
+            entityManager.refresh(offer);
             offerService.finishAuction(offer);
         }
     }

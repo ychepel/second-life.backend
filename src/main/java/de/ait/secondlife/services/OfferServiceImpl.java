@@ -16,8 +16,10 @@ import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.Wro
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.WrongAuctionPriceParameterException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.is_null_exceptions.IdIsNullException;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.OfferNotFoundException;
+import de.ait.secondlife.exception_handling.exceptions.not_found_exception.UserNotFoundException;
 import de.ait.secondlife.repositories.OfferRepository;
 import de.ait.secondlife.security.services.AuthService;
+import de.ait.secondlife.security.Role;
 import de.ait.secondlife.services.interfaces.*;
 import de.ait.secondlife.services.mapping.OfferMappingService;
 import jakarta.transaction.Transactional;
@@ -49,6 +51,14 @@ public class OfferServiceImpl implements OfferService {
     private final ImageService imageService;
     private final OfferContext offerContext;
 
+    private Set<OfferStatus> STATUSES_FOR_BID_SEARCH = Set.of(
+            OfferStatus.AUCTION_STARTED,
+            OfferStatus.QUALIFICATION,
+            OfferStatus.COMPLETED,
+            OfferStatus.CANCELED,
+            OfferStatus.BLOCKED_BY_ADMIN);
+
+
     @Override
     public OfferResponseWithPaginationDto findOffers(
             Pageable pageable,
@@ -58,7 +68,7 @@ public class OfferServiceImpl implements OfferService {
     ) {
         OfferStatus offerStatus = status != null ? OfferStatus.get(status) : null;
         Page<Offer> pageOfOffer = offerRepository
-                .findAllWithFiltration(categoryId, offerStatus, isFree, pageable);
+                .findAll(categoryId, offerStatus, isFree, pageable);
         return offersToOfferRequestWithPaginationDto(pageOfOffer);
     }
 
@@ -82,7 +92,7 @@ public class OfferServiceImpl implements OfferService {
             Long categoryId,
             String status,
             Boolean isFree) {
-        if (id == null) throw new IdIsNullException();
+        checkUserId(id);
         OfferStatus offerStatus = status != null ? OfferStatus.get(status) : null;
         Page<Offer> pageOfOffer = offerRepository.findByUserId(id, categoryId, offerStatus, isFree, pageable);
         return offersToOfferRequestWithPaginationDto(pageOfOffer);
@@ -247,11 +257,29 @@ public class OfferServiceImpl implements OfferService {
             try {
                 User authenticatedUser = AuthService.getCurrentUser();
                 userService.setLocation(authenticatedUser.getId(), locationId);
-            } catch (CredentialException ignored) {
-            }
+            } catch (CredentialException ignored) {}
         }
 
         Page<Offer> pageOfOffer = offerRepository.searchAll(OfferStatus.AUCTION_STARTED, pageable, locationId, pattern);
+        return offersToOfferRequestWithPaginationDto(pageOfOffer);
+    }
+
+    @Override
+    public OfferResponseWithPaginationDto findUserAuctionParticipations(
+            Long id,
+            Pageable pageable,
+            Long categoryId,
+            String status,
+            Boolean isFree) {
+
+        checkUserId(id);
+        checkUserCredentials(id);
+        OfferStatus offerStatus = status != null ? OfferStatus.get(status) : null;
+
+        Page<Offer> pageOfOffer = offerRepository.findUserAuctionParticipations(
+                id, categoryId, offerStatus, isFree,
+                STATUSES_FOR_BID_SEARCH, pageable);
+
         return offersToOfferRequestWithPaginationDto(pageOfOffer);
     }
 
@@ -307,9 +335,24 @@ public class OfferServiceImpl implements OfferService {
         }
     }
 
+    private void checkUserId(Long id) {
+        if (id == null) throw new IdIsNullException();
+        if (!userService.checkEntityExistsById(id)) throw new UserNotFoundException(id);
+    }
+
     @Override
     public boolean checkEntityExistsById(Long id) {
         if (id == null) throw new IdIsNullException();
         return offerRepository.existsById(id);
+    }
+
+    private void checkUserCredentials(Long id) {
+        try {
+            User user = userService.getAuthenticatedUser();
+            if (!user.getId().equals(id))
+                if (!user.getAuthorities().contains(Role.ROLE_ADMIN))
+                    throw new NoRightToChangeException("User  is not authorised for this operation");
+        } catch (CredentialException ignored) {
+        }
     }
 }

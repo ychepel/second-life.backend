@@ -116,17 +116,15 @@ public class OfferController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = OfferResponseWithPaginationDto.class))),
-            @ApiResponse(responseCode = "404", description = "Offers not found",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class)))
     })
     public ResponseEntity<OfferResponseWithPaginationDto> getByUserId(
-            @RequestParam(defaultValue = "0")
+            @RequestParam(defaultValue = PAGE_VALUE)
             @Parameter(description = "Requested page number. ", example = "0")
             int page,
-            @RequestParam(defaultValue = "10")
-            @Parameter(description = "Number of entities per page. ", example = "0")
+            @RequestParam(defaultValue = SIZE_VALUE)
+            @Parameter(description = "Number of entities per page.", example = "10")
             int size,
-            @RequestParam(defaultValue = "createdAt")
+            @RequestParam(defaultValue = SORT_BY)
             @Parameter(description = "Sorting field. ", example = "createdAt")
             String sortBy,
             @RequestParam(defaultValue = "true")
@@ -360,6 +358,56 @@ public class OfferController {
             Long locationId
     ){
         return ResponseEntity.ok(service.searchOffers(getPageable(page, size, sortBy, isAsc), locationId, pattern));
+    }
+
+    @GetMapping("/participations/user/{id}")
+    @Operation(
+            summary = "Get all offers by user id in which the user has placed a bid",
+            description = "Receiving all offers by user id available in the database with pagination" +
+                    " in which the user has placed and the offers have statuses : " +
+                    "AUCTION_STARTED, QUALIFICATION, COMPLETED, CANCELED, BLOCKED_BY_ADMIN"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = OfferResponseWithPaginationDto.class))),
+    })
+    public ResponseEntity<OfferResponseWithPaginationDto> getUserAuctionParticipations(
+            @RequestParam(defaultValue = PAGE_VALUE)
+            @Parameter(description = "Requested page number. ", example = "0")
+            int page,
+            @RequestParam(defaultValue = SIZE_VALUE)
+            @Parameter(description = "Number of entities per page.", example = "10")
+            int size,
+            @RequestParam(defaultValue = SORT_BY)
+            @Parameter(description = "Sorting field. ", example = "createdAt")
+            String sortBy,
+            @RequestParam(defaultValue = "true")
+            @Parameter(description = "Sorting direction.", examples = {
+                    @ExampleObject(name = "Sort direction is ascending(default)", value = "true"),
+                    @ExampleObject(name = "Sort direction is descending", value = "false")
+            })
+            Boolean isAsc,
+            @RequestParam(required = false)
+            @Parameter(description = "Category id for filtration. Can be null." +
+                    " Optional parameter", example = "3")
+            Long category_id,
+            @RequestParam(required = false)
+            @Parameter(description = "Offer status for filtration. Can be null." +
+                    " Optional parameter", example = "DrAfT")
+            String status,
+            @RequestParam(required = false)
+            @Parameter(description = "Is offer free or not for filtration. Can be null." +
+                    " Optional parameter", example = "true, false")
+            Boolean free,
+            @PathVariable
+            @Parameter(description = "User id in Long format. ", example = "2321")
+            Long id) {
+        return ResponseEntity.ok(service.findUserAuctionParticipations(
+                id,
+                getPageable(page, size, sortBy, isAsc),
+                category_id,
+                status,
+                free));
     }
 
     private Pageable getPageable(int page, int size, String sortBy, Boolean isAsc) {
