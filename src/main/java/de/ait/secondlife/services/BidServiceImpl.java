@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import javax.security.auth.login.CredentialException;
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -38,6 +39,9 @@ public class BidServiceImpl implements BidService {
     @Override
     public void save(BidCreationDto dto) throws CredentialException {
         Offer offer = offerService.findById(dto.getOfferId());
+
+        checkOfferStatus(offer);
+
         BigDecimal newBidValue = dto.getBidValue();
 
         if (offer.getIsFree()) {
@@ -45,8 +49,6 @@ public class BidServiceImpl implements BidService {
         } else {
             checkNotFreeAuction(offer, newBidValue);
         }
-
-        checkOfferStatus(offer);
 
         User user = AuthService.getCurrentUser();
         checkAuthentication(offer, user);
@@ -77,6 +79,15 @@ public class BidServiceImpl implements BidService {
     private void checkAuthentication(Offer offer, User user) {
         if (Objects.equals(offer.getUser().getId(), user.getId())) {
             throw new BidCreationException("Bid cannot be created by offer owner");
+        }
+        if (offer.getIsFree()) {
+            List<Long> auctionParticipantIds = offer.getBids()
+                    .stream()
+                    .map(bid -> bid.getUser().getId())
+                    .toList();
+            if (auctionParticipantIds.contains(user.getId())) {
+                throw new BidCreationException("Bid cannot be created twice by one user in free auction");
+            }
         }
     }
 
