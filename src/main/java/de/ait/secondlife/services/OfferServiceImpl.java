@@ -8,6 +8,7 @@ import de.ait.secondlife.domain.dto.OfferResponseWithPaginationDto;
 import de.ait.secondlife.domain.dto.OfferUpdateDto;
 
 import de.ait.secondlife.domain.dto.*;
+import de.ait.secondlife.domain.entity.Bid;
 import de.ait.secondlife.domain.entity.Offer;
 import de.ait.secondlife.domain.entity.User;
 import de.ait.secondlife.exception_handling.exceptions.NoRightToChangeException;
@@ -311,6 +312,24 @@ public class OfferServiceImpl implements OfferService {
     public boolean checkEntityExistsById(Long id) {
         if (id == null) throw new IdIsNullException();
         return offerRepository.existsById(id);
+    }
+
+    @Override
+    public boolean isCurrentUserAuctionParticipant(Offer offer) {
+        try {
+            User user = AuthService.getCurrentUser();
+            List<Bid> bids = offer.getBids();
+            if (bids == null) {
+                return false;
+            }
+            List<Long> participantIds = bids.stream()
+                    .map(Bid::getUser)
+                    .map(User::getId)
+                    .toList();
+            return participantIds.contains(user.getId());
+        } catch (CredentialException e) {
+            return false;
+        }
     }
 
     private Offer getOfferById(Long id) {

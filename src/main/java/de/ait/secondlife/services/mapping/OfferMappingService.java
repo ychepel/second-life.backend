@@ -3,11 +3,18 @@ package de.ait.secondlife.services.mapping;
 import de.ait.secondlife.domain.dto.OfferCreationDto;
 import de.ait.secondlife.domain.dto.OfferResponseDto;
 import de.ait.secondlife.domain.entity.Offer;
+import de.ait.secondlife.services.interfaces.OfferService;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 
 @Mapper
 public abstract class OfferMappingService extends EntityWIthImageMappingService {
+
+    @Autowired
+    @Lazy
+    protected OfferService offerService;
 
     @Mapping(target = "ownerId", source = "user.id")
     @Mapping(target = "winnerBidId", source = "winnerBid.id")
@@ -27,6 +34,7 @@ public abstract class OfferMappingService extends EntityWIthImageMappingService 
     )
     @Mapping(target = "maxBidValue", expression = "java(offer.getMaxBidValue())")
     @Mapping(target = "bidsCount", expression = "java(offer.getBidsCount())")
+    @Mapping(target = "isCurrentUserAuctionParticipant", expression = "java(offerService.isCurrentUserAuctionParticipant(offer))")
     public abstract OfferResponseDto toDto(Offer offer);
 
     @Mapping(target = "id", ignore = true)

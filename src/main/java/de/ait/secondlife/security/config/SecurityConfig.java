@@ -65,6 +65,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/v1/offers/{id}/start-auction").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/v1/offers/{id}/cancel").hasRole("USER")
                         .requestMatchers(HttpMethod.DELETE, "/v1/offers/{id}/block-by-admin").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/v1/bids/offer/{id}").hasRole("USER")
                         .requestMatchers(HttpMethod.POST, "/v1/bids").hasRole("USER")
                         .anyRequest().denyAll()
                 )

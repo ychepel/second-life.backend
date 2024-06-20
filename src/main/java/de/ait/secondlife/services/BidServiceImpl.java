@@ -2,9 +2,12 @@ package de.ait.secondlife.services;
 
 import de.ait.secondlife.constants.OfferStatus;
 import de.ait.secondlife.domain.dto.BidCreationDto;
+import de.ait.secondlife.domain.dto.BidResponseDto;
+import de.ait.secondlife.domain.dto.BidsResponseDto;
 import de.ait.secondlife.domain.entity.Bid;
 import de.ait.secondlife.domain.entity.Offer;
 import de.ait.secondlife.domain.entity.User;
+import de.ait.secondlife.exception_handling.exceptions.UserIsNotAuthorizedException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.BidCreationException;
 import de.ait.secondlife.repositories.BidRepository;
 import de.ait.secondlife.security.services.AuthService;
@@ -18,6 +21,8 @@ import org.springframework.stereotype.Service;
 
 import javax.security.auth.login.CredentialException;
 import java.math.BigDecimal;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -38,6 +43,9 @@ public class BidServiceImpl implements BidService {
     @Override
     public void save(BidCreationDto dto) throws CredentialException {
         Offer offer = offerService.findById(dto.getOfferId());
+
+        checkOfferStatus(offer);
+
         BigDecimal newBidValue = dto.getBidValue();
 
         if (offer.getIsFree()) {
@@ -45,8 +53,6 @@ public class BidServiceImpl implements BidService {
         } else {
             checkNotFreeAuction(offer, newBidValue);
         }
-
-        checkOfferStatus(offer);
 
         User user = AuthService.getCurrentUser();
         checkAuthentication(offer, user);
@@ -60,6 +66,23 @@ public class BidServiceImpl implements BidService {
             entityManager.refresh(offer);
             offerService.finishAuction(offer);
         }
+    }
+
+    @Override
+    public BidsResponseDto findAllByOfferId(Long id) throws CredentialException {
+        Offer offer = offerService.findById(id);
+        User user = AuthService.getCurrentUser();
+        if (!Objects.equals(offer.getUser().getId(), user.getId())) {
+            throw new UserIsNotAuthorizedException("The non-owner is not authorized to view list of bids");
+        }
+        List<BidResponseDto> bids = offer.getBids()
+                .stream()
+                .sorted(Comparator.comparing(Bid::getId).reversed())
+                .map(mappingService::toDto)
+                .toList();
+        BidsResponseDto response = new BidsResponseDto();
+        response.setBids(bids);
+        return response;
     }
 
     private boolean isWinningBid(Offer offer, BigDecimal newBidValue) {
@@ -77,6 +100,15 @@ public class BidServiceImpl implements BidService {
     private void checkAuthentication(Offer offer, User user) {
         if (Objects.equals(offer.getUser().getId(), user.getId())) {
             throw new BidCreationException("Bid cannot be created by offer owner");
+        }
+        if (offer.getIsFree()) {
+            List<Long> auctionParticipantIds = offer.getBids()
+                    .stream()
+                    .map(bid -> bid.getUser().getId())
+                    .toList();
+            if (auctionParticipantIds.contains(user.getId())) {
+                throw new BidCreationException("Bid cannot be created twice by one user in free auction");
+            }
         }
     }
 
