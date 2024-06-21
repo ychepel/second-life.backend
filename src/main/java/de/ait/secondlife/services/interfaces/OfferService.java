@@ -40,8 +40,6 @@ public interface OfferService extends CheckEntityExistsService{
 
     void finishAuction(Offer offer);
 
-    void qualifyAuction(Long id);
-
     OfferResponseDto completeOffer(Long id, OfferCompletionDto offerCompletionDto);
 
     void cancelOffer(Long id);
@@ -53,4 +51,6 @@ public interface OfferService extends CheckEntityExistsService{
     OfferResponseWithPaginationDto findUserAuctionParticipations(Long id, Pageable pageable, Long categoryId, String status, Boolean isFree);
 
     boolean isCurrentUserAuctionParticipant(Offer offer);
+
+    Long findOwnerIdByOfferId(Long id);
 }

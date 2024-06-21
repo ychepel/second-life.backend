@@ -176,7 +176,7 @@ public class OfferController {
             @RequestBody
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Offer create DTO ")
             OfferCreationDto dto) throws CredentialException {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.createOffer(dto));
+              return ResponseEntity.status(HttpStatus.CREATED).body(service.createOffer(dto));
     }
 
     @PutMapping
@@ -204,7 +204,7 @@ public class OfferController {
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Offer update DTO ")
             OfferUpdateDto dto
     ) throws CredentialException {
-        return ResponseEntity.ok(service.updateOffer(dto));
+             return ResponseEntity.ok(service.updateOffer(dto));
     }
 
     @PatchMapping("/{id}/reject")
