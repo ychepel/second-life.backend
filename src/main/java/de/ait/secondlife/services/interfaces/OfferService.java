@@ -40,8 +40,6 @@ public interface OfferService extends CheckEntityExistsService{
 
     void finishAuction(Offer offer);
 
-    void qualifyAuction(Long id);
-
     OfferResponseDto completeOffer(Long id, OfferCompletionDto offerCompletionDto);
 
     void cancelOffer(Long id);
