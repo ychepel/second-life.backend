@@ -13,7 +13,10 @@ import de.ait.secondlife.repositories.CategoryRepository;
 import de.ait.secondlife.services.interfaces.CategoryService;
 import de.ait.secondlife.services.interfaces.ImageService;
 import de.ait.secondlife.services.mapping.NewCategoryMappingService;
+import de.ait.secondlife.services.utilities.UserPermissionsUtilities;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,7 +29,10 @@ public class CategoryServiceImpl implements CategoryService {
 
     private final NewCategoryMappingService mappingService;
 
-    private final ImageService imageService;
+    private final UserPermissionsUtilities utilities;
+    @Lazy
+    @Autowired
+    private ImageService imageService;
 
     @Override
     public CategoryDto getById(Long id) {
@@ -60,6 +66,9 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryDto save(CategoryCreationDto categoryDto) {
 
+        if (categoryDto.getBaseNameOfImages() != null)
+            utilities.checkUserPermissionsForImageByBaseName(categoryDto.getBaseNameOfImages());
+
         String categoryName = categoryDto.getName();
         if (repository.existsByName(categoryName)) {
             throw new DuplicateCategoryException(categoryName);
@@ -86,7 +95,8 @@ public class CategoryServiceImpl implements CategoryService {
 
         existingCategory.setName(dto.getName());
         existingCategory.setDescription(dto.getDescription());
-
+        if (dto.getBaseNameOfImages() != null)
+            utilities.checkUserPermissionsForImageByBaseName(dto.getBaseNameOfImages());
         imageService.connectTempImagesToEntity(
                 dto.getBaseNameOfImages(),
                 EntityTypeWithImages.CATEGORY.getType(),
@@ -133,7 +143,6 @@ public class CategoryServiceImpl implements CategoryService {
         return repository.findById(id)
                 .orElseThrow(() -> new CategoryNotFoundException(id));
     }
-
 
 
     @Override

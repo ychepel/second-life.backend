@@ -6,7 +6,7 @@ import de.ait.secondlife.domain.dto.ImagePathsResponseDto;
 import de.ait.secondlife.domain.dto.ImageRequestDto;
 import de.ait.secondlife.domain.dto.ResponseMessageDto;
 import de.ait.secondlife.services.interfaces.ImageService;
-import de.ait.secondlife.services.utilities.EntityUtilities;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.*;
 public class ImageController {
 
     private final ImageService imageService;
-    private final EntityUtilities utilities;
+
 
     @PostMapping
     @Operation(
@@ -56,7 +56,6 @@ public class ImageController {
 
         String entityType = EntityTypeWithImages.get(request.getEntityType().toLowerCase()).getType();
         Long entityId = request.getEntityId();
-        utilities.checkEntityExists(entityType, entityId);
 
         return ResponseEntity.ok(imageService.saveNewImage(entityType, entityId, request));
     }
@@ -84,7 +83,9 @@ public class ImageController {
                     schema = @Schema(implementation = ImageRequestDto.class))
             @RequestBody ImageRequestDto dto
     ) {
+//        utilities.checkCredentials(dto.getBaseName());
         imageService.deleteImage(dto.getBaseName());
+
         return ResponseEntity.ok(new ResponseMessageDto("Image deleted successfully"));
     }
 }

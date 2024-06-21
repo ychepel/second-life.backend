@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+
 import java.util.List;
 
 @RestController
@@ -84,6 +85,7 @@ public class CategoryController {
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDto.class)))}
     )
     public ResponseEntity<CategoryDto> add(@Valid @RequestBody CategoryCreationDto dto) {
+
         return ResponseEntity.status(HttpStatus.CREATED).body(service.save(dto));
     }
 

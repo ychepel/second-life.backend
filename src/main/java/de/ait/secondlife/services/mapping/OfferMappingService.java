@@ -20,7 +20,6 @@ public abstract class OfferMappingService extends EntityWIthImageMappingService 
     @Mapping(target = "winnerBidId", source = "winnerBid.id")
     @Mapping(target = "categoryId", source = "category.id")
     @Mapping(target = "locationId", source = "location.id")
-    //TODO change the logic after creating the order status processing
     @Mapping(target = "images", expression = "java(getImages(offer))")
     @Mapping(target = "status", expression = "java(offer.getOfferStatus().toString())")
     @Mapping(

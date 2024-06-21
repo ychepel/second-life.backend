@@ -16,7 +16,10 @@ import de.ait.secondlife.services.interfaces.LocationService;
 import de.ait.secondlife.services.interfaces.UserService;
 import de.ait.secondlife.services.mapping.NewUserMappingService;
 import de.ait.secondlife.services.mapping.UserMappingService;
+import de.ait.secondlife.services.utilities.UserPermissionsUtilities;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -32,10 +35,15 @@ public class UserServiceImpl implements UserService {
     private final UserMappingService userMappingService;
     private final BCryptPasswordEncoder encoder;
     private final LocationService locationService;
-    private final ImageService imageService;
+    private final UserPermissionsUtilities utilities;
+    @Lazy
+    @Autowired
+    private ImageService imageService;
 
     @Override
     public UserDto register(UserCreationDto newUserDto) {
+        if (newUserDto.getBaseNameOfImages() != null)
+            utilities.checkUserPermissionsForImageByBaseName(newUserDto.getBaseNameOfImages());
         String userEmail = newUserDto.getEmail();
         if (userRepository.existsByEmail(userEmail)) {
             throw new DuplicateUserEmailException(userEmail);

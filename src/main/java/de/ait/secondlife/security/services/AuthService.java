@@ -68,12 +68,17 @@ public class AuthService {
         return (Admin) authenticatedUser;
     }
 
-    public static Role getCurrentRole() throws CredentialException {
-        AuthenticatedUser authenticatedUser = getAuthenticatedUser();
-        if (authenticatedUser == null) {
-            throw new UserIsNotAuthenticatedException();
+   public static Role getCurrentRole() {
+        AuthenticatedUser authenticatedUser = null;
+        try {
+            authenticatedUser = getAuthenticatedUser();
+            if (authenticatedUser == null) {
+                throw new UserIsNotAuthenticatedException();
+            }
+            return authenticatedUser.getRole();
+        } catch (CredentialException e) {
+            return null;
         }
-        return authenticatedUser.getRole();
     }
 
     private static AuthenticatedUser getAuthenticatedUser() throws CredentialException {

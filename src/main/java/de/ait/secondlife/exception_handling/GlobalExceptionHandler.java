@@ -5,7 +5,7 @@ import de.ait.secondlife.exception_handling.dto.ValidationErrorDto;
 import de.ait.secondlife.exception_handling.dto.ValidationErrorsDto;
 import de.ait.secondlife.exception_handling.exceptions.DuplicateCategoryException;
 import de.ait.secondlife.exception_handling.exceptions.DuplicateUserEmailException;
-import de.ait.secondlife.exception_handling.exceptions.NoRightToChangeException;
+import de.ait.secondlife.exception_handling.exceptions.NoRightsException;
 import de.ait.secondlife.exception_handling.exceptions.UserSavingException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.BadRequestException;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.ParameterNotFoundException;
@@ -70,8 +70,8 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(new ResponseMessageDto("Something went wrong"), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler(NoRightToChangeException.class)
-    public ResponseEntity<ResponseMessageDto> handleException(NoRightToChangeException e) {
+    @ExceptionHandler(NoRightsException.class)
+    public ResponseEntity<ResponseMessageDto> handleException(NoRightsException e) {
         return new ResponseEntity<>(new ResponseMessageDto(e.getMessage()), HttpStatus.FORBIDDEN);
     }
 
