@@ -22,7 +22,7 @@ import de.ait.secondlife.repositories.OfferRepository;
 import de.ait.secondlife.security.services.AuthService;
 import de.ait.secondlife.services.interfaces.*;
 import de.ait.secondlife.services.mapping.OfferMappingService;
-import de.ait.secondlife.services.utilities.UserCredentialsUtilities;
+import de.ait.secondlife.services.utilities.UserPermissionsUtilities;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
@@ -51,7 +51,7 @@ public class OfferServiceImpl implements OfferService {
     private final CategoryService categoryService;
     private final LocationService locationService;
     private final OfferStatusHistoryService offerStatusHistoryService;
-    private final UserCredentialsUtilities utilities;
+    private final UserPermissionsUtilities utilities;
     @Lazy
     @Autowired
     private  ImageService imageService;
@@ -106,7 +106,7 @@ public class OfferServiceImpl implements OfferService {
     @Transactional
     @Override
     public OfferResponseDto createOffer(OfferCreationDto dto) throws CredentialException {
-        utilities.checkUserCredentials(dto.getBaseNameOfImages());
+        utilities.checkUserPermissionsForImageByBaseName(dto.getBaseNameOfImages());
 
         User user = AuthService.getCurrentUser();
         try {
@@ -148,7 +148,7 @@ public class OfferServiceImpl implements OfferService {
     @Transactional
     @Override
     public OfferResponseDto updateOffer(OfferUpdateDto dto) throws CredentialException {
-        utilities.checkUserCredentials(dto.getBaseNameOfImages());
+        utilities.checkUserPermissionsForImageByBaseName(dto.getBaseNameOfImages());
         User user = AuthService.getCurrentUser();
         Offer offer = offerRepository.findById(dto.getId())
                 .orElseThrow(() -> new OfferNotFoundException(dto.getId()));
@@ -228,14 +228,6 @@ public class OfferServiceImpl implements OfferService {
         offerContext.finishAuction();
     }
 
-    //TODO method no usages
-    @Transactional
-    @Override
-    public void qualifyAuction(Long id) {
-        offerContext.setOffer(getOfferById(id));
-        offerContext.qualify();
-    }
-
     @Transactional
     @Override
     public OfferResponseDto completeOffer(Long id, OfferCompletionDto offerCompletionDto) {
@@ -281,7 +273,7 @@ public class OfferServiceImpl implements OfferService {
             Boolean isFree) {
 
         checkUserId(id);
-        utilities.checkUserCredentials(id);
+        utilities.checkUserPermissions(id);
         OfferStatus offerStatus = status != null ? OfferStatus.get(status) : null;
 
         Page<Offer> pageOfOffer = offerRepository.findUserAuctionParticipations(

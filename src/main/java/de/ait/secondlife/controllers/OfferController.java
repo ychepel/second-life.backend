@@ -10,7 +10,6 @@ import de.ait.secondlife.domain.dto.*;
 import de.ait.secondlife.exception_handling.dto.ValidationErrorsDto;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.PaginationParameterIsWrongException;
 import de.ait.secondlife.services.interfaces.OfferService;
-import de.ait.secondlife.services.utilities.UserCredentialsUtilities;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;

@@ -13,7 +13,7 @@ import de.ait.secondlife.exception_handling.exceptions.not_found_exception.BadEn
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.ImagesNotFoundException;
 import de.ait.secondlife.repositories.ImageRepository;
 import de.ait.secondlife.services.interfaces.*;
-import de.ait.secondlife.services.utilities.UserCredentialsUtilities;
+import de.ait.secondlife.services.utilities.UserPermissionsUtilities;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
@@ -44,14 +44,14 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
     private final ImageRepository repository;
     @Lazy
     @Autowired
-    private  OfferService offerService;
+    private OfferService offerService;
     @Lazy
     @Autowired
-    private  UserService userService;
+    private UserService userService;
     @Lazy
     @Autowired
-    private  CategoryService categoryService;
-    private final UserCredentialsUtilities userCredentialsUtilities;
+    private CategoryService categoryService;
+    private final UserPermissionsUtilities userCredentialsUtilities;
 
     @Value("${do.buket.name}")
     private String bucketName;
@@ -71,8 +71,7 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
             userId = userService.getCurrentUser().getId();
         } catch (CredentialException ignored) {
         }
-
-        userCredentialsUtilities.checkUserCredentials(entityType, entityId);
+        if (entityId != null) userCredentialsUtilities.checkUserPermissions(entityType, entityId);
 
         MultipartFile file = dto.getFile();
         checkFile(file);

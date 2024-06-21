@@ -6,7 +6,6 @@ import de.ait.secondlife.domain.dto.CategoryUpdateDto;
 import de.ait.secondlife.domain.dto.ResponseMessageDto;
 import de.ait.secondlife.exception_handling.dto.ValidationErrorsDto;
 import de.ait.secondlife.services.interfaces.CategoryService;
-import de.ait.secondlife.services.utilities.UserCredentialsUtilities;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
