@@ -26,6 +26,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -48,6 +49,7 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
     private String basePath;
 
     @Override
+    @Transactional
     public ImagePathsResponseDto saveNewImage(String entityType, Long entityId, ImageCreationDto dto) {
         MultipartFile file = dto.getFile();
         checkFile(file);
@@ -56,7 +58,7 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
 
         ImagePathsResponseDto currentImages = findAllImageForEntity(entityType, entityId);
 
-        checkCountOfImageForEntityType(currentImages, entityType);
+        if (entityId != null) checkCountOfImageForEntityType(currentImages, entityType);
 
         ObjectMetadata metadata = createMetadata(file);
 
@@ -83,13 +85,19 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
 
             s3Client.putObject(request);
 
-            ImageEntity savedImgEntity = repository.save(ImageEntity.builder()
-                    .size(size)
-                    .baseName(baseName.toString())
-                    .entityType(entityType)
-                    .entityId(entityId)
-                    .fullPath(toUnixStylePath(basePath + imagePath))
-                    .build());
+            LocalDateTime now = LocalDateTime.now();
+            ImageEntity savedImgEntity = repository.save(
+                    ImageEntity.builder()
+                            .size(size)
+                            .baseName(baseName.toString())
+                            .entityType(entityType)
+                            .entityId(entityId)
+                            .fullPath(toUnixStylePath(basePath + imagePath))
+                            .updatedAt(now)
+                            .build()
+            );
+            if (entityId == null) savedImgEntity.setCreatedAt(now);
+
             savedImgEntities.add(savedImgEntity);
         });
         return getImagePathsResponseDto(savedImgEntities);
@@ -121,6 +129,7 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
                                 String newPath = toUnixStylePath(basePath + path);
 
                                 k.setFullPath(newPath);
+                                k.setUpdatedAt(LocalDateTime.now());
                                 repository.save(k);
                                 relocateImageFile(oldPath, newPath);
                             } else usedBaseNames.add(k.getBaseName());
