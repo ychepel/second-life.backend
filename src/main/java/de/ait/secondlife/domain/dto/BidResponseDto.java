@@ -24,4 +24,10 @@ public class BidResponseDto {
 
     @Schema(description = "User ID", example = "123")
     private Long userId;
+
+    @Schema(description = "Shortened username", example = "John S.")
+    private String userNameShorted;
+
+    @Schema(description = "User Email", example = "user@mail.com")
+    private String userEmail;
 }

@@ -67,6 +67,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/v1/offers/{id}/block-by-admin").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/v1/bids/offer/{id}").hasRole("USER")
                         .requestMatchers(HttpMethod.POST, "/v1/bids").hasRole("USER")
+                        .requestMatchers(HttpMethod.GET, "/v1/rejection-reasons").permitAll()
                         .anyRequest().denyAll()
                 )
                 .httpBasic(AbstractHttpConfigurer::disable)
