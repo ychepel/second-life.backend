@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.ait.secondlife.constants.EntityTypeWithImages;
+import de.ait.secondlife.controllers.test_dto.TestImagePropsDto;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -113,7 +114,7 @@ public class ImagesIntegrationTest {
         JsonNode jsonNodeOffer = mapper.readTree(jsonResponseOffer);
         createdOfferId = jsonNodeOffer.get("id").asLong();
 
-        MvcResult creatingCategory =mockMvc.perform(post("/v1/categories")
+        MvcResult creatingCategory = mockMvc.perform(post("/v1/categories")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -130,6 +131,48 @@ public class ImagesIntegrationTest {
         System.out.println();
     }
 
+    private TestImagePropsDto getTestImagePropsForSettingImage(
+            String entityType, Long entityId, String testImagePath) throws Exception {
+        File imageFile = ResourceUtils.getFile(testImagePath);
+        byte[] imageBytes = null;
+        try (FileInputStream fis = new FileInputStream(imageFile)) {
+            imageBytes = fis.readAllBytes();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        MockMultipartFile testFile = new MockMultipartFile(
+                "file",
+                imageFile.getName(),
+                MediaType.IMAGE_JPEG_VALUE,
+                imageBytes
+        );
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("entityType", entityType);
+        params.add("entityId", String.valueOf(entityId));
+
+        return TestImagePropsDto.builder()
+                .testFile(testFile)
+                .params(params)
+                .build();
+    }
+
+    private void setImageWithResponse200(String entityType, Long entityId) throws Exception {
+        TestImagePropsDto imageProps = getTestImagePropsForSettingImage(entityType, entityId, "classpath:test_image/testImg.jpeg");
+
+        mockMvc.perform(multipart("/v1/images")
+                        .file(imageProps.getTestFile())
+                        .params(imageProps.getParams())
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .cookie(userCookie))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.values").isMap())
+                .andExpect(jsonPath("$.values[*]").isArray())
+                .andExpect(jsonPath("$.values[*][*]").isArray())
+                .andExpect(jsonPath("$.values[*][*]").value(everyItem(startsWith("http"))))
+                .andExpect(jsonPath("$.values[*]['64x64']").exists());
+    }
+
     @Nested
     @DisplayName("POST /v1/images")
     @Transactional
@@ -137,52 +180,32 @@ public class ImagesIntegrationTest {
     public class UploadImageTest {
 
         @Test
-        public void set_image_for_offer() throws Exception {
-
-            setImage(EntityTypeWithImages.OFFER.getType(), createdOfferId);
+               public void upload_image_for_offer_return_200_and_paths_of_images() throws Exception {
+            setImageWithResponse200(EntityTypeWithImages.OFFER.getType(), createdOfferId);
         }
 
         @Test
-        public void set_image_for_user() throws Exception {
-
-            setImage(EntityTypeWithImages.USER.getType(), createdUserId);
+        public void upload_image_for_user_return_200_and_paths_of_images() throws Exception {
+            setImageWithResponse200(EntityTypeWithImages.USER.getType(), createdUserId);
         }
 
         @Test
-        public void set_image_for_category() throws Exception {
-                  setImage(EntityTypeWithImages.CATEGORY.getType(), createdCategoryId);
+        public void upload_image_for_category_return_200_and_paths_of_images() throws Exception {
+            setImageWithResponse200(EntityTypeWithImages.CATEGORY.getType(), createdCategoryId);
         }
 
-        private void setImage(String entityType, Long entityId) throws Exception {
-            File imageFile = ResourceUtils.getFile("classpath:test_image/testImg.jpeg");
-            byte[] imageBytes = null;
-            try (FileInputStream fis = new FileInputStream(imageFile)) {
-                imageBytes = fis.readAllBytes();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            MockMultipartFile testFile = new MockMultipartFile(
-                    "file",
-                    imageFile.getName(),
-                    MediaType.IMAGE_JPEG_VALUE,
-                    imageBytes
-            );
-            MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-            params.add("entityType", entityType);
-            params.add("entityId", String.valueOf(entityId));
+        @Test
+        public void return_400_if_image_file_is_empty() throws Exception {
+            TestImagePropsDto imageProps = getTestImagePropsForSettingImage(
+                    EntityTypeWithImages.CATEGORY.getType(), createdCategoryId,
+                    "classpath:test_image/empty.jpeg");
 
             mockMvc.perform(multipart("/v1/images")
-                            .file(testFile)
-                            .params(params)
+                            .file(imageProps.getTestFile())
+                            .params(imageProps.getParams())
                             .contentType(MediaType.MULTIPART_FORM_DATA)
                             .cookie(userCookie))
-                    .andExpect(status().isOk())
-                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(jsonPath("$.values").isMap())
-                    .andExpect(jsonPath("$.values[*]").isArray())
-                    .andExpect(jsonPath("$.values[*][*]").isArray())
-                    .andExpect(jsonPath("$.values[*][*]").value(everyItem(startsWith("http"))))
-                    .andExpect(jsonPath("$.values[*]['64x64']").exists());
+                    .andExpect(status().isBadRequest());
         }
     }
 
