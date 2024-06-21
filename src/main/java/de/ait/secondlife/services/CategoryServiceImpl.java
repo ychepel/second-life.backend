@@ -32,7 +32,7 @@ public class CategoryServiceImpl implements CategoryService {
     private final UserPermissionsUtilities utilities;
     @Lazy
     @Autowired
-    private  ImageService imageService;
+    private ImageService imageService;
 
     @Override
     public CategoryDto getById(Long id) {
@@ -66,7 +66,8 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryDto save(CategoryCreationDto categoryDto) {
 
-        utilities.checkUserPermissionsForImageByBaseName(categoryDto.getBaseNameOfImages());
+        if (categoryDto.getBaseNameOfImages() != null)
+            utilities.checkUserPermissionsForImageByBaseName(categoryDto.getBaseNameOfImages());
 
         String categoryName = categoryDto.getName();
         if (repository.existsByName(categoryName)) {
@@ -94,7 +95,8 @@ public class CategoryServiceImpl implements CategoryService {
 
         existingCategory.setName(dto.getName());
         existingCategory.setDescription(dto.getDescription());
-        utilities.checkUserPermissionsForImageByBaseName(dto.getBaseNameOfImages());
+        if (dto.getBaseNameOfImages() != null)
+            utilities.checkUserPermissionsForImageByBaseName(dto.getBaseNameOfImages());
         imageService.connectTempImagesToEntity(
                 dto.getBaseNameOfImages(),
                 EntityTypeWithImages.CATEGORY.getType(),
@@ -141,7 +143,6 @@ public class CategoryServiceImpl implements CategoryService {
         return repository.findById(id)
                 .orElseThrow(() -> new CategoryNotFoundException(id));
     }
-
 
 
     @Override

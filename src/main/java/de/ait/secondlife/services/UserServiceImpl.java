@@ -38,11 +38,12 @@ public class UserServiceImpl implements UserService {
     private final UserPermissionsUtilities utilities;
     @Lazy
     @Autowired
-    private  ImageService imageService;
+    private ImageService imageService;
 
     @Override
     public UserDto register(UserCreationDto newUserDto) {
-        utilities.checkUserPermissionsForImageByBaseName(newUserDto.getBaseNameOfImages());
+        if (newUserDto.getBaseNameOfImages() != null)
+            utilities.checkUserPermissionsForImageByBaseName(newUserDto.getBaseNameOfImages());
         String userEmail = newUserDto.getEmail();
         if (userRepository.existsByEmail(userEmail)) {
             throw new DuplicateUserEmailException(userEmail);
