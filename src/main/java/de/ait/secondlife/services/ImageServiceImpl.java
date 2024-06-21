@@ -250,7 +250,7 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
         return switch (EntityTypeWithImages.get(entityType.toLowerCase())) {
             case OFFER -> Set.of(IMAGE_1_SIZE, IMAGE_2_SIZE, IMAGE_3_SIZE);
             case USER -> Set.of(IMAGE_2_SIZE, IMAGE_3_SIZE);
-            case CATEGORY -> Set.of(IMAGE_2_SIZE);
+            case CATEGORY -> Set.of(IMAGE_3_SIZE);
         };
     }
 
