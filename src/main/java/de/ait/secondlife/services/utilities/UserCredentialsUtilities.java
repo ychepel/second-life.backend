@@ -5,12 +5,11 @@ import de.ait.secondlife.constants.ImageConstants;
 import de.ait.secondlife.domain.entity.ImageEntity;
 import de.ait.secondlife.domain.entity.User;
 import de.ait.secondlife.exception_handling.exceptions.NoRightsException;
-import de.ait.secondlife.exception_handling.exceptions.UserIsNotAuthorizedException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.PathWrongException;
 import de.ait.secondlife.security.Role;
 import de.ait.secondlife.security.services.AuthService;
-import de.ait.secondlife.services.interfaces.*;
-import lombok.RequiredArgsConstructor;
+import de.ait.secondlife.services.interfaces.ImageService;
+import de.ait.secondlife.services.interfaces.OfferService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
@@ -22,6 +21,7 @@ import java.util.Set;
 
 
 @Component
+//TODO: PR review - rename class to UserPermissionsUtilities
 public class UserCredentialsUtilities implements ImageConstants {
     @Lazy
     @Autowired
@@ -33,8 +33,8 @@ public class UserCredentialsUtilities implements ImageConstants {
     @Value("${do.base.path}")
     private String basePath;
 
-
-    public void checkUserCredentials(Long id) {
+    //TODO: PR review - rename method to checkUserPermissions
+    public void checkUserCredentials(Long id ) { //TODO: PR review rename argument to userId
         try {
             Role role = AuthService.getCurrentRole();
 
@@ -60,6 +60,7 @@ public class UserCredentialsUtilities implements ImageConstants {
             }
             case USER -> checkUserCredentials(entityId);
             case CATEGORY -> {
+                //TODO: PR review - we need to check only role (equals or not to ADMIN)
                 try {
                     User user = AuthService.getCurrentUser();
                     checkUserCredentials(user.getId());

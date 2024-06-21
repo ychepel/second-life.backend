@@ -70,6 +70,7 @@ public class AuthService {
         return (Admin) authenticatedUser;
     }
 
+    //TODO: PR review - please remove throwing exception. for not authentication user return null
     public static Role getCurrentRole() throws CredentialException {
         AuthenticatedUser authenticatedUser = getAuthenticatedUser();
         if (authenticatedUser == null) {
