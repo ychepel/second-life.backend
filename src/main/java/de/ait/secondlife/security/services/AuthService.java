@@ -12,7 +12,6 @@ import de.ait.secondlife.security.dto.TokenResponseDto;
 import de.ait.secondlife.security.filters.TokenFilter;
 import de.ait.secondlife.services.UserDetailsServiceImpl;
 import de.ait.secondlife.services.interfaces.AdminService;
-import de.ait.secondlife.services.interfaces.UserService;
 import io.jsonwebtoken.Claims;
 import jakarta.security.auth.message.AuthException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -36,7 +35,6 @@ import java.util.Map;
 public class AuthService {
 
     private final AdminService adminService;
-    private final UserService userService;
     private final TokenService tokenService;
     private final TokenFilter tokenFilter;
     private final BCryptPasswordEncoder encoder;
@@ -100,11 +98,6 @@ public class AuthService {
             String accessToken = tokenService.generateAccessToken(foundUser);
             String refreshToken = tokenService.generateRefreshToken(foundUser);
             refreshStorage.put(getTokenStorageKey(role, userEmail), refreshToken);
-
-            if (role == Role.ROLE_USER) {
-                userService.updateLastActive((User) foundUser);
-            }
-
             return new TokenResponseDto(foundUser.getId(), accessToken, refreshToken);
         } else {
             throw new CredentialException("Password is incorrect");
