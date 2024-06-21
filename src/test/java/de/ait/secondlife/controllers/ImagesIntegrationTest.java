@@ -2,7 +2,6 @@ package de.ait.secondlife.controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import de.ait.secondlife.constants.EntityTypeWithImages;
 import de.ait.secondlife.constants.ImageConstants;
 import de.ait.secondlife.controllers.test_dto.TestImagePropsDto;
@@ -21,15 +20,13 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ResourceUtils;
 
-
-import static org.hamcrest.Matchers.*;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Random;
 
-import static org.hamcrest.Matchers.matchesPattern;
+import static org.hamcrest.Matchers.everyItem;
+import static org.hamcrest.Matchers.startsWith;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -71,18 +68,6 @@ public class ImagesIntegrationTest implements ImageConstants {
         JsonNode jsonNode = mapper.readTree(jsonResponse);
         createdUserId = jsonNode.get("id").asLong();
 
-        MvcResult authAdminResult = mockMvc.perform(post("/v1/auth/admin/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "email": "admin@email.com",
-                                  "password": "Security!234"
-                                }"""))
-                .andExpect(status().isOk())
-                .andReturn();
-        String adminToken = authAdminResult.getResponse().getCookie("Access-Token").getValue();
-        adminCookie = new Cookie("Access-Token", adminToken);
-
         MvcResult authUserResult = mockMvc.perform(post("/v1/auth/user/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -94,6 +79,18 @@ public class ImagesIntegrationTest implements ImageConstants {
                 .andReturn();
         String userToken = authUserResult.getResponse().getCookie("Access-Token").getValue();
         userCookie = new Cookie("Access-Token", userToken);
+
+        MvcResult authAdminResult = mockMvc.perform(post("/v1/auth/admin/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "email": "admin@email.com",
+                                  "password": "Security!234"
+                                }"""))
+                .andExpect(status().isOk())
+                .andReturn();
+        String adminToken = authAdminResult.getResponse().getCookie("Access-Token").getValue();
+        adminCookie = new Cookie("Access-Token", adminToken);
 
         MvcResult creatingOffer = mockMvc.perform(post("/v1/offers")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -130,7 +127,11 @@ public class ImagesIntegrationTest implements ImageConstants {
         String jsonResponseCategory = creatingCategory.getResponse().getContentAsString();
         JsonNode jsonNodeCategory = mapper.readTree(jsonResponseCategory);
         createdCategoryId = jsonNodeCategory.get("id").asLong();
-        System.out.println();
+
+        mockMvc.perform(patch("/v1/categories/" + createdCategoryId + "/set-active")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(adminCookie))
+                .andExpect(status().isOk());
     }
 
     private TestImagePropsDto getTestImagePropsForSettingImage(
