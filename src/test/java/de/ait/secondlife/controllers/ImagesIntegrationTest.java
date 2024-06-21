@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.ait.secondlife.constants.EntityTypeWithImages;
+import de.ait.secondlife.constants.ImageConstants;
 import de.ait.secondlife.controllers.test_dto.TestImagePropsDto;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.*;
@@ -26,6 +27,7 @@ import static org.hamcrest.Matchers.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Random;
 
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -37,7 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @DisplayNameGeneration(value = DisplayNameGenerator.ReplaceUnderscores.class)
 
 //@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class ImagesIntegrationTest {
+public class ImagesIntegrationTest implements ImageConstants {
 
     @Autowired
     private MockMvc mockMvc;
@@ -180,7 +182,7 @@ public class ImagesIntegrationTest {
     public class UploadImageTest {
 
         @Test
-               public void upload_image_for_offer_return_200_and_paths_of_images() throws Exception {
+        public void upload_image_for_offer_return_200_and_paths_of_images() throws Exception {
             setImageWithResponse200(EntityTypeWithImages.OFFER.getType(), createdOfferId);
         }
 
@@ -203,6 +205,31 @@ public class ImagesIntegrationTest {
             mockMvc.perform(multipart("/v1/images")
                             .file(imageProps.getTestFile())
                             .params(imageProps.getParams())
+                            .contentType(MediaType.MULTIPART_FORM_DATA)
+                            .cookie(userCookie))
+                    .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        public void return_400_if_image_file_is_greater_than_MAX_FILE_SIZE() throws Exception {
+
+            long fileSizeInBytes = MAX_FILE_SIZE + 1;
+            byte[] largeFileBytes = new byte[(int) fileSizeInBytes];
+            new Random().nextBytes(largeFileBytes);
+
+            MockMultipartFile largeTestFile = new MockMultipartFile(
+                    "file",
+                    "largeTestImage.jpg",
+                    MediaType.IMAGE_JPEG_VALUE,
+                    largeFileBytes
+            );
+            MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+            params.add("entityType", EntityTypeWithImages.CATEGORY.getType());
+            params.add("entityId", String.valueOf(createdCategoryId));
+
+            mockMvc.perform(multipart("/v1/images")
+                            .file(largeTestFile)
+                            .params(params)
                             .contentType(MediaType.MULTIPART_FORM_DATA)
                             .cookie(userCookie))
                     .andExpect(status().isBadRequest());

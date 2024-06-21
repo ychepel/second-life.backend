@@ -12,6 +12,5 @@ public abstract class NewCategoryMappingService extends EntityWIthImageMappingSe
     @Mapping(target = "images", expression = "java(getImages(entity))")
     public abstract CategoryDto toDto(Category entity);
 
-    @Mapping(target = "active", constant = "true")
     public abstract Category toEntity(CategoryCreationDto dto);
 }
