@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "image")
 @NoArgsConstructor
@@ -32,4 +34,10 @@ public class ImageEntity {
 
     @Column(name="full_path")
     private String fullPath;
+
+    @Column(name="created_at")
+    private LocalDateTime createdAt;
+
+    @Column(name="updated_at")
+    private LocalDateTime updatedAt;
 }
