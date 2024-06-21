@@ -54,7 +54,7 @@ public class OfferServiceImpl implements OfferService {
     private final UserPermissionsUtilities utilities;
     @Lazy
     @Autowired
-    private  ImageService imageService;
+    private ImageService imageService;
     private final OfferContext offerContext;
 
     private Set<OfferStatus> STATUSES_FOR_BID_SEARCH = Set.of(
@@ -106,7 +106,8 @@ public class OfferServiceImpl implements OfferService {
     @Transactional
     @Override
     public OfferResponseDto createOffer(OfferCreationDto dto) throws CredentialException {
-        utilities.checkUserPermissionsForImageByBaseName(dto.getBaseNameOfImages());
+        if (dto.getBaseNameOfImages() != null)
+            utilities.checkUserPermissionsForImageByBaseName(dto.getBaseNameOfImages());
 
         User user = AuthService.getCurrentUser();
         try {
@@ -148,7 +149,8 @@ public class OfferServiceImpl implements OfferService {
     @Transactional
     @Override
     public OfferResponseDto updateOffer(OfferUpdateDto dto) throws CredentialException {
-        utilities.checkUserPermissionsForImageByBaseName(dto.getBaseNameOfImages());
+        if (dto.getBaseNameOfImages() != null)
+            utilities.checkUserPermissionsForImageByBaseName(dto.getBaseNameOfImages());
         User user = AuthService.getCurrentUser();
         Offer offer = offerRepository.findById(dto.getId())
                 .orElseThrow(() -> new OfferNotFoundException(dto.getId()));
@@ -257,7 +259,8 @@ public class OfferServiceImpl implements OfferService {
             try {
                 User authenticatedUser = AuthService.getCurrentUser();
                 userService.setLocation(authenticatedUser.getId(), locationId);
-            } catch (CredentialException ignored) {}
+            } catch (CredentialException ignored) {
+            }
         }
 
         Page<Offer> pageOfOffer = offerRepository.searchAll(OfferStatus.AUCTION_STARTED, pageable, locationId, pattern);
