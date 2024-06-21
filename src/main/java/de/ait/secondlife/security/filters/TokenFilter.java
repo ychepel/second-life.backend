@@ -1,5 +1,6 @@
 package de.ait.secondlife.security.filters;
 
+import de.ait.secondlife.domain.entity.User;
 import de.ait.secondlife.domain.interfaces.AuthenticatedUser;
 import de.ait.secondlife.security.AuthInfo;
 import de.ait.secondlife.security.Role;
@@ -52,9 +53,17 @@ public class TokenFilter extends GenericFilterBean {
             UserDetails userDetails = userDetailsService.loadUserByUsername(authInfo.getName());
             authInfo.setAuthenticatedUser((AuthenticatedUser) userDetails);
             SecurityContextHolder.getContext().setAuthentication(authInfo);
+
+            updateUserLastActivity(userDetailsService, userDetails);
         }
 
         filterChain.doFilter(servletRequest, servletResponse);
+    }
+
+    private void updateUserLastActivity(UserDetailsService userDetailsService, UserDetails userDetails) {
+        if (userDetailsService instanceof UserDetailsServiceImpl) {
+            ((UserDetailsServiceImpl) userDetailsService).updateLastActive((User)userDetails);
+        }
     }
 
     private UserDetailsService getUserDetailsService(Collection<? extends GrantedAuthority> authorities) throws IOException {
