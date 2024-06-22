@@ -27,7 +27,7 @@ public class VerificationState extends StateStrategy {
         EmailService emailService = context.getEmailService();
         emailService.createNotification(
                 offer.getUser(),
-                NotificationType.REJECTED_OFFER_EMAIL,
+                NotificationType.OFFER_REJECTION_EMAIL,
                 offer.getId()
         );
     }

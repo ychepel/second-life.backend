@@ -1,11 +1,16 @@
 package de.ait.secondlife.services.offer_status;
 
+import de.ait.secondlife.constants.NotificationType;
 import de.ait.secondlife.constants.OfferStatus;
 import de.ait.secondlife.domain.entity.Offer;
+import de.ait.secondlife.domain.entity.User;
 import de.ait.secondlife.exception_handling.exceptions.ProhibitedOfferStateChangeException;
+import de.ait.secondlife.services.interfaces.EmailService;
 import de.ait.secondlife.services.interfaces.OfferContext;
 import de.ait.secondlife.services.interfaces.OfferService;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
 
 @Slf4j
 public class AuctionStartedState extends StateStrategy {
@@ -55,7 +60,15 @@ public class AuctionStartedState extends StateStrategy {
         Offer offer = getOfferAllowedForCurrentUser(context);
         OfferService offerService = context.getOfferService();
         offerService.setStatus(offer, OfferStatus.CANCELED);
-        //TODO: mailing - inform all participants that auction was canceled
+        EmailService emailService = context.getEmailService();
+
+        List<User> participants = offerService.getParticipants(offer);
+        for (User user : participants) {
+            emailService.createNotification(
+                    user,
+                    NotificationType.OFFER_CANCELLATION_EMAIL,
+                    offer.getId());
+        }
         context.setStateStrategy(new CancelState());
     }
 
@@ -64,7 +77,13 @@ public class AuctionStartedState extends StateStrategy {
         Offer offer = getOfferAllowedForCurrentAdmin(context);
         OfferService offerService = context.getOfferService();
         offerService.setStatus(offer, OfferStatus.BLOCKED_BY_ADMIN);
-        //TODO: mailing - inform offer owner about blocking offer
+
+        EmailService emailService = context.getEmailService();
+        emailService.createNotification(
+                offer.getUser(),
+                NotificationType.OFFER_BLOCKED_EMAIL,
+                offer.getId());
+
         context.setStateStrategy(new BlockByAdminState());
     }
 }

@@ -4,6 +4,7 @@ import de.ait.secondlife.constants.NotificationType;
 import de.ait.secondlife.constants.OfferStatus;
 import de.ait.secondlife.domain.entity.Bid;
 import de.ait.secondlife.domain.entity.Offer;
+import de.ait.secondlife.domain.entity.User;
 import de.ait.secondlife.exception_handling.exceptions.ProhibitedOfferStateChangeException;
 import de.ait.secondlife.services.interfaces.EmailService;
 import de.ait.secondlife.services.interfaces.OfferContext;
@@ -50,7 +51,7 @@ public class AuctionFinishedState extends StateStrategy {
 
             emailService.createNotification(
                     offer.getUser(),
-                    NotificationType.OFFER_COMPLETED_DUE_TO_NO_BIDS_EMAIL,
+                    NotificationType.OFFER_COMPLETION_DUE_TO_NO_BIDS_EMAIL,
                     offer.getId()
             );
 
@@ -65,7 +66,7 @@ public class AuctionFinishedState extends StateStrategy {
 
             emailService.createNotification(
                     offer.getUser(),
-                    NotificationType.OFFER_COMPLETED_DUE_TO_1_BID_EMAIL_TO_OFFER_OWNER_EMAIL,
+                    NotificationType.OFFER_COMPLETION_DUE_TO_1_BID_EMAIL_TO_OFFER_OWNER_EMAIL,
                     offer.getId()
             );
 
@@ -76,7 +77,7 @@ public class AuctionFinishedState extends StateStrategy {
             );
 
             context.setStateStrategy(new CompleteState());
-        } else if(!offer.getIsFree() && offer.getMaxBidValue().compareTo(offer.getWinBid()) == 0) {
+        } else if (!offer.getIsFree() && offer.getMaxBidValue().compareTo(offer.getWinBid()) == 0) {
             if (offer.getWinnerBid() != null) {
                 throw new IllegalStateException(String.format("Offer [ID=%d] already has a winner", offer.getId()));
             }
@@ -88,7 +89,7 @@ public class AuctionFinishedState extends StateStrategy {
 
             emailService.createNotification(
                     offer.getUser(),
-                    NotificationType.OFFER_COMPLETED_DUE_TO_BUYOUT_WIN_BID_EMAIL,
+                    NotificationType.OFFER_COMPLETION_DUE_TO_BUYOUT_WIN_BID_EMAIL,
                     offer.getId()
             );
 
@@ -98,7 +99,13 @@ public class AuctionFinishedState extends StateStrategy {
                     offer.getId()
             );
 
-            //TODO - inform other participants, that they didnt win an auction
+            List<User> loserParticipants = offerService.getNotWinners(offer);
+            for (User user : loserParticipants) {
+                    emailService.createNotification(
+                            user,
+                            NotificationType.PARTICIPANT_IS_NOT_WINNER_EMAIL,
+                            offer.getId());
+            }
 
             context.setStateStrategy(new CompleteState());
         } else {
@@ -117,7 +124,14 @@ public class AuctionFinishedState extends StateStrategy {
         }
         OfferService offerService = context.getOfferService();
         offerService.setStatus(offer, OfferStatus.QUALIFICATION);
-        //TODO: mailing - inform offer owner about need to choose a winner
+
+        EmailService emailService = context.getEmailService();
+
+        emailService.createNotification(
+                offer.getUser(),
+                NotificationType.OFFER_QUALIFICATION_EMAIL,
+                offer.getId());
+
         context.setStateStrategy(new QualificationState());
     }
 
@@ -126,7 +140,17 @@ public class AuctionFinishedState extends StateStrategy {
         Offer offer = getOfferAllowedForCurrentUser(context);
         OfferService offerService = context.getOfferService();
         offerService.setStatus(offer, OfferStatus.CANCELED);
-        //TODO: mailing - inform all participants that auction was canceled
+
+        EmailService emailService = context.getEmailService();
+
+        List<User> participants = offerService.getParticipants(offer);
+        for (User user : participants) {
+            emailService.createNotification(
+                    user,
+                    NotificationType.OFFER_CANCELLATION_EMAIL,
+                    offer.getId());
+        }
+
         context.setStateStrategy(new CancelState());
     }
 

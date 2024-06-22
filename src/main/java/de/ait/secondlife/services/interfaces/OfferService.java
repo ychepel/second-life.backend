@@ -56,4 +56,6 @@ public interface OfferService extends CheckEntityExistsService{
     boolean isCurrentUserAuctionParticipant(Offer offer);
 
     List<User> getNotWinners(Offer offer);
+
+    List<User> getParticipants(Offer offer);
 }

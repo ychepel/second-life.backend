@@ -105,7 +105,13 @@ public class QualificationState extends StateStrategy {
         Offer offer = getOfferAllowedForCurrentAdmin(context);
         OfferService offerService = context.getOfferService();
         offerService.setStatus(offer, OfferStatus.BLOCKED_BY_ADMIN);
-        //TODO: mailing - inform offer owner about blocking offer
+
+        EmailService emailService = context.getEmailService();
+        emailService.createNotification(
+                offer.getUser(),
+                NotificationType.OFFER_BLOCKED_EMAIL,
+                offer.getId());
+
         context.setStateStrategy(new BlockByAdminState());
     }
 }

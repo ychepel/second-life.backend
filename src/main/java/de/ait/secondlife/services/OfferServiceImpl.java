@@ -349,8 +349,23 @@ public class OfferServiceImpl implements OfferService {
         }else {
             return new ArrayList<>();
         }
-
     }
+
+    @Override
+    public List<User> getParticipants(Offer offer) {
+
+        List<Bid> bidList = offer.getBids();
+
+        if (bidList != null){
+            return offer.getBids()
+                    .stream()
+                    .map(Bid::getUser)
+                    .toList();
+        }else {
+            return new ArrayList<>();
+        }
+    }
+
 
     private Offer getOfferById(Long id) {
         return offerRepository.findById(id).orElseThrow(() -> new OfferNotFoundException(id));
