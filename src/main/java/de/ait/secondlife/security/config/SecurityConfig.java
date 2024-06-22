@@ -62,6 +62,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/v1/offers/{id}").authenticated()
                         .requestMatchers(HttpMethod.GET, "/v1/locations","/v1/locations/{id}").permitAll()
                         .requestMatchers(HttpMethod.PATCH, "/v1/offers/{id}/reject").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/v1/offers/{id}/complete").authenticated()
                         .requestMatchers(HttpMethod.PATCH, "/v1/offers/{id}/start-auction").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/v1/offers/{id}/cancel").hasRole("USER")
                         .requestMatchers(HttpMethod.DELETE, "/v1/offers/{id}/block-by-admin").hasRole("ADMIN")
