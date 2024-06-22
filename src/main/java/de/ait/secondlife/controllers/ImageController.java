@@ -83,7 +83,7 @@ public class ImageController {
                     schema = @Schema(implementation = ImageRequestDto.class))
             @RequestBody ImageRequestDto dto
     ) {
-//        utilities.checkCredentials(dto.getBaseName());
+
         imageService.deleteImage(dto.getBaseName());
 
         return ResponseEntity.ok(new ResponseMessageDto("Image deleted successfully"));
