@@ -70,12 +70,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void updateLastActive(User user) {
-        user.setLastActive(LocalDateTime.now());
-        userRepository.save(user);
-    }
-
-    @Override
     public UserDto setLocation(Long userId, Long locationId) {
 
         if (userId == null || userId < 1) {
