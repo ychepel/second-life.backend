@@ -2,6 +2,7 @@ package de.ait.secondlife.services.interfaces;
 
 import de.ait.secondlife.domain.dto.ImageCreationDto;
 import de.ait.secondlife.domain.dto.ImagePathsResponseDto;
+import de.ait.secondlife.domain.entity.ImageEntity;
 
 import java.util.Set;
 
@@ -15,4 +16,7 @@ public interface ImageService {
     void connectTempImagesToEntity(Set<String> baseNames, String entityType,Long entityId);
 
     void deleteImage(String baseName);
+
+    Set<ImageEntity>  findAllImagesByBaseName(String baseName);
+
 }

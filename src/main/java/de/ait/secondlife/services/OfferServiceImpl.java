@@ -11,8 +11,7 @@ import de.ait.secondlife.domain.dto.*;
 import de.ait.secondlife.domain.entity.Bid;
 import de.ait.secondlife.domain.entity.Offer;
 import de.ait.secondlife.domain.entity.User;
-import de.ait.secondlife.exception_handling.exceptions.NoRightToChangeException;
-import de.ait.secondlife.exception_handling.exceptions.UserIsNotAuthorizedException;
+import de.ait.secondlife.exception_handling.exceptions.NoRightsException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.CreateOfferConstraintViolationException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.WrongAuctionParameterException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.WrongAuctionPriceParameterException;
@@ -21,12 +20,14 @@ import de.ait.secondlife.exception_handling.exceptions.not_found_exception.Offer
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.UserNotFoundException;
 import de.ait.secondlife.repositories.OfferRepository;
 import de.ait.secondlife.security.services.AuthService;
-import de.ait.secondlife.security.Role;
 import de.ait.secondlife.services.interfaces.*;
 import de.ait.secondlife.services.mapping.OfferMappingService;
+import de.ait.secondlife.services.utilities.UserPermissionsUtilities;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -52,7 +53,10 @@ public class OfferServiceImpl implements OfferService {
     private final CategoryService categoryService;
     private final LocationService locationService;
     private final OfferStatusHistoryService offerStatusHistoryService;
-    private final ImageService imageService;
+    private final UserPermissionsUtilities utilities;
+    @Lazy
+    @Autowired
+    private ImageService imageService;
     private final OfferContext offerContext;
 
     private Set<OfferStatus> STATUSES_FOR_BID_SEARCH = Set.of(
@@ -104,6 +108,9 @@ public class OfferServiceImpl implements OfferService {
     @Transactional
     @Override
     public OfferResponseDto createOffer(OfferCreationDto dto) throws CredentialException {
+        if (dto.getBaseNameOfImages() != null)
+            utilities.checkUserPermissionsForImageByBaseName(dto.getBaseNameOfImages());
+
         User user = AuthService.getCurrentUser();
         try {
             Offer newOffer = mappingService.toEntity(dto);
@@ -144,11 +151,13 @@ public class OfferServiceImpl implements OfferService {
     @Transactional
     @Override
     public OfferResponseDto updateOffer(OfferUpdateDto dto) throws CredentialException {
+        if (dto.getBaseNameOfImages() != null)
+            utilities.checkUserPermissionsForImageByBaseName(dto.getBaseNameOfImages());
         User user = AuthService.getCurrentUser();
         Offer offer = offerRepository.findById(dto.getId())
                 .orElseThrow(() -> new OfferNotFoundException(dto.getId()));
         if (!user.equals(offer.getUser()))
-            throw new NoRightToChangeException(String.format("User <%d> can't change this offer", user.getId()));
+            throw new NoRightsException(String.format("User <%d> can't change this offer", user.getId()));
 
         offer.setTitle(dto.getTitle() == null ? offer.getTitle() : dto.getTitle());
         offer.setDescription(dto.getDescription() == null ? offer.getDescription() : dto.getDescription());
@@ -223,18 +232,11 @@ public class OfferServiceImpl implements OfferService {
         offerContext.finishAuction();
     }
 
-    //TODO method no usages
-    @Transactional
-    @Override
-    public void qualifyAuction(Long id) {
-        offerContext.setOffer(getOfferById(id));
-        offerContext.qualify();
-    }
-
     @Transactional
     @Override
     public OfferResponseDto completeOffer(Long id, OfferCompletionDto offerCompletionDto) {
         Offer offer = getOfferById(id);
+        utilities.checkUserPermissions(offer.getUser().getId());
         offerContext.setOffer(offer);
         offerContext.complete(offerCompletionDto.getWinnerBidId());
         return mappingService.toDto(offer);
@@ -277,7 +279,7 @@ public class OfferServiceImpl implements OfferService {
             Boolean isFree) {
 
         checkUserId(id);
-        checkUserCredentials(id);
+        utilities.checkUserPermissions(id);
         OfferStatus offerStatus = status != null ? OfferStatus.get(status) : null;
 
         Page<Offer> pageOfOffer = offerRepository.findUserAuctionParticipations(
@@ -285,6 +287,11 @@ public class OfferServiceImpl implements OfferService {
                 STATUSES_FOR_BID_SEARCH, pageable);
 
         return offersToOfferRequestWithPaginationDto(pageOfOffer);
+    }
+
+    @Override
+    public Long findOwnerIdByOfferId(Long id) {
+        return findById(id).getUser().getId();
     }
 
     @Transactional

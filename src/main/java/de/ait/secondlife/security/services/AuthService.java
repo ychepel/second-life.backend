@@ -12,7 +12,6 @@ import de.ait.secondlife.security.dto.TokenResponseDto;
 import de.ait.secondlife.security.filters.TokenFilter;
 import de.ait.secondlife.services.UserDetailsServiceImpl;
 import de.ait.secondlife.services.interfaces.AdminService;
-import de.ait.secondlife.services.interfaces.UserService;
 import io.jsonwebtoken.Claims;
 import jakarta.security.auth.message.AuthException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -78,12 +77,17 @@ public class AuthService {
         return (Admin) authenticatedUser;
     }
 
-    public static Role getCurrentRole() throws CredentialException {
-        AuthenticatedUser authenticatedUser = getAuthenticatedUser();
-        if (authenticatedUser == null) {
-            throw new UserIsNotAuthenticatedException();
+   public static Role getCurrentRole() {
+        AuthenticatedUser authenticatedUser = null;
+        try {
+            authenticatedUser = getAuthenticatedUser();
+            if (authenticatedUser == null) {
+                throw new UserIsNotAuthenticatedException();
+            }
+            return authenticatedUser.getRole();
+        } catch (CredentialException e) {
+            return null;
         }
-        return authenticatedUser.getRole();
     }
 
     private static AuthenticatedUser getAuthenticatedUser() throws CredentialException {
@@ -103,11 +107,6 @@ public class AuthService {
             String accessToken = tokenService.generateAccessToken(foundUser);
             String refreshToken = tokenService.generateRefreshToken(foundUser);
             refreshStorage.put(getTokenStorageKey(role, userEmail), refreshToken);
-
-            if (role == Role.ROLE_USER) {
-                userService.updateLastActive((User) foundUser);
-            }
-
             return new TokenResponseDto(foundUser.getId(), accessToken, refreshToken);
         } else {
             throw new CredentialException("Password is incorrect");

@@ -10,8 +10,6 @@ import javax.security.auth.login.CredentialException;
 public interface UserService extends CheckEntityExistsService {
     UserDto register(UserCreationDto userDto);
 
-    void updateLastActive(User user);
-
     UserDto setLocation(Long userId, Long locationId);
 
     UserDto getCurrentUser() throws CredentialException;
