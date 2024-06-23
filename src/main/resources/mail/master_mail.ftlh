@@ -10,7 +10,7 @@
                 <a href="https://www.second-life.space" style="color: rgb(86, 17, 156); text-decoration: none;">Second Life</a>
             </h1>
         </div>
-        <div style="background-color: #ffffff; padding: 20px; margin: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+        <div style="background-color: #ffffff; padding: 20px; margin: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); font-size: 120%;">
             <h2 style="color: #4D418BFF;"><@title/></h2>
             <p><@greeting/></p>
             <p><@maintext/></p>

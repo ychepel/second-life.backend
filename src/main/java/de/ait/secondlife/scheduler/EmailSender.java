@@ -13,7 +13,7 @@ public class EmailSender {
 
     private final EmailService emailService;
 
-//    @Scheduled(fixedRate = 60000)
+    @Scheduled(fixedRate = 60000)
     public void sendEmail(){
         emailService.sendPendingEmails();
     }
