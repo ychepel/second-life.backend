@@ -13,5 +13,6 @@
     <include file="/create-table-confirmation-code.xml" relativeToChangelogFile="true"/>
     <include file="/create-foreign-key-offer-confirmation-code-to-user.xml" relativeToChangelogFile="true"/>
     <include file="create-table-notification.xml" relativeToChangelogFile="true"/>
+    <include file="change-admin-email.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>
