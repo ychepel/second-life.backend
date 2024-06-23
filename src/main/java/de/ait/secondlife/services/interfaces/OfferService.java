@@ -56,4 +56,8 @@ public interface OfferService extends CheckEntityExistsService{
     List<User> getNotWinners(Offer offer);
 
     List<User> getParticipants(Offer offer);
+
+    OfferWinnerDto getWinnerDetails(Offer offer);
+
+    OfferForUserDto getCurrentUserDetails(Offer offer);
 }

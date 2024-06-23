@@ -55,11 +55,21 @@ public class AuctionFinishedState extends StateStrategy {
             completeWithoutBids(offer, offerService, emailService);
         } else if (bids.size() == 1) {
             completeWithSingleBid(offer, offerService, emailService);
-        } else if (!offer.getIsFree() && offer.getMaxBidValue().compareTo(offer.getWinBid()) == 0) {
+        } else if (isExistsPayoutBid(offer)) {
             completeWithMaxBid(offer, offerService, emailService);
         } else {
             qualify(context);
         }
+    }
+
+    private boolean isExistsPayoutBid(Offer offer) {
+        if (offer.getIsFree()) {
+            return false;
+        }
+        if (offer.getWinBid() == null) {
+            return false;
+        }
+        return offer.getMaxBidValue().compareTo(offer.getWinBid()) == 0;
     }
 
     private void completeWithMaxBid(Offer offer, OfferService offerService, EmailService emailService) {
@@ -100,7 +110,7 @@ public class AuctionFinishedState extends StateStrategy {
             throw new IllegalStateException(String.format("Offer [ID=%d] already has a winner", offer.getId()));
         }
         Bid winnerBid = offer.getBids().get(0);
-        offer.setWinnerBid(winnerBid );
+        offer.setWinnerBid(winnerBid);
         offerService.setStatus(offer, OfferStatus.COMPLETED);
 
         emailService.createNotification(

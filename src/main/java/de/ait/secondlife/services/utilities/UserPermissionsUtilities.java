@@ -5,7 +5,6 @@ import de.ait.secondlife.constants.ImageConstants;
 import de.ait.secondlife.domain.entity.ImageEntity;
 import de.ait.secondlife.domain.entity.User;
 import de.ait.secondlife.exception_handling.exceptions.NoRightsException;
-import de.ait.secondlife.exception_handling.exceptions.UserIsNotAuthorizedException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.PathWrongException;
 import de.ait.secondlife.security.Role;
 import de.ait.secondlife.security.services.AuthService;
@@ -20,9 +19,9 @@ import javax.security.auth.login.CredentialException;
 import java.util.HashSet;
 import java.util.Set;
 
-
 @Component
 public class UserPermissionsUtilities  {
+
     @Lazy
     @Autowired
     private OfferService offerService;
@@ -33,22 +32,26 @@ public class UserPermissionsUtilities  {
     @Value("${do.base.path}")
     private String basePath;
 
-
     public void checkUserPermissions(Long userId) {
+        Role role = AuthService.getCurrentRole();
+
+        if (role == Role.ROLE_ADMIN) {
+            return;
+        }
+
+        if (role != Role.ROLE_USER) {
+            throw new NoRightsException("The user does not have enough rights");
+        }
+
+        User user;
         try {
-            Role role = AuthService.getCurrentRole();
+            user = AuthService.getCurrentUser();
+        } catch (CredentialException e) {
+            throw new NoRightsException("The user does not have enough rights");
+        }
 
-            if (role != Role.ROLE_ADMIN) {
-
-                if (role == Role.ROLE_USER) {
-                    User user = AuthService.getCurrentUser();
-                    if (!user.getId().equals(userId)) {
-                        throw new NoRightsException("The user does not have enough rights");
-                    }
-                } else throw new UserIsNotAuthorizedException();
-            }
-
-        } catch (CredentialException ignored) {
+        if (!user.getId().equals(userId)) {
+            throw new NoRightsException("The user does not have enough rights");
         }
     }
 
