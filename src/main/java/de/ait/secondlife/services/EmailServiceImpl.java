@@ -34,6 +34,9 @@ public class EmailServiceImpl implements EmailService {
     @Value("${spring.mail.username}")
     private String senderEmail;
 
+    @Value("${spring.application.name}")
+    private String applicationName;
+
     public EmailServiceImpl(
             JavaMailSender sender,
             Configuration mailConfig,
@@ -105,7 +108,7 @@ public class EmailServiceImpl implements EmailService {
                 notification
         );
 
-        helper.setFrom(senderEmail);
+        helper.setFrom(getSender());
 
         AuthenticatedUser authenticatedUser = authService.getAuthenticatedUser(
                 notification.getReceiverRole(),
@@ -114,8 +117,13 @@ public class EmailServiceImpl implements EmailService {
         helper.setTo(authenticatedUser.getEmail());
 
         helper.setSubject(templateService.getSubject());
-        helper.setText(templateService.getBody(), true);
+        String body = templateService.getBody();
+        helper.setText(body, true);
 
         sender.send(message);
+    }
+
+    private String getSender() {
+        return String.format("%s <%s>", applicationName, senderEmail);
     }
 }

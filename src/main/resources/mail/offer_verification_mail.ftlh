@@ -1,12 +1,7 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Offer verification</title>
-</head>
-<body>
-<h1 style="color: green">Offer verification</h1>
-<h2>Hello, admin!</h2>
-<p>Please, pay attention, that there is new offer, that needs your approve <a href="${link}">offer</a></p>
-</body>
-</html>
+<#include "master_mail.ftlh">
+
+<#macro title>Offer verification</#macro>
+<#macro greeting>Hello, admin!</#macro>
+<#macro maintext>Please, pay attention, that there is new offer, that needs your approve <a href="${link}">offer</a></#macro>
+
+<@content/>

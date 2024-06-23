@@ -16,6 +16,7 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class OfferCancellation extends TemplateService {
+
     private final OfferService offerService;
     private final AuthService authService;
 
