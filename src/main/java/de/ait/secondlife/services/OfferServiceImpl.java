@@ -12,6 +12,7 @@ import de.ait.secondlife.domain.entity.Bid;
 import de.ait.secondlife.domain.entity.Offer;
 import de.ait.secondlife.domain.entity.User;
 import de.ait.secondlife.exception_handling.exceptions.NoRightsException;
+import de.ait.secondlife.exception_handling.exceptions.UserIsNotAuthorizedException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.CreateOfferConstraintViolationException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.WrongAuctionParameterException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.WrongAuctionPriceParameterException;
@@ -19,6 +20,7 @@ import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.is_
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.OfferNotFoundException;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.UserNotFoundException;
 import de.ait.secondlife.repositories.OfferRepository;
+import de.ait.secondlife.security.Role;
 import de.ait.secondlife.security.services.AuthService;
 import de.ait.secondlife.services.interfaces.*;
 import de.ait.secondlife.services.mapping.OfferMappingService;
@@ -36,8 +38,7 @@ import org.springframework.stereotype.Service;
 import javax.security.auth.login.CredentialException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -106,8 +107,9 @@ public class OfferServiceImpl implements OfferService {
     @Transactional
     @Override
     public OfferResponseDto createOffer(OfferCreationDto dto) throws CredentialException {
-        if (dto.getBaseNameOfImages() != null)
+        if (dto.getBaseNameOfImages() != null) {
             utilities.checkUserPermissionsForImageByBaseName(dto.getBaseNameOfImages());
+        }
 
         User user = AuthService.getCurrentUser();
         try {
@@ -338,6 +340,91 @@ public class OfferServiceImpl implements OfferService {
         } catch (CredentialException e) {
             return false;
         }
+    }
+
+    @Override
+    public List<User> getNotWinners(Offer offer) {
+
+        List<Bid> bidList = offer.getBids();
+
+        if (bidList != null){
+            return offer.getBids()
+                    .stream()
+                    .filter(bid -> !Objects.equals(bid.getId(), offer.getWinnerBid().getId()))
+                    .map(Bid::getUser)
+                    .toList();
+        }else {
+            return new ArrayList<>();
+        }
+    }
+
+    @Override
+    public List<User> getParticipants(Offer offer) {
+
+        List<Bid> bidList = offer.getBids();
+
+        if (bidList != null){
+            return offer.getBids()
+                    .stream()
+                    .map(Bid::getUser)
+                    .toList();
+        }else {
+            return new ArrayList<>();
+        }
+    }
+
+    @Override
+    public OfferWinnerDto getWinnerDetails(Offer offer) {
+        OfferWinnerDto offerWinnerDto = new OfferWinnerDto();
+        Bid winnerBid = offer.getWinnerBid();
+        if (winnerBid == null) {
+            return offerWinnerDto;
+        }
+
+        offerWinnerDto.setBidId(winnerBid.getId());
+        offerWinnerDto.setBidValue(winnerBid.getBidValue());
+
+        User winner = winnerBid.getUser();
+        try {
+            utilities.checkUserPermissions(offer.getUser().getId());
+            offerWinnerDto.setNameShorted(winner.getShortedName());
+            offerWinnerDto.setEmail(winner.getEmail());
+        } catch (NoRightsException ignored) {
+        }
+
+        return offerWinnerDto;
+    }
+
+    @Override
+    public OfferForUserDto getCurrentUserDetails(Offer offer) {
+        OfferForUserDto userDto = new OfferForUserDto();
+        userDto.setIsAuctionParticipant(false);
+        userDto.setIsWinner(false);
+
+        List<Bid> bids = offer.getBids();
+        if (bids != null) {
+            try {
+                User user = AuthService.getCurrentUser();
+                BigDecimal maxBidValue = bids.stream()
+                        .filter(bid -> Objects.equals(bid.getUser().getId(), user.getId()))
+                        .max(Comparator.comparing(Bid::getBidValue))
+                        .map(Bid::getBidValue)
+                        .orElse(null);
+                if (maxBidValue != null) {
+                    userDto.setIsAuctionParticipant(true);
+                    userDto.setMaxBidValue(maxBidValue);
+                }
+                if (offer.getOfferStatus() == OfferStatus.COMPLETED
+                        && maxBidValue != null
+                        && offer.getWinnerBid() != null
+                        && offer.getWinnerBid().getBidValue().compareTo(maxBidValue) == 0) {
+                    userDto.setIsWinner(true);
+                }
+            } catch (CredentialException ignored) {
+            }
+        }
+
+        return userDto;
     }
 
     private Offer getOfferById(Long id) {

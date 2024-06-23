@@ -54,7 +54,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author: Second Life Team
  */
 @Component
-public class UserPermissionsUtilities {
+public class UserPermissionsUtilities  {
     @Lazy
     @Autowired
     private OfferService offerService;
@@ -74,19 +74,25 @@ public class UserPermissionsUtilities {
      * @throws CredentialException          if there is an issue with user credentials
      */
     public void checkUserPermissions(Long userId) {
+        Role role = AuthService.getCurrentRole();
+
+        if (role == Role.ROLE_ADMIN) {
+            return;
+        }
+
+        if (role != Role.ROLE_USER) {
+            throw new NoRightsException("The user does not have enough rights");
+        }
+
+        User user;
         try {
-            Role role = AuthService.getCurrentRole();
+            user = AuthService.getCurrentUser();
+        } catch (CredentialException e) {
+            throw new NoRightsException("The user does not have enough rights");
+        }
 
-            if (role != Role.ROLE_ADMIN) {
-
-                if (role == Role.ROLE_USER) {
-                    User user = AuthService.getCurrentUser();
-                    if (!user.getId().equals(userId)) {
-                        throw new NoRightsException("The user does not have enough rights");
-                    }
-                } else throw new UserIsNotAuthorizedException();
-            }
-        } catch (CredentialException ignored) {
+        if (!user.getId().equals(userId)) {
+            throw new NoRightsException("The user does not have enough rights");
         }
     }
 

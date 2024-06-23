@@ -9,6 +9,10 @@ public interface OfferContext {
 
     BidService getBidService();
 
+    EmailService getEmailService();
+
+    AdminService getAdminService();
+
     void setStateStrategy(StateStrategy stateStrategy);
 
     void setOffer(Offer offer);

@@ -1,6 +1,8 @@
 package de.ait.secondlife.services;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import de.ait.secondlife.constants.EntityTypeWithImages;
@@ -8,7 +10,10 @@ import de.ait.secondlife.constants.ImageConstants;
 import de.ait.secondlife.domain.dto.ImageCreationDto;
 import de.ait.secondlife.domain.dto.ImagePathsResponseDto;
 import de.ait.secondlife.domain.entity.ImageEntity;
-import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.*;
+import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.BadFileFormatException;
+import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.BadFileSizeException;
+import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.BadRequestException;
+import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.MaxImageCountException;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.BadEntityTypeException;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.ImagesNotFoundException;
 import de.ait.secondlife.repositories.ImageRepository;
@@ -16,7 +21,6 @@ import de.ait.secondlife.services.interfaces.*;
 import de.ait.secondlife.services.utilities.UserPermissionsUtilities;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,11 +30,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
 import javax.security.auth.login.CredentialException;
-
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.*;
-
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -205,7 +210,6 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
      */
     @Override
     public void connectTempImagesToEntity(Set<String> baseNames, String entityType, Long entityId) {
-
         if (baseNames != null && entityId != null) {
             Set<String> usedBaseNames = new HashSet<>();
             baseNames.forEach(e -> {
@@ -282,9 +286,13 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
     private void relocateImageFile(String oldPath, String newPath) {
         String oldDoPath = oldPath.substring(basePath.length());
         String newDoPath = newPath.substring(basePath.length());
-        s3Client.copyObject(
-                bucketName, oldDoPath,
-                bucketName, newDoPath);
+        CopyObjectRequest copyObjRequest = new CopyObjectRequest(
+                bucketName,
+                oldDoPath,
+                bucketName,
+                newDoPath
+        ).withCannedAccessControlList(CannedAccessControlList.PublicReadWrite);
+        s3Client.copyObject(copyObjRequest);
         s3Client.deleteObject(bucketName, oldDoPath);
     }
 

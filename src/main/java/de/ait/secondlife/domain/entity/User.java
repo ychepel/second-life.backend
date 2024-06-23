@@ -71,4 +71,12 @@ public class User implements AuthenticatedUser, EntityWithImage {
     public Role getRole() {
         return Role.ROLE_USER;
     }
+
+    public String getFullName() {
+        return this.getFirstName() + ' ' + this.getLastName();
+    }
+
+    public String getShortedName() {
+        return String.format("%s %s.", this.getFirstName(), this.getLastName().substring(0, 1));
+    }
 }

@@ -46,6 +46,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/v1/users/register").permitAll()
                         .requestMatchers(HttpMethod.GET, "/v1/users/me").hasRole("USER")
                         .requestMatchers(HttpMethod.PATCH, "/v1/users/{id}/set-location").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "v1/users/{id}/set-active").permitAll()
                         .requestMatchers(HttpMethod.GET, "/v1/categories", "/v1/categories/{category-id}").permitAll()
                         .requestMatchers(HttpMethod.GET, "/v1/categories/get-all-for-admin").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/v1/categories").hasRole("ADMIN")
@@ -69,6 +70,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/v1/bids/offer/{id}").hasRole("USER")
                         .requestMatchers(HttpMethod.POST, "/v1/bids").hasRole("USER")
                         .requestMatchers(HttpMethod.GET, "/v1/rejection-reasons").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/emails/send").permitAll() //TODO: remove after cleaning db from incorrect emails
                         .anyRequest().denyAll()
                 )
                 .httpBasic(AbstractHttpConfigurer::disable)

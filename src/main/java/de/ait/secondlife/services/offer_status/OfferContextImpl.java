@@ -18,6 +18,10 @@ public class OfferContextImpl implements OfferContext {
 
     private OfferService offerService;
     private BidService bidService;
+    private final EmailService emailService;
+    private final UserService userService;
+    private final AdminService adminService;
+
     private Offer offer;
 
     @Autowired
