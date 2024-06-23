@@ -399,6 +399,7 @@ public class OfferServiceImpl implements OfferService {
     public OfferForUserDto getCurrentUserDetails(Offer offer) {
         OfferForUserDto userDto = new OfferForUserDto();
         userDto.setIsAuctionParticipant(false);
+        userDto.setIsWinner(false);
 
         List<Bid> bids = offer.getBids();
         if (bids != null) {
@@ -412,6 +413,12 @@ public class OfferServiceImpl implements OfferService {
                 if (maxBidValue != null) {
                     userDto.setIsAuctionParticipant(true);
                     userDto.setMaxBidValue(maxBidValue);
+                }
+                if (offer.getOfferStatus() == OfferStatus.COMPLETED
+                        && maxBidValue != null
+                        && offer.getWinnerBid() != null
+                        && offer.getWinnerBid().getBidValue().compareTo(maxBidValue) == 0) {
+                    userDto.setIsWinner(true);
                 }
             } catch (CredentialException ignored) {
             }

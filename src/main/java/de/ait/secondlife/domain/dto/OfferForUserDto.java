@@ -16,4 +16,7 @@ public class OfferForUserDto {
 
     @Schema(description = "Max bid value of current user", example = "123")
     private BigDecimal maxBidValue;
+
+    @Schema(description = "The variable indicates whether the current user is the winner of the completed auction", example = "false")
+    private Boolean isWinner;
 }
