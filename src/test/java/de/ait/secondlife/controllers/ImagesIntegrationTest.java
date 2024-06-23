@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.ait.secondlife.constants.EntityTypeWithImages;
 import de.ait.secondlife.constants.ImageConstants;
 import de.ait.secondlife.controllers.test_dto.TestImagePropsDto;
+import de.ait.secondlife.domain.dto.ImageRequestDto;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,10 @@ import org.springframework.util.ResourceUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
 
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.startsWith;
@@ -206,7 +210,7 @@ public class ImagesIntegrationTest implements ImageConstants {
                 .andExpect(jsonPath("$.values[*]['64x64']").exists());
     }
 
-    private Cookie getCookieByEntityType(String entityType)  {
+    private Cookie getCookieByEntityType(String entityType) {
         return switch (EntityTypeWithImages.get(entityType.toLowerCase())) {
             case OFFER, USER -> userCookie1;
             case CATEGORY -> adminCookie;
@@ -229,7 +233,7 @@ public class ImagesIntegrationTest implements ImageConstants {
                     .andExpect(status().isBadRequest());
         }
 
-        private void setEntityImageForEntity(String entityType, Long entityId) throws Exception {
+        private void setImageForEntity400(String entityType, Long entityId) throws Exception {
             TestImagePropsDto imageProps = getTestImagePropsForSettingImage(
                     entityType, entityId, "classpath:test_image/empty.jpeg");
             setImageAndGet400(imageProps, entityType);
@@ -285,15 +289,18 @@ public class ImagesIntegrationTest implements ImageConstants {
                     .andExpect(status().isOk());
         }
 
-        private void setImageWithResponse400IfCountOfImageIsGreaterThanMaxCount(String entityType, Long entityId, int maxCount) throws Exception {
+        private void setImageWithResponse400IfCountOfImageIsGreaterThanMaxCount(
+                String entityType, Long entityId, int maxCount) throws Exception {
             for (int i = 0; i < maxCount; i++) {
                 setImageAndGet200(entityType, entityId);
             }
-            TestImagePropsDto imageProps = getTestImagePropsForSettingImage(entityType, entityId, "classpath:test_image/testImg.jpeg");
+            TestImagePropsDto imageProps = getTestImagePropsForSettingImage(
+                    entityType, entityId, "classpath:test_image/testImg.jpeg");
             setImageAndGet400(imageProps, entityType);
         }
 
-        private void setImageWithResponse200IfCountOfImageIsGreaterThanMaxCount(String entityType, Long entityId, int maxCount) throws Exception {
+        private void setImageWithResponse200IfCountOfImageIsGreaterThanMaxCount(
+                String entityType, Long entityId, int maxCount) throws Exception {
             for (int i = 0; i < maxCount + 1; i++) {
                 setImageAndGet200(entityType, entityId);
             }
@@ -308,7 +315,8 @@ public class ImagesIntegrationTest implements ImageConstants {
                     .andExpect(status().isNotFound());
         }
 
-        private void setImageAndGet400IfImageMediaTypeNull(String entityType, Long entityId) throws Exception {
+        private void setImageAndGet400IfImageMediaTypeNull(
+                String entityType, Long entityId) throws Exception {
             String testImagePath = "classpath:test_image/testImg.jpeg";
             File imageFile = ResourceUtils.getFile(testImagePath);
             byte[] imageBytes = null;
@@ -333,7 +341,8 @@ public class ImagesIntegrationTest implements ImageConstants {
                     .build(), entityType);
         }
 
-        private void setImageAndGet400IfImageMediaTypeWrong(String entityType, Long entityId) throws Exception {
+        private void setImageAndGet400IfImageMediaTypeWrong(
+                String entityType, Long entityId) throws Exception {
             String testImagePath = "classpath:test_image/testImg.jpeg";
             File imageFile = ResourceUtils.getFile(testImagePath);
             byte[] imageBytes = null;
@@ -356,6 +365,30 @@ public class ImagesIntegrationTest implements ImageConstants {
                     .testFile(testFile)
                     .params(params)
                     .build(), entityType);
+        }
+
+        private TestImagePropsDto getTestImagePropsIfEntityTypeIsNull(
+                Long entityId) throws Exception {
+            File imageFile = ResourceUtils.getFile("classpath:test_image/testImg.jpeg");
+            byte[] imageBytes = null;
+            try (FileInputStream fis = new FileInputStream(imageFile)) {
+                imageBytes = fis.readAllBytes();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            MockMultipartFile testFile = new MockMultipartFile(
+                    "file",
+                    imageFile.getName(),
+                    MediaType.IMAGE_JPEG_VALUE,
+                    imageBytes
+            );
+            MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+            if (entityId != null) params.add("entityId", String.valueOf(entityId));
+
+            return TestImagePropsDto.builder()
+                    .testFile(testFile)
+                    .params(params)
+                    .build();
         }
 
         @Test
@@ -389,33 +422,45 @@ public class ImagesIntegrationTest implements ImageConstants {
         }
 
         @Test
+        public void return_400_if_entity_type_is_null() throws Exception {
+            TestImagePropsDto imageProps= getTestImagePropsIfEntityTypeIsNull(createdOfferId);
+
+            mockMvc.perform(multipart("/v1/images")
+                            .file(imageProps.getTestFile())
+                            .params(imageProps.getParams())
+                            .contentType(MediaType.MULTIPART_FORM_DATA)
+                            .cookie(userCookie1))
+                    .andExpect(status().isBadRequest());
+        }
+
+        @Test
         public void return_400_if_image_file_for_category_is_empty() throws Exception {
-            setEntityImageForEntity(EntityTypeWithImages.CATEGORY.getType(), createdCategoryId);
+            setImageForEntity400(EntityTypeWithImages.CATEGORY.getType(), createdCategoryId);
         }
 
         @Test
         public void return_400_if_image_file_for_user_is_empty() throws Exception {
-            setEntityImageForEntity(EntityTypeWithImages.USER.getType(), createdUser1Id);
+            setImageForEntity400(EntityTypeWithImages.USER.getType(), createdUser1Id);
         }
 
         @Test
         public void return_400_if_image_file_for_offer_is_empty() throws Exception {
-            setEntityImageForEntity(EntityTypeWithImages.OFFER.getType(), createdOfferId);
+            setImageForEntity400(EntityTypeWithImages.OFFER.getType(), createdOfferId);
         }
 
         @Test
         public void return_400_if_image_file_for_category_is_empty_and_if_entity_id_is_null() throws Exception {
-            setEntityImageForEntity(EntityTypeWithImages.CATEGORY.getType(), null);
+            setImageForEntity400(EntityTypeWithImages.CATEGORY.getType(), null);
         }
 
         @Test
         public void return_400_if_image_file_for_user_is_empty_and_if_entity_id_is_null() throws Exception {
-            setEntityImageForEntity(EntityTypeWithImages.USER.getType(), null);
+            setImageForEntity400(EntityTypeWithImages.USER.getType(), null);
         }
 
         @Test
         public void return_400_if_image_file_for_offer_is_empty_and_if_entity_id_is_null() throws Exception {
-            setEntityImageForEntity(EntityTypeWithImages.OFFER.getType(), null);
+            setImageForEntity400(EntityTypeWithImages.OFFER.getType(), null);
         }
 
         @Test
@@ -611,70 +656,226 @@ public class ImagesIntegrationTest implements ImageConstants {
         public void return_404_if_type_of_image_file_is_wrong_l_for_user_and_entity_id_is_null() throws Exception {
             setImageAndGet400IfImageMediaTypeWrong(EntityTypeWithImages.USER.getType(),null);
         }
-
-
     }
 
-//    @Nested
-//    @DisplayName("DELETE /v1/images")
-//    public class DeleteImageTest {
-//
-//        String fileName;
-//
-//        @BeforeEach
-//        public void setup() throws Exception {
-//            File imageFile = ResourceUtils.getFile("classpath:test_image/testImg.jpeg");
-//            byte[] imageBytes = null;
-//            try (FileInputStream fis = new FileInputStream(imageFile)) {
-//                imageBytes = fis.readAllBytes();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//            MockMultipartFile testFile = new MockMultipartFile(
-//                    "file",
-//                    imageFile.getName(),
-//                    MediaType.IMAGE_JPEG_VALUE,
-//                    imageBytes
-//            );
-//            MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-//            params.add("entityType", EntityTypeWithImages.OFFER.getType());
-//            params.add("entityId", String.valueOf(createdEntityId));
-//
-//            mockMvc.perform(multipart("/v1/images/upload")
-//                            .file(testFile)
-//                            .params(params)
-//                            .header("Authorization", "Bearer " + token)
-//                            .contentType(MediaType.MULTIPART_FORM_DATA)
-//                    )
-//                    .andExpect(status().isOk());
-//
-//
-//            MvcResult result = mockMvc.perform(get("/v1/offers/" + createdEntityId)
-//                            .contentType(MediaType.APPLICATION_JSON))
-//                    .andExpect(status().isOk())
-//                    .andReturn();
-//            String response = result.getResponse().getContentAsString();
-//
-//            fileName = mapper.readTree(response)
-//                    .get("images")
-//                    .get("images")
-//                    .get("0")
-//                    .get("320x320").toString();
-//
-//            fileName = fileName.replaceAll("^\"|\"$", "");
-//        }
-//
-//        @Test
-//        public void delete_image_for_offer() throws Exception {
-//            ImageRequestDto imageRequestDto = new ImageRequestDto(fileName.replaceAll("\"", ""));
-//
-//            String json = mapper.writeValueAsString(imageRequestDto);
-//            mockMvc.perform(delete("/v1/images")
-//                            .contentType(MediaType.APPLICATION_JSON)
-//                            .header("Authorization", "Bearer " + token)
-//                            .content(json))
-//                    .andExpect(status().isOk())
-//                    .andExpect(jsonPath("$.message", is("Image deleted successfully")));
-//        }
-//    }
+    @Nested
+    @DisplayName("DELETE /v1/images")
+    @Rollback
+    @Transactional
+    public class DeleteImageTest {
+
+        public String setImageAndReturnImageBaseName(String entityType, Long entityId) throws Exception {
+            TestImagePropsDto imageProps = getTestImagePropsForSettingImage(
+                    entityType,
+                    entityId,
+                    "classpath:test_image/testImg.jpeg");
+
+            MvcResult createdImage = mockMvc.perform(multipart("/v1/images")
+                            .file(imageProps.getTestFile())
+                            .params(imageProps.getParams())
+                            .contentType(MediaType.MULTIPART_FORM_DATA)
+                            .cookie(getCookieByEntityType(entityType)))
+                    .andExpect(status().isOk())
+                    .andReturn();
+            String jsonRes = createdImage.getResponse().getContentAsString();
+            JsonNode json = mapper.readTree(jsonRes).get("values");
+            Iterator<Map.Entry<String, JsonNode>> fields = json.fields();
+            String key = null;
+            while (fields.hasNext()) {
+                Map.Entry<String, JsonNode> field = fields.next();
+                key = field.getKey();
+            }
+            return key;
+        }
+
+        private void delImageByImageBaseName200(String imageBaseNAme, String entityType) throws Exception {
+            ImageRequestDto imageRequestDto = new ImageRequestDto(imageBaseNAme);
+            String jsonRequest = mapper.writeValueAsString(imageRequestDto);
+
+            mockMvc.perform(delete("/v1/images")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(jsonRequest)
+                            .cookie(getCookieByEntityType(entityType)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.message").isString());
+        }
+
+        private void delImageByImageBaseName404(String imageBaseNAme) throws Exception {
+            ImageRequestDto imageRequestDto = new ImageRequestDto(imageBaseNAme);
+            String jsonRequest = mapper.writeValueAsString(imageRequestDto);
+
+            mockMvc.perform(delete("/v1/images")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(jsonRequest)
+                            .cookie(getCookieByEntityType(EntityTypeWithImages.OFFER.getType())))
+                    .andExpect(status().isNotFound());
+        }
+
+        private void delImageByImageBaseName400(String imageBaseNAme) throws Exception {
+            ImageRequestDto imageRequestDto = new ImageRequestDto(imageBaseNAme);
+            String jsonRequest = mapper.writeValueAsString(imageRequestDto);
+
+            mockMvc.perform(delete("/v1/images")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(jsonRequest)
+                            .cookie(getCookieByEntityType(EntityTypeWithImages.OFFER.getType())))
+                    .andExpect(status().isBadRequest());
+        }
+
+        private void deleteImageAndGet403(String entityType, Long entityId) throws Exception {
+            String imageBaseNAme = setImageAndReturnImageBaseName(entityType, entityId);
+
+            ImageRequestDto imageRequestDto = new ImageRequestDto(imageBaseNAme);
+            String jsonRequest = mapper.writeValueAsString(imageRequestDto);
+
+            mockMvc.perform(delete("/v1/images")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(jsonRequest)
+                            .cookie(userCookie2))
+                    .andExpect(status().isForbidden());
+        }
+
+        @Test
+        public void return_403_delete_image_for_offer_user_do_not_have_rights() throws Exception {
+            deleteImageAndGet403(EntityTypeWithImages.OFFER.getType(), createdOfferId);
+        }
+
+        @Test
+        public void return_403_delete_image_for_user_user_do_not_have_rights() throws Exception {
+            deleteImageAndGet403(EntityTypeWithImages.USER.getType(), createdUser1Id);
+        }
+
+        @Test
+        public void return_403_delete_image_for_category_user_do_not_have_rights() throws Exception {
+            deleteImageAndGet403(EntityTypeWithImages.CATEGORY.getType(), createdCategoryId);
+        }
+
+        @Test
+        public void return_403_delete_image_for_offer_user_do_not_have_rights_if_entity_id_is_null() throws Exception {
+            deleteImageAndGet403(EntityTypeWithImages.OFFER.getType(), null);
+        }
+
+        @Test
+        public void return_403_delete_image_for_user_user_do_not_have_rights_if_entity_id_is_null() throws Exception {
+            deleteImageAndGet403(EntityTypeWithImages.USER.getType(), null);
+        }
+
+        @Test
+        public void return_403_delete_image_for_category_user_do_not_have_rights_if_entity_id_is_null() throws Exception {
+            deleteImageAndGet403(EntityTypeWithImages.CATEGORY.getType(), null);
+        }
+
+        @Test
+        public void return_200_delete_image_for_offer() throws Exception {
+            String entityType =EntityTypeWithImages.OFFER.getType();
+            String imageBaseNAme = setImageAndReturnImageBaseName(entityType, createdOfferId);
+            delImageByImageBaseName200(imageBaseNAme, entityType);
+        }
+
+        @Test
+        public void return_200_delete_image_for_user() throws Exception {
+            String entityType =EntityTypeWithImages.USER.getType();
+            String imageBaseNAme = setImageAndReturnImageBaseName(entityType, createdUser1Id);
+            delImageByImageBaseName200(imageBaseNAme, entityType);
+        }
+
+        @Test
+        public void return_200_delete_image_for_category() throws Exception {
+            String entityType =EntityTypeWithImages.CATEGORY.getType();
+            String imageBaseNAme = setImageAndReturnImageBaseName(entityType, createdCategoryId);
+            delImageByImageBaseName200(imageBaseNAme, entityType);
+        }
+
+        @Test
+        public void return_200_delete_image_for_offer_if_entity_id_is_null() throws Exception {
+            String entityType =EntityTypeWithImages.OFFER.getType();
+            String imageBaseNAme = setImageAndReturnImageBaseName(entityType, null);
+            delImageByImageBaseName200(imageBaseNAme, entityType);
+        }
+
+        @Test
+        public void return_200_delete_image_for_user_if_entity_id_is_null() throws Exception {
+            String entityType =EntityTypeWithImages.USER.getType();
+            String imageBaseNAme = setImageAndReturnImageBaseName(entityType, null);
+            delImageByImageBaseName200(imageBaseNAme, entityType);
+        }
+
+        @Test
+        public void return_200_delete_image_for_category_if_entity_id_is_null() throws Exception {
+            String entityType =EntityTypeWithImages.CATEGORY.getType();
+            String imageBaseNAme = setImageAndReturnImageBaseName(entityType, null);
+            delImageByImageBaseName200(imageBaseNAme, entityType);
+        }
+
+        @Test
+        public void return_400_if_image_base_name_is_empty_for_offer() throws Exception {
+            delImageByImageBaseName400("");
+        }
+
+        @Test
+        public void return_400_if_image_base_name_is_empty_for_user() throws Exception {
+            delImageByImageBaseName400("");
+        }
+
+        @Test
+        public void return_400_if_image_base_name_is_empty_for_category() throws Exception {
+            delImageByImageBaseName400("");
+        }
+
+        @Test
+        public void return_400_if_image_base_name_is_empty_for_offer_if_entity_id_is_null() throws Exception {
+            delImageByImageBaseName400("");
+        }
+
+        @Test
+        public void return_400_if_image_base_name_is_empty_for_user_if_entity_id_is_null() throws Exception {
+            delImageByImageBaseName400("");
+        }
+
+        @Test
+        public void return_400_if_image_base_name_is_empty_for_category_if_entity_id_is_null() throws Exception {
+            delImageByImageBaseName400("");
+        }
+
+        @Test
+        public void return_400_if_image_base_name_is_null_for_offer() throws Exception {
+            delImageByImageBaseName400(null);
+        }
+
+        @Test
+        public void return_400_if_image_base_name_is_null_for_user() throws Exception {
+            delImageByImageBaseName400(null);
+        }
+
+        @Test
+        public void return_400_if_image_base_name_is_null_for_category() throws Exception {
+            delImageByImageBaseName400(null);
+        }
+
+        @Test
+        public void return_400_if_image_base_name_is_null_for_offer_if_entity_id_is_null() throws Exception {
+            delImageByImageBaseName400(null);
+        }
+
+        @Test
+        public void return_400_if_image_base_name_is_null_for_user_if_entity_id_is_null() throws Exception {
+            delImageByImageBaseName400(null);
+        }
+
+        @Test
+        public void return_400_if_image_base_name_is_null_for_category_if_entity_id_is_null() throws Exception {
+            delImageByImageBaseName400(null);
+        }
+
+        @Test
+        public void return_404_delete_image_with_nonexistent_base_name() throws Exception {
+            String imageBaseNAme = UUID.randomUUID().toString();
+            delImageByImageBaseName404(imageBaseNAme);
+        }
+        @Test
+        public void return_404_delete_image_if_image_base_name_wrong() throws Exception {
+            String imageBaseNAme = "wrong base name";
+            delImageByImageBaseName404(imageBaseNAme);
+        }
+    }
 }

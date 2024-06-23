@@ -19,10 +19,11 @@ import org.springframework.stereotype.Component;
 import javax.security.auth.login.CredentialException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 @Component
-public class UserPermissionsUtilities  {
+public class UserPermissionsUtilities {
     @Lazy
     @Autowired
     private OfferService offerService;
@@ -32,7 +33,6 @@ public class UserPermissionsUtilities  {
 
     @Value("${do.base.path}")
     private String basePath;
-
 
     public void checkUserPermissions(Long userId) {
         try {
@@ -70,26 +70,36 @@ public class UserPermissionsUtilities  {
 
     public void checkUserPermissionsForImageByBaseName(Set<String> baseNames) {
         baseNames.forEach(baseName -> {
-
             Set<ImageEntity> images = imageService.findAllImagesByBaseName(baseName);
-            String startSub = basePath + ImageConstants.TEMP_IMAGE_DIR + "/";
-            Set<Long> ids = new HashSet<>();
+            checkUserPermissionsForImageByImageEntities(images);
+
+        });
+    }
+    public void checkUserPermissionsForImageByImageEntities(Set<ImageEntity> images) {
+        String startSub = basePath + ImageConstants.TEMP_IMAGE_DIR + "/";
+        Set<Long> ids = new HashSet<>();
+        AtomicBoolean isEntityIdIsNull = new AtomicBoolean(true);
 
             images.forEach(e -> {
-                String tempPath = e.getFullPath();
-                if (tempPath.startsWith(startSub)) {
-                    String remainingPath = tempPath.substring(startSub.length());
-                    int nextSlashIndex = remainingPath.indexOf("/");
-                    if (nextSlashIndex != -1) {
-                        String id = remainingPath.substring(0, nextSlashIndex);
-                        ids.add(Long.parseLong(id));
+                if (e.getEntityId() == null) {
+                    String tempPath = e.getFullPath();
+                    if (tempPath.startsWith(startSub)) {
+                        String remainingPath = tempPath.substring(startSub.length());
+                        int nextSlashIndex = remainingPath.indexOf("/");
+                        if (nextSlashIndex != -1) {
+                            String id = remainingPath.substring(0, nextSlashIndex);
+                            ids.add(Long.parseLong(id));
+                        } else throw new PathWrongException();
                     } else throw new PathWrongException();
-
-                } else throw new PathWrongException();
+                } else {
+                    checkUserPermissions(e.getEntityType(), e.getEntityId());
+                    isEntityIdIsNull.set(false);
+                }
             });
-            if (ids.size() != 1) throw new PathWrongException();
-            Long userId = ids.iterator().next();
-            checkUserPermissions(userId);
-        });
+            if (isEntityIdIsNull.get()) {
+                if (ids.size() != 1) throw new PathWrongException();
+                Long userId = ids.iterator().next();
+                checkUserPermissions(userId);
+            }
     }
 }
