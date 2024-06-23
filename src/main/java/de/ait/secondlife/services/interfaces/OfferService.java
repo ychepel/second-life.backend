@@ -1,6 +1,5 @@
 package de.ait.secondlife.services.interfaces;
 
-
 import de.ait.secondlife.constants.OfferStatus;
 import de.ait.secondlife.domain.dto.*;
 import de.ait.secondlife.domain.entity.Offer;
@@ -9,7 +8,6 @@ import org.springframework.data.domain.Pageable;
 
 import javax.security.auth.login.CredentialException;
 import java.util.List;
-
 
 public interface OfferService extends CheckEntityExistsService{
 

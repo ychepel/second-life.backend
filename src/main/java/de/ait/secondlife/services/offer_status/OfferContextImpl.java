@@ -4,7 +4,6 @@ import de.ait.secondlife.constants.OfferStatus;
 import de.ait.secondlife.domain.entity.Offer;
 import de.ait.secondlife.domain.entity.Status;
 import de.ait.secondlife.services.interfaces.*;
-import de.ait.secondlife.services.mapping.OfferMappingService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;

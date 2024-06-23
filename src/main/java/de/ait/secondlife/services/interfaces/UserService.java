@@ -2,7 +2,6 @@ package de.ait.secondlife.services.interfaces;
 
 import de.ait.secondlife.domain.dto.UserCreationDto;
 import de.ait.secondlife.domain.dto.UserDto;
-import de.ait.secondlife.domain.entity.User;
 import de.ait.secondlife.domain.interfaces.AuthenticatedUser;
 
 import javax.security.auth.login.CredentialException;

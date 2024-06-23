@@ -12,6 +12,7 @@ import de.ait.secondlife.security.dto.TokenResponseDto;
 import de.ait.secondlife.security.filters.TokenFilter;
 import de.ait.secondlife.services.UserDetailsServiceImpl;
 import de.ait.secondlife.services.interfaces.AdminService;
+import de.ait.secondlife.services.interfaces.UserService;
 import io.jsonwebtoken.Claims;
 import jakarta.security.auth.message.AuthException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -156,7 +157,7 @@ public class AuthService {
                 throw new AccountNotFoundException("User not found");
             }
             if (!authenticatedUser.isEnabled()) {
-                throw new AccountException("User is not active.");
+                throw new AccountException("User is not active");
             }
             return authenticatedUser;
         }

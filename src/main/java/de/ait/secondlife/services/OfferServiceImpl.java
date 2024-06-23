@@ -12,6 +12,7 @@ import de.ait.secondlife.domain.entity.Bid;
 import de.ait.secondlife.domain.entity.Offer;
 import de.ait.secondlife.domain.entity.User;
 import de.ait.secondlife.exception_handling.exceptions.NoRightsException;
+import de.ait.secondlife.exception_handling.exceptions.UserIsNotAuthorizedException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.CreateOfferConstraintViolationException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.WrongAuctionParameterException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.WrongAuctionPriceParameterException;
@@ -19,6 +20,7 @@ import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.is_
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.OfferNotFoundException;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.UserNotFoundException;
 import de.ait.secondlife.repositories.OfferRepository;
+import de.ait.secondlife.security.Role;
 import de.ait.secondlife.security.services.AuthService;
 import de.ait.secondlife.services.interfaces.*;
 import de.ait.secondlife.services.mapping.OfferMappingService;
@@ -405,21 +407,5 @@ public class OfferServiceImpl implements OfferService {
     private void checkUserId(Long id) {
         if (id == null) throw new IdIsNullException();
         if (!userService.checkEntityExistsById(id)) throw new UserNotFoundException(id);
-    }
-
-    private void checkUserCredentials(Long id) {
-        try {
-            Role role = AuthService.getCurrentRole();
-            if (role == Role.ROLE_ADMIN) {
-                return;
-            }
-            if (role == Role.ROLE_USER) {
-                User user = AuthService.getCurrentUser();
-                if (!user.getId().equals(id)) {
-                    throw new UserIsNotAuthorizedException();
-                }
-            }
-        } catch (CredentialException ignored) {
-        }
     }
 }
