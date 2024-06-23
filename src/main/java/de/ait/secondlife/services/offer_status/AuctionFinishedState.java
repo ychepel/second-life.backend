@@ -15,6 +15,8 @@ import java.util.List;
 
 public class AuctionFinishedState extends StateStrategy {
 
+    private OfferContext context;
+
     @Override
     public void draft(OfferContext context) {
         throw new ProhibitedOfferStateChangeException(context.getOffer());
@@ -42,75 +44,88 @@ public class AuctionFinishedState extends StateStrategy {
 
     @Override
     public void complete(OfferContext context, Long winnerBidId) {
+        this.context = context;
         Offer offer = context.getOffer();
         OfferService offerService = context.getOfferService();
-        List<Bid> bids = offer.getBids();
         EmailService emailService = context.getEmailService();
+
+        List<Bid> bids = offer.getBids();
+
         if (bids == null || bids.isEmpty()) {
-            offerService.setStatus(offer, OfferStatus.COMPLETED);
-
-            emailService.createNotification(
-                    offer.getUser(),
-                    NotificationType.OFFER_COMPLETION_DUE_TO_NO_BIDS_EMAIL,
-                    offer.getId()
-            );
-
-
-            context.setStateStrategy(new CompleteState());
+            completeWithoutBids(offer, offerService, emailService);
         } else if (bids.size() == 1) {
-            if (offer.getWinnerBid() != null) {
-                throw new IllegalStateException(String.format("Offer [ID=%d] already has a winner", offer.getId()));
-            }
-            offer.setWinnerBid(bids.get(0));
-            offerService.setStatus(offer, OfferStatus.COMPLETED);
-
-            emailService.createNotification(
-                    offer.getUser(),
-                    NotificationType.OFFER_COMPLETION_DUE_TO_1_BID_EMAIL_TO_OFFER_OWNER_EMAIL,
-                    offer.getId()
-            );
-
-            emailService.createNotification(
-                    offer.getWinnerBid().getUser(),
-                    NotificationType.PARTICIPANT_IS_WINNER_EMAIL,
-                    offer.getId()
-            );
-
-            context.setStateStrategy(new CompleteState());
+            completeWithSingleBid(offer, offerService, emailService);
         } else if (!offer.getIsFree() && offer.getMaxBidValue().compareTo(offer.getWinBid()) == 0) {
-            if (offer.getWinnerBid() != null) {
-                throw new IllegalStateException(String.format("Offer [ID=%d] already has a winner", offer.getId()));
-            }
-            Bid maxBid = bids.stream()
-                    .max(Comparator.comparing(Bid::getBidValue))
-                    .get();
-            offer.setWinnerBid(maxBid);
-            offerService.setStatus(offer, OfferStatus.COMPLETED);
-
-            emailService.createNotification(
-                    offer.getUser(),
-                    NotificationType.OFFER_COMPLETION_DUE_TO_BUYOUT_WIN_BID_EMAIL,
-                    offer.getId()
-            );
-
-            emailService.createNotification(
-                    offer.getWinnerBid().getUser(),
-                    NotificationType.PARTICIPANT_IS_WINNER_EMAIL,
-                    offer.getId()
-            );
-
-            List<User> loserParticipants = offerService.getNotWinners(offer);
-            for (User user : loserParticipants) {
-                    emailService.createNotification(
-                            user,
-                            NotificationType.PARTICIPANT_IS_NOT_WINNER_EMAIL,
-                            offer.getId());
-            }
-
-            context.setStateStrategy(new CompleteState());
+            completeWithMaxBid(offer, offerService, emailService);
         } else {
             qualify(context);
         }
+    }
+
+    private void completeWithMaxBid(Offer offer, OfferService offerService, EmailService emailService) {
+        if (offer.getWinnerBid() != null) {
+            throw new IllegalStateException(String.format("Offer [ID=%d] already has a winner", offer.getId()));
+        }
+        Bid maxBid = offer.getBids().stream()
+                .max(Comparator.comparing(Bid::getBidValue))
+                .get();
+        offer.setWinnerBid(maxBid);
+        offerService.setStatus(offer, OfferStatus.COMPLETED);
+
+        emailService.createNotification(
+                offer.getUser(),
+                NotificationType.OFFER_COMPLETION_DUE_TO_BUYOUT_WIN_BID_EMAIL,
+                offer.getId()
+        );
+
+        emailService.createNotification(
+                offer.getWinnerBid().getUser(),
+                NotificationType.PARTICIPANT_IS_WINNER_EMAIL,
+                offer.getId()
+        );
+
+        List<User> loserParticipants = offerService.getNotWinners(offer);
+        for (User user : loserParticipants) {
+            emailService.createNotification(
+                    user,
+                    NotificationType.PARTICIPANT_IS_NOT_WINNER_EMAIL,
+                    offer.getId());
+        }
+
+        context.setStateStrategy(new CompleteState());
+    }
+
+    private void completeWithSingleBid(Offer offer, OfferService offerService, EmailService emailService) {
+        if (offer.getWinnerBid() != null) {
+            throw new IllegalStateException(String.format("Offer [ID=%d] already has a winner", offer.getId()));
+        }
+        Bid winnerBid = offer.getBids().get(0);
+        offer.setWinnerBid(winnerBid );
+        offerService.setStatus(offer, OfferStatus.COMPLETED);
+
+        emailService.createNotification(
+                offer.getUser(),
+                NotificationType.OFFER_COMPLETION_DUE_TO_1_BID_EMAIL_TO_OFFER_OWNER_EMAIL,
+                offer.getId()
+        );
+
+        emailService.createNotification(
+                offer.getWinnerBid().getUser(),
+                NotificationType.PARTICIPANT_IS_WINNER_EMAIL,
+                offer.getId()
+        );
+
+        context.setStateStrategy(new CompleteState());
+    }
+
+    private void completeWithoutBids(Offer offer, OfferService offerService, EmailService emailService) {
+        offerService.setStatus(offer, OfferStatus.COMPLETED);
+        emailService.createNotification(
+                offer.getUser(),
+                NotificationType.OFFER_COMPLETION_DUE_TO_NO_BIDS_EMAIL,
+                offer.getId()
+        );
+        context.setStateStrategy(new CompleteState());
     }
 
     @Override
