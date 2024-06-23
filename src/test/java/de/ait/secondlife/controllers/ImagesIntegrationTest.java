@@ -57,65 +57,37 @@ public class ImagesIntegrationTest implements ImageConstants {
     @BeforeEach
     public void setup() throws Exception {
 
-        MvcResult registerUserResult1 = mockMvc.perform(post("/v1/users/register")
+        MvcResult registerUserResult1 = mockMvc.perform(post("/v1/auth/user/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "firstName": "NewUserFirstName",
-                                  "lastName": "NewUserLastName",
-                                  "email": "newUser.user1@mail.com",
-                                  "password": "qwerty!123"
-                                }"""))
-                .andExpect(status().isCreated())
-                .andReturn();
-        String jsonResponse1 = registerUserResult1.getResponse().getContentAsString();
-        JsonNode jsonNode1 = mapper.readTree(jsonResponse1);
-        createdUser1Id = jsonNode1.get("id").asLong();
-
-        MvcResult authUserResult1 = mockMvc.perform(post("/v1/auth/user/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "email": "newUser.user1@mail.com",
-                                  "password": "qwerty!123"
+                                  "email": "barak.obama@email.com",
+                                  "password": "Security!234"
                                 }"""))
                 .andExpect(status().isOk())
                 .andReturn();
-        String userToken1 = authUserResult1.getResponse().getCookie("Access-Token").getValue();
+        String userToken1 = registerUserResult1.getResponse().getCookie("Access-Token").getValue();
         userCookie1 = new Cookie("Access-Token", userToken1);
+        createdUser1Id =1L;
 
-        MvcResult registerUserResult2 = mockMvc.perform(post("/v1/users/register")
+        MvcResult registerUserResult2 = mockMvc.perform(post("/v1/auth/user/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "firstName": "NewUserFirstName2",
-                                  "lastName": "NewUserLastName2",
-                                  "email": "newUser.user2@mail.com",
-                                  "password": "qwerty!123"
-                                }"""))
-                .andExpect(status().isCreated())
-                .andReturn();
-        String jsonResponse2 = registerUserResult2.getResponse().getContentAsString();
-        JsonNode jsonNode2 = mapper.readTree(jsonResponse2);
-        createdUser2Id = jsonNode2.get("id").asLong();
-
-        MvcResult authUserResult2 = mockMvc.perform(post("/v1/auth/user/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "email": "newUser.user2@mail.com",
-                                  "password": "qwerty!123"
+                                  "email": "john.smith@email.com",
+                                  "password": "Security!234"
                                 }"""))
                 .andExpect(status().isOk())
                 .andReturn();
-        String userToken2 = authUserResult2.getResponse().getCookie("Access-Token").getValue();
+        String userToken2 = registerUserResult2.getResponse().getCookie("Access-Token").getValue();
         userCookie2 = new Cookie("Access-Token", userToken2);
+        createdUser2Id =2L;
 
         MvcResult authAdminResult = mockMvc.perform(post("/v1/auth/admin/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "email": "admin@email.com",
+                                  "email": "admin@second-life.space",
                                   "password": "Security!234"
                                 }"""))
                 .andExpect(status().isOk())
