@@ -38,7 +38,7 @@ public class OfferRejection extends TemplateService {
         Map<String, Object> model = new HashMap<>();
 
         User user = (User) authService.getAuthenticatedUser(Role.ROLE_USER, notification.getAuthenticatedUserId());
-        model.put("name", user.getUsername());
+        model.put("name", user.getFullName());
 
         Long offerId = notification.getContextId();
         Offer offer = offerService.findById(offerId);
