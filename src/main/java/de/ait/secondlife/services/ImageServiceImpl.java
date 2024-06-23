@@ -95,8 +95,6 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
     private CategoryService categoryService;
     private final UserPermissionsUtilities userCredentialsUtilities;
 
-    private final UserPermissionsUtilities utilities;
-
     @Value("${do.buket.name}")
     private String bucketName;
 
@@ -255,7 +253,7 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
         Set<ImageEntity> images = findAllImagesByBaseName(baseName);
         if (images.isEmpty()) throw new ImagesNotFoundException(baseName);
 
-        utilities.checkUserPermissionsForImageByImageEntities(images);
+        userCredentialsUtilities.checkUserPermissionsForImageByImageEntities(images);
 
         images.forEach(e -> {
             String doFileName = e.getFullPath().substring(basePath.length());
