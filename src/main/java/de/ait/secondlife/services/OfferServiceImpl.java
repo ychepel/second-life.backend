@@ -107,8 +107,9 @@ public class OfferServiceImpl implements OfferService {
     @Transactional
     @Override
     public OfferResponseDto createOffer(OfferCreationDto dto) throws CredentialException {
-        if (dto.getBaseNameOfImages() != null)
+        if (dto.getBaseNameOfImages() != null) {
             utilities.checkUserPermissionsForImageByBaseName(dto.getBaseNameOfImages());
+        }
 
         User user = AuthService.getCurrentUser();
         try {

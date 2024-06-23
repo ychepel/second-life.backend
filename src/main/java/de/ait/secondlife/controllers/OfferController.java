@@ -175,8 +175,9 @@ public class OfferController {
             @Valid
             @RequestBody
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Offer create DTO ")
-            OfferCreationDto dto) throws CredentialException {
-              return ResponseEntity.status(HttpStatus.CREATED).body(service.createOffer(dto));
+            OfferCreationDto dto
+    ) throws CredentialException {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.createOffer(dto));
     }
 
     @PutMapping
@@ -204,7 +205,7 @@ public class OfferController {
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Offer update DTO ")
             OfferUpdateDto dto
     ) throws CredentialException {
-             return ResponseEntity.ok(service.updateOffer(dto));
+        return ResponseEntity.ok(service.updateOffer(dto));
     }
 
     @PatchMapping("/{id}/reject")
@@ -356,7 +357,7 @@ public class OfferController {
             @RequestParam(required = false, name = "location_id")
             @Parameter(description = "Location id for filtration. Can be null. Optional parameter", example = "3")
             Long locationId
-    ){
+    ) {
         return ResponseEntity.ok(service.searchOffers(getPageable(page, size, sortBy, isAsc), locationId, pattern));
     }
 
@@ -413,7 +414,7 @@ public class OfferController {
     private Pageable getPageable(int page, int size, String sortBy, Boolean isAsc) {
         try {
             Sort.Direction direction = isAsc ? Sort.Direction.ASC : Sort.Direction.DESC;
-           var res = PageRequest.of(page, size, Sort.by(direction, sortBy));
+            var res = PageRequest.of(page, size, Sort.by(direction, sortBy));
             return res;
         } catch (IllegalArgumentException e) {
             throw new PaginationParameterIsWrongException(page, size, sortBy);
