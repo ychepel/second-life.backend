@@ -38,10 +38,7 @@ import org.springframework.stereotype.Service;
 import javax.security.auth.login.CredentialException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -375,6 +372,52 @@ public class OfferServiceImpl implements OfferService {
         }
     }
 
+    @Override
+    public OfferWinnerDto getWinnerDetails(Offer offer) {
+        OfferWinnerDto offerWinnerDto = new OfferWinnerDto();
+        Bid winnerBid = offer.getWinnerBid();
+        if (winnerBid == null) {
+            return offerWinnerDto;
+        }
+
+        offerWinnerDto.setBidId(winnerBid.getId());
+        offerWinnerDto.setBidValue(winnerBid.getBidValue());
+
+        User winner = winnerBid.getUser();
+        try {
+            utilities.checkUserPermissions(offer.getUser().getId());
+            offerWinnerDto.setNameShorted(winner.getShortedName());
+            offerWinnerDto.setEmail(winner.getEmail());
+        } catch (NoRightsException ignored) {
+        }
+
+        return offerWinnerDto;
+    }
+
+    @Override
+    public OfferForUserDto getCurrentUserDetails(Offer offer) {
+        OfferForUserDto userDto = new OfferForUserDto();
+        userDto.setIsAuctionParticipant(false);
+
+        List<Bid> bids = offer.getBids();
+        if (bids != null) {
+            try {
+                User user = AuthService.getCurrentUser();
+                BigDecimal maxBidValue = bids.stream()
+                        .filter(bid -> Objects.equals(bid.getUser().getId(), user.getId()))
+                        .max(Comparator.comparing(Bid::getBidValue))
+                        .map(Bid::getBidValue)
+                        .orElse(null);
+                if (maxBidValue != null) {
+                    userDto.setIsAuctionParticipant(true);
+                    userDto.setMaxBidValue(maxBidValue);
+                }
+            } catch (CredentialException ignored) {
+            }
+        }
+
+        return userDto;
+    }
 
     private Offer getOfferById(Long id) {
         return offerRepository.findById(id).orElseThrow(() -> new OfferNotFoundException(id));

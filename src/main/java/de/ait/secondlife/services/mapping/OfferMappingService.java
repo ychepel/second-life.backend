@@ -34,6 +34,8 @@ public abstract class OfferMappingService extends EntityWIthImageMappingService 
     @Mapping(target = "maxBidValue", expression = "java(offer.getMaxBidValue())")
     @Mapping(target = "bidsCount", expression = "java(offer.getBidsCount())")
     @Mapping(target = "isCurrentUserAuctionParticipant", expression = "java(offerService.isCurrentUserAuctionParticipant(offer))")
+    @Mapping(target = "winner", expression = "java(offerService.getWinnerDetails(offer))")
+    @Mapping(target = "currentUser", expression = "java(offerService.getCurrentUserDetails(offer))")
     public abstract OfferResponseDto toDto(Offer offer);
 
     @Mapping(target = "id", ignore = true)

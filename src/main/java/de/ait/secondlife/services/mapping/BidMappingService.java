@@ -15,7 +15,7 @@ public interface BidMappingService {
 
     @Mapping(target = "userId", source = "user.id")
     @Mapping(target = "offerId", source = "offer.id")
-    @Mapping(target = "userNameShorted", expression = "java(java.lang.String.format(\"%s %s.\", bid.getUser().getFirstName(), bid.getUser().getLastName().substring(0, 1)))")
+    @Mapping(target = "userNameShorted", expression = "java(bid.getUser().getShortedName())")
     @Mapping(target = "userEmail", source = "user.email")
     BidResponseDto toDto(Bid bid);
 }

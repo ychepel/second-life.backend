@@ -79,9 +79,8 @@ public class AuthService {
     }
 
    public static Role getCurrentRole() {
-        AuthenticatedUser authenticatedUser = null;
         try {
-            authenticatedUser = getAuthenticatedUser();
+            AuthenticatedUser authenticatedUser = getAuthenticatedUser();
             if (authenticatedUser == null) {
                 throw new UserIsNotAuthenticatedException();
             }

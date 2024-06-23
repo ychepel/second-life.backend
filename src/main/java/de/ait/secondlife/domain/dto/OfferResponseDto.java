@@ -56,7 +56,7 @@ public class OfferResponseDto extends ImageUploadDetails {
     private Long categoryId;
 
     @Schema(description = "Winner bid id", example = "123")
-    private Long winnerBidId;
+    private Long winnerBidId; //TODO: remove after switching front-end to nested json object
 
     @Schema(description = "Location id", example = "1")
     private Long locationId;
@@ -71,5 +71,11 @@ public class OfferResponseDto extends ImageUploadDetails {
     private int bidsCount;
 
     @Schema(description = "Is the current user a participant in the auction", example = "false")
-    private Boolean isCurrentUserAuctionParticipant;
+    private Boolean isCurrentUserAuctionParticipant; //TODO: remove after switching front-end to nested json object
+
+    @Schema(description = "Auction winner details")
+    private OfferWinnerDto winner;
+
+    @Schema(description = "Current user details")
+    private OfferForUserDto currentUser;
 }

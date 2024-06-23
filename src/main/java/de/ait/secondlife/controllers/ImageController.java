@@ -27,7 +27,6 @@ public class ImageController {
 
     private final ImageService imageService;
 
-
     @PostMapping
     @Operation(
             summary = "Create new image",
