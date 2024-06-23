@@ -70,6 +70,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/v1/bids/offer/{id}").hasRole("USER")
                         .requestMatchers(HttpMethod.POST, "/v1/bids").hasRole("USER")
                         .requestMatchers(HttpMethod.GET, "/v1/rejection-reasons").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/emails/send").permitAll() //TODO: remove after cleaning db from incorrect emails
                         .anyRequest().denyAll()
                 )
                 .httpBasic(AbstractHttpConfigurer::disable)
