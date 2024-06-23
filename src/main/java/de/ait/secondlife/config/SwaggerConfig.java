@@ -10,9 +10,9 @@ import io.swagger.v3.oas.annotations.info.Info;
                 description = "API for final project in AIT school. Group - cohort 38",
                 version = "1.0.0",
                 contact = @Contact(
-                        name = "John Smith",
-                        email = "john.snmith@ait-tr.de",
-                        url = "https://www.ait-tr.de/"
+                        name = "Second Life",
+                        email = "admin@second-life.space",
+                        url = "https://www.second-life.space/"
                 )
         )
 )
