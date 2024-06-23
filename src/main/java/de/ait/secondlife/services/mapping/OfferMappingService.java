@@ -29,7 +29,7 @@ public abstract class OfferMappingService extends EntityWIthImageMappingService 
     @Mapping(target = "auctionEndAt", source = "auctionFinishedAt")
     @Mapping(
             target = "ownerFullName",
-            expression = "java(offer.getUser().getFirstName() + ' ' + offer.getUser().getLastName())"
+            expression = "java(offer.getUser().getFullName())"
     )
     @Mapping(target = "maxBidValue", expression = "java(offer.getMaxBidValue())")
     @Mapping(target = "bidsCount", expression = "java(offer.getBidsCount())")

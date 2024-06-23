@@ -12,6 +12,7 @@ import de.ait.secondlife.domain.entity.Bid;
 import de.ait.secondlife.domain.entity.Offer;
 import de.ait.secondlife.domain.entity.User;
 import de.ait.secondlife.exception_handling.exceptions.NoRightsException;
+import de.ait.secondlife.exception_handling.exceptions.UserIsNotAuthorizedException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.CreateOfferConstraintViolationException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.WrongAuctionParameterException;
 import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.WrongAuctionPriceParameterException;
@@ -19,6 +20,7 @@ import de.ait.secondlife.exception_handling.exceptions.bad_request_exception.is_
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.OfferNotFoundException;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.UserNotFoundException;
 import de.ait.secondlife.repositories.OfferRepository;
+import de.ait.secondlife.security.Role;
 import de.ait.secondlife.security.services.AuthService;
 import de.ait.secondlife.services.interfaces.*;
 import de.ait.secondlife.services.mapping.OfferMappingService;
@@ -36,7 +38,9 @@ import org.springframework.stereotype.Service;
 import javax.security.auth.login.CredentialException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -339,6 +343,38 @@ public class OfferServiceImpl implements OfferService {
             return false;
         }
     }
+
+    @Override
+    public List<User> getNotWinners(Offer offer) {
+
+        List<Bid> bidList = offer.getBids();
+
+        if (bidList != null){
+            return offer.getBids()
+                    .stream()
+                    .filter(bid -> !Objects.equals(bid.getId(), offer.getWinnerBid().getId()))
+                    .map(Bid::getUser)
+                    .toList();
+        }else {
+            return new ArrayList<>();
+        }
+    }
+
+    @Override
+    public List<User> getParticipants(Offer offer) {
+
+        List<Bid> bidList = offer.getBids();
+
+        if (bidList != null){
+            return offer.getBids()
+                    .stream()
+                    .map(Bid::getUser)
+                    .toList();
+        }else {
+            return new ArrayList<>();
+        }
+    }
+
 
     private Offer getOfferById(Long id) {
         return offerRepository.findById(id).orElseThrow(() -> new OfferNotFoundException(id));

@@ -1,9 +1,12 @@
 package de.ait.secondlife.services.offer_status;
 
+import de.ait.secondlife.constants.NotificationType;
 import de.ait.secondlife.constants.OfferStatus;
 import de.ait.secondlife.domain.entity.Bid;
 import de.ait.secondlife.domain.entity.Offer;
+import de.ait.secondlife.domain.entity.User;
 import de.ait.secondlife.exception_handling.exceptions.ProhibitedOfferStateChangeException;
+import de.ait.secondlife.services.interfaces.EmailService;
 import de.ait.secondlife.services.interfaces.OfferContext;
 import de.ait.secondlife.services.interfaces.OfferService;
 
@@ -11,6 +14,8 @@ import java.util.Comparator;
 import java.util.List;
 
 public class AuctionFinishedState extends StateStrategy {
+
+    private OfferContext context;
 
     @Override
     public void draft(OfferContext context) {
@@ -39,37 +44,88 @@ public class AuctionFinishedState extends StateStrategy {
 
     @Override
     public void complete(OfferContext context, Long winnerBidId) {
+        this.context = context;
         Offer offer = context.getOffer();
         OfferService offerService = context.getOfferService();
+        EmailService emailService = context.getEmailService();
+
         List<Bid> bids = offer.getBids();
+
         if (bids == null || bids.isEmpty()) {
-            offerService.setStatus(offer, OfferStatus.COMPLETED);
-            //TODO: mailing - inform offer owner about finishing auction without winners
-            context.setStateStrategy(new CompleteState());
+            completeWithoutBids(offer, offerService, emailService);
         } else if (bids.size() == 1) {
-            if (offer.getWinnerBid() != null) {
-                throw new IllegalStateException(String.format("Offer [ID=%d] already has a winner", offer.getId()));
-            }
-            offer.setWinnerBid(bids.get(0));
-            offerService.setStatus(offer, OfferStatus.COMPLETED);
-            //TODO: mailing - inform offer owner about finishing auction with winner
-            //TODO: mailing - inform bid owner, that he/she is the winner of the auction
-            context.setStateStrategy(new CompleteState());
-        } else if(!offer.getIsFree() && offer.getMaxBidValue().compareTo(offer.getWinBid()) == 0) {
-            if (offer.getWinnerBid() != null) {
-                throw new IllegalStateException(String.format("Offer [ID=%d] already has a winner", offer.getId()));
-            }
-            Bid maxBid = bids.stream()
-                    .max(Comparator.comparing(Bid::getBidValue))
-                    .get();
-            offer.setWinnerBid(maxBid);
-            offerService.setStatus(offer, OfferStatus.COMPLETED);
-            //TODO: mailing - inform offer owner about finishing auction with buyout price
-            //TODO: mailing - inform bid owner, that he/she is the winner of the auction
-            context.setStateStrategy(new CompleteState());
+            completeWithSingleBid(offer, offerService, emailService);
+        } else if (!offer.getIsFree() && offer.getMaxBidValue().compareTo(offer.getWinBid()) == 0) {
+            completeWithMaxBid(offer, offerService, emailService);
         } else {
             qualify(context);
         }
+    }
+
+    private void completeWithMaxBid(Offer offer, OfferService offerService, EmailService emailService) {
+        if (offer.getWinnerBid() != null) {
+            throw new IllegalStateException(String.format("Offer [ID=%d] already has a winner", offer.getId()));
+        }
+        Bid maxBid = offer.getBids().stream()
+                .max(Comparator.comparing(Bid::getBidValue))
+                .get();
+        offer.setWinnerBid(maxBid);
+        offerService.setStatus(offer, OfferStatus.COMPLETED);
+
+        emailService.createNotification(
+                offer.getUser(),
+                NotificationType.OFFER_COMPLETION_DUE_TO_BUYOUT_WIN_BID_EMAIL,
+                offer.getId()
+        );
+
+        emailService.createNotification(
+                offer.getWinnerBid().getUser(),
+                NotificationType.PARTICIPANT_IS_WINNER_EMAIL,
+                offer.getId()
+        );
+
+        List<User> loserParticipants = offerService.getNotWinners(offer);
+        for (User user : loserParticipants) {
+            emailService.createNotification(
+                    user,
+                    NotificationType.PARTICIPANT_IS_NOT_WINNER_EMAIL,
+                    offer.getId());
+        }
+
+        context.setStateStrategy(new CompleteState());
+    }
+
+    private void completeWithSingleBid(Offer offer, OfferService offerService, EmailService emailService) {
+        if (offer.getWinnerBid() != null) {
+            throw new IllegalStateException(String.format("Offer [ID=%d] already has a winner", offer.getId()));
+        }
+        Bid winnerBid = offer.getBids().get(0);
+        offer.setWinnerBid(winnerBid );
+        offerService.setStatus(offer, OfferStatus.COMPLETED);
+
+        emailService.createNotification(
+                offer.getUser(),
+                NotificationType.OFFER_COMPLETION_DUE_TO_1_BID_EMAIL_TO_OFFER_OWNER_EMAIL,
+                offer.getId()
+        );
+
+        emailService.createNotification(
+                offer.getWinnerBid().getUser(),
+                NotificationType.PARTICIPANT_IS_WINNER_EMAIL,
+                offer.getId()
+        );
+
+        context.setStateStrategy(new CompleteState());
+    }
+
+    private void completeWithoutBids(Offer offer, OfferService offerService, EmailService emailService) {
+        offerService.setStatus(offer, OfferStatus.COMPLETED);
+        emailService.createNotification(
+                offer.getUser(),
+                NotificationType.OFFER_COMPLETION_DUE_TO_NO_BIDS_EMAIL,
+                offer.getId()
+        );
+        context.setStateStrategy(new CompleteState());
     }
 
     @Override
@@ -83,7 +139,14 @@ public class AuctionFinishedState extends StateStrategy {
         }
         OfferService offerService = context.getOfferService();
         offerService.setStatus(offer, OfferStatus.QUALIFICATION);
-        //TODO: mailing - inform offer owner about need to choose a winner
+
+        EmailService emailService = context.getEmailService();
+
+        emailService.createNotification(
+                offer.getUser(),
+                NotificationType.OFFER_QUALIFICATION_EMAIL,
+                offer.getId());
+
         context.setStateStrategy(new QualificationState());
     }
 
@@ -92,7 +155,17 @@ public class AuctionFinishedState extends StateStrategy {
         Offer offer = getOfferAllowedForCurrentUser(context);
         OfferService offerService = context.getOfferService();
         offerService.setStatus(offer, OfferStatus.CANCELED);
-        //TODO: mailing - inform all participants that auction was canceled
+
+        EmailService emailService = context.getEmailService();
+
+        List<User> participants = offerService.getParticipants(offer);
+        for (User user : participants) {
+            emailService.createNotification(
+                    user,
+                    NotificationType.OFFER_CANCELLATION_EMAIL,
+                    offer.getId());
+        }
+
         context.setStateStrategy(new CancelState());
     }
 

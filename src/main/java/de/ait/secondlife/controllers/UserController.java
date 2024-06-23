@@ -80,4 +80,14 @@ public class UserController {
     public ResponseEntity<UserDto> getCurrentUser() throws CredentialException {
         return ResponseEntity.ok(userService.getCurrentUser());
     }
+
+
+    @GetMapping("{id}/set-active")
+    public ResponseEntity<UserDto> setActive(
+            @Valid
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Set active the user according to confirmation code")
+            @PathVariable("id") Long userId, @RequestParam("code") String code){
+        UserDto userDto = userService.setActive(userId,code);
+        return ResponseEntity.ok(userDto);
+    }
 }
