@@ -234,6 +234,7 @@ public class OfferServiceImpl implements OfferService {
     @Override
     public OfferResponseDto completeOffer(Long id, OfferCompletionDto offerCompletionDto) {
         Offer offer = getOfferById(id);
+        utilities.checkUserPermissions(offer.getUser().getId());
         offerContext.setOffer(offer);
         offerContext.complete(offerCompletionDto.getWinnerBidId());
         return mappingService.toDto(offer);
