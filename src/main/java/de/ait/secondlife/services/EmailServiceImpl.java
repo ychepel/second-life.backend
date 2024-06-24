@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 
 /**
- * Service implementation for sending emails.
+ * Service implementation for sending emails.(Version 1.0)
  * This service manages the creation and sending of notification emails to users.
  *
  * <p>

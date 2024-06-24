@@ -28,7 +28,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * Service implementation for managing bids on offers.
+ * Service implementation for managing bids on offers.(Version 1.0)
  * This service provides methods for saving bids, retrieving bids by offer ID,
  * and various checks and validations related to bids and offers.
  *

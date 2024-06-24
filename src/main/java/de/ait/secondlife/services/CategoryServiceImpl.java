@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /**
- * Service implementation for managing categories.
+ * Service implementation for managing categories.(Version 1.0)
  * This service provides methods for retrieving, saving, updating, and hiding categories,
  * along with various validations and utilities related to categories.
  *

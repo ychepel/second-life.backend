@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
- * Service implementation for managing confirmation codes.
+ * Service implementation for managing confirmation codes.(Version 1.0)
  * This service provides methods for generating and retrieving confirmation codes
  * associated with user confirmation processes.
  *
@@ -31,8 +31,9 @@ import java.util.UUID;
  * <p>
  * Author: Second Life Team
  * </p>
- * @author: Second Life Team
+ *
  * @version 1.0
+ * @author: Second Life Team
  */
 @Service
 @RequiredArgsConstructor

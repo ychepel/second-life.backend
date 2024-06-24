@@ -11,12 +11,44 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
+/**
+ * Implementation of the UserDetailsService interface for loading user details by username.(Version 1.0)
+ *
+ * <p>
+ * This service class provides methods to load user details from the UserRepository based on a username.
+ * It implements Spring Security's UserDetailsService interface.
+ * </p>
+ *
+ * <p>
+ * The {@link UserDetailsServiceImpl#loadUserByUsername(String)} method loads a user entity by username.
+ * It throws a {@link UsernameNotFoundException} if no user with the specified username is found.
+ * </p>
+ *
+ * <p>
+ * The {@link UserDetailsServiceImpl#updateLastActive(User)} method updates the last active timestamp of a user.
+ * It saves the updated user entity using the UserRepository.
+ * </p>
+ *
+ * <p>
+ * Author: Second Life Team
+ * </p>
+ *
+ * @author Second Life Team
+ * @version 1.0
+ */
 @RequiredArgsConstructor
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 
     private final UserRepository userRepository;
 
+    /**
+     * Loads user details by username.
+     *
+     * @param username the username (email) of the user to load
+     * @return UserDetails object representing the loaded user
+     * @throws UsernameNotFoundException if no user with the specified username is found
+     */
     @Override
     public UserDetails loadUserByUsername(String username) throws UserNotFoundException {
         User user = userRepository.findByEmail(username);
@@ -26,6 +58,11 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         return user;
     }
 
+    /**
+     * Updates the last active timestamp of the user.
+     *
+     * @param user the user entity for which to update the last active timestamp
+     */
     public void updateLastActive(User user) {
         user.setLastActive(LocalDateTime.now());
         userRepository.save(user);

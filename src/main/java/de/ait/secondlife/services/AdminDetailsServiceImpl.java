@@ -10,7 +10,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 /**
- * Service implementation for loading Admin details based on username.
+ * Service implementation for loading Admin details based on username.(Version 1.0)
  * This service is used by Spring Security to authenticate and authorize Admin users.
  *
  * <p>

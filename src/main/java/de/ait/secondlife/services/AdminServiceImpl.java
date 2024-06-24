@@ -11,7 +11,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 /**
- * Service implementation for managing Admin operations.
+ * Service implementation for managing Admin operations.(Version 1.0)
  * This service provides methods for loading admin user details, retrieving the default admin,
  * and finding admin by ID.
  *
