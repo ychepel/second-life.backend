@@ -41,6 +41,47 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Implementation of the ImageService interface.(Version 1.0)
+ * This service provides methods to handle image operations such as saving, deleting, and connecting images to entities.
+ * It interacts with AWS S3 for storing and managing images and with various repositories for storing image metadata.
+ *
+ * <p>
+ * This class utilizes services for different entities (offers, users, categories) to verify existence and permissions
+ * before performing operations on images related to those entities.
+ * </p>
+ *
+ * <p>
+ * The class uses Amazon S3 for storing images and various utilities for permission checking and metadata creation.
+ * </p>
+ *
+ * <p>
+ * Note: This class requires the following configuration properties:
+ * - do.buket.name: The name of the S3 bucket.
+ * - do.dir.prefix: The directory prefix for storing images.
+ * - do.base.path: The base path for accessing images.
+ * </p>
+ *
+ * <p>
+ * Exceptions that may be thrown by this class include:
+ * <ul>
+ *     <li>{@link BadRequestException} - if the provided file is empty</li>
+ *     <li>{@link BadFileSizeException} - if the file size exceeds the maximum allowed size</li>
+ *     <li>{@link BadFileFormatException} - if the file format is not supported</li>
+ *     <li>{@link MaxImageCountException} - if the number of images for the entity type exceeds the allowed limit</li>
+ *     <li>{@link ImagesNotFoundException} - if no images are found for the given base name</li>
+ *     <li>{@link BadEntityTypeException} - if the entity type is not recognized or the entity does not exist</li>
+ *     <li>{@link CredentialException} - if there is an issue with user credentials</li>
+ * </ul>
+ * </p>
+ *
+ * <p>
+ * Author: Second Life Team
+ * </p>
+ *
+ * @author: Second Life Team
+ * @version 1.0
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -68,6 +109,20 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
     @Value("${do.base.path}")
     private String basePath;
 
+    /**
+     * Saves a new image for a given entity type and entity ID.
+     * The image is validated, compressed, and uploaded to S3.
+     *
+     * @param entityType the type of the entity (e.g., "offer", "user", "category")
+     * @param entityId   the ID of the entity
+     * @param dto        the image creation DTO containing the image file
+     * @return ImagePathsResponseDto containing paths of the saved images
+     * @throws BadRequestException    if the provided file is empty
+     * @throws BadFileSizeException   if the file size exceeds the maximum allowed size
+     * @throws BadFileFormatException if the file format is not supported
+     * @throws MaxImageCountException if the number of images for the entity type exceeds the allowed limit
+     * @throws BadEntityTypeException if the entity type is not recognized or the entity does not exist
+     */
     @Override
     @Transactional
     public ImagePathsResponseDto saveNewImage(String entityType, Long entityId, ImageCreationDto dto) {
@@ -130,12 +185,29 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
         return getImagePathsResponseDto(savedImgEntities);
     }
 
+    /**
+     * Finds all images for a given entity type and entity ID.
+     *
+     * @param entityType the type of the entity
+     * @param entityId   the ID of the entity
+     * @return ImagePathsResponseDto containing paths of the images
+     * @throws BadEntityTypeException if the entity type is not recognized or the entity does not exist
+     */
     @Override
     public ImagePathsResponseDto findAllImageForEntity(String entityType, Long entityId) {
         Set<ImageEntity> images = repository.findAllByEntityIdAndEntityType(entityId, entityType);
         return getImagePathsResponseDto(images);
     }
 
+    /**
+     * Connects temporary images to a given entity.
+     * This method updates the entity ID and paths of the images.
+     *
+     * @param baseNames  the set of base names of the images
+     * @param entityType the type of the entity
+     * @param entityId   the ID of the entity
+     * @throws BadEntityTypeException if the entity type is not recognized or the entity does not exist
+     */
     @Override
     public void connectTempImagesToEntity(Set<String> baseNames, String entityType, Long entityId) {
         if (baseNames != null && entityId != null) {
@@ -170,12 +242,22 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
         }
     }
 
+    /**
+     * Deletes an image by its base name.
+     * This method removes the image from both S3 and the repository.
+     *
+     * @param baseName the base name of the image
+     * @throws ImagesNotFoundException if no images are found for the given base name
+     * @throws CredentialException     if there is an issue with user credentials
+     */
     @Transactional
     @Override
     public void deleteImage(String baseName) {
 
         Set<ImageEntity> images = findAllImagesByBaseName(baseName);
         if (images.isEmpty()) throw new ImagesNotFoundException(baseName);
+
+        userCredentialsUtilities.checkUserPermissionsForImageByImageEntities(images);
 
         images.forEach(e -> {
             String doFileName = e.getFullPath().substring(basePath.length());
@@ -184,11 +266,23 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
         repository.deleteAllByBaseName(baseName);
     }
 
+    /**
+     * Finds all images by their base name.
+     *
+     * @param baseName the base name of the images
+     * @return the set of ImageEntity objects
+     */
     @Override
     public Set<ImageEntity> findAllImagesByBaseName(String baseName) {
         return repository.findAllByBaseName(baseName);
     }
 
+    /**
+     * Relocates an image file from one path to another in S3.
+     *
+     * @param oldPath the old path of the image
+     * @param newPath the new path of the image
+     */
     private void relocateImageFile(String oldPath, String newPath) {
         String oldDoPath = oldPath.substring(basePath.length());
         String newDoPath = newPath.substring(basePath.length());
@@ -202,6 +296,12 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
         s3Client.deleteObject(bucketName, oldDoPath);
     }
 
+    /**
+     * Creates an ImagePathsResponseDto from a set of ImageEntity objects.
+     *
+     * @param imagesSet the set of ImageEntity objects
+     * @return ImagePathsResponseDto containing the paths of the images
+     */
     private ImagePathsResponseDto getImagePathsResponseDto(Set<ImageEntity> imagesSet) {
         Map<String, Map<String, String>> images = new HashMap<>();
 
@@ -222,7 +322,14 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
         return new ImagePathsResponseDto(images);
     }
 
-
+    /**
+     * Compresses an image file to a specified size.
+     *
+     * @param file the image file to compress
+     * @param size the target size for the compressed image
+     * @return InputStream of the compressed image
+     * @throws RuntimeException if an IOException occurs during image processing
+     */
     private InputStream compressFile(MultipartFile file, int[] size) {
 
         ByteArrayOutputStream outputStream;
@@ -261,6 +368,13 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
         return new ByteArrayInputStream(outputStream.toByteArray());
     }
 
+    /**
+     * Checks if the provided file is valid.
+     *
+     * @param file the image file to check
+     * @throws BadRequestException  if the provided file is empty
+     * @throws BadFileSizeException if the file size exceeds the maximum allowed size
+     */
     private void checkFile(MultipartFile file) {
         if (file.isEmpty())
             throw new BadRequestException(String.format("File <%s> is empty", file.getOriginalFilename()));
@@ -268,6 +382,13 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
             throw new BadFileSizeException(file.getOriginalFilename(), file.getSize(), MAX_FILE_SIZE);
     }
 
+    /**
+     * Checks if the number of images for an entity type exceeds the allowed maximum.
+     *
+     * @param currentImages the current images for the entity
+     * @param entityType    the type of the entity
+     * @throws MaxImageCountException if the number of images for the entity type exceeds the allowed limit
+     */
     private void checkCountOfImageForEntityType(
             ImagePathsResponseDto currentImages,
             String entityType) {
@@ -277,6 +398,13 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
         }
     }
 
+    /**
+     * Creates metadata for an image file.
+     *
+     * @param file the image file
+     * @return ObjectMetadata for the image file
+     * @throws BadFileFormatException if the file format is not supported
+     */
     private ObjectMetadata createMetadata(MultipartFile file) {
         ObjectMetadata metadata = new ObjectMetadata();
 
@@ -289,6 +417,12 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
         return metadata;
     }
 
+    /**
+     * Gets the file sizes for a given entity type.
+     *
+     * @param entityType the type of the entity
+     * @return Set of int arrays representing the sizes
+     */
     private Set<int[]> getFileSizesForEntityType(String entityType) {
         return switch (EntityTypeWithImages.get(entityType.toLowerCase())) {
             case OFFER -> Set.of(IMAGE_1_SIZE, IMAGE_2_SIZE, IMAGE_3_SIZE);
@@ -297,14 +431,34 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
         };
     }
 
+    /**
+     * Converts a file path to Unix style.
+     *
+     * @param path the original file path
+     * @return the Unix style file path
+     */
     private String toUnixStylePath(String path) {
         return path.replace("\\", "/");
     }
 
+    /**
+     * Creates a file name from a size and base name.
+     *
+     * @param size     the size of the image
+     * @param baseName the base name of the image
+     * @return the generated file name
+     */
     private String makeFileName(String size, String baseName) {
         return String.format("%s_%s.%s", size, baseName, IMAGE);
     }
 
+    /**
+     * Checks if an entity exists by its type and ID.
+     *
+     * @param entityType the type of the entity
+     * @param entityId   the ID of the entity
+     * @throws BadEntityTypeException if the entity type is not recognized or the entity does not exist
+     */
     public void checkEntityExists(String entityType, Long entityId) {
         if (entityId == null) return;
         CheckEntityExistsService service;
