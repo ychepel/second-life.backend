@@ -11,7 +11,7 @@ public interface OfferContext {
 
     EmailService getEmailService();
 
-    AdminService getAdminService();
+    CustomAdminDetails getAdminDetails();
 
     void setStateStrategy(StateStrategy stateStrategy);
 

@@ -19,6 +19,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import javax.naming.AuthenticationException;
 import javax.security.auth.login.CredentialException;
 import javax.security.auth.login.LoginException;
 import java.util.ArrayList;
@@ -51,6 +52,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(CredentialException.class)
     public ResponseEntity<ResponseMessageDto> handleException(CredentialException e) {
+        return new ResponseEntity<>(new ResponseMessageDto(e.getMessage()), HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ResponseMessageDto> handleException(AuthenticationException e) {
         return new ResponseEntity<>(new ResponseMessageDto(e.getMessage()), HttpStatus.UNAUTHORIZED);
     }
 

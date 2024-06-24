@@ -5,8 +5,8 @@ import de.ait.secondlife.domain.interfaces.AuthenticatedUser;
 import de.ait.secondlife.security.AuthInfo;
 import de.ait.secondlife.security.Role;
 import de.ait.secondlife.security.services.TokenService;
-import de.ait.secondlife.services.AdminDetailsServiceImpl;
-import de.ait.secondlife.services.UserDetailsServiceImpl;
+import de.ait.secondlife.services.interfaces.CustomAdminDetails;
+import de.ait.secondlife.services.interfaces.CustomUserDetails;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -19,6 +19,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.GenericFilterBean;
 
@@ -35,8 +36,8 @@ public class TokenFilter extends GenericFilterBean {
     private static final int BEARER_HEADER_PREFIX_LENGTH = BEARER_HEADER_PREFIX.length();
 
     private final TokenService service;
-    private final UserDetailsServiceImpl userDetailsService;
-    private final AdminDetailsServiceImpl adminDetailsService;
+    private final CustomUserDetails userDetailsService;
+    private final CustomAdminDetails adminDetailsService;
 
     @Override
     public void doFilter(
@@ -45,24 +46,39 @@ public class TokenFilter extends GenericFilterBean {
             FilterChain filterChain
     ) throws IOException, ServletException {
         String token = getAccessTokenFromRequest((HttpServletRequest) servletRequest);
-        if (token != null && service.validateAccessToken(token)) {
-            Claims claims = service.getAccessClaims(token);
-            AuthInfo authInfo = service.mapClaims(claims);
-            authInfo.setAuthenticated(true);
-            UserDetailsService userDetailsService = getUserDetailsService(authInfo.getAuthorities());
-            UserDetails userDetails = userDetailsService.loadUserByUsername(authInfo.getName());
-            authInfo.setAuthenticatedUser((AuthenticatedUser) userDetails);
-            SecurityContextHolder.getContext().setAuthentication(authInfo);
-
-            updateUserLastActivity(userDetailsService, userDetails);
-        }
-
+        setAuthentication(token);
         filterChain.doFilter(servletRequest, servletResponse);
     }
 
+    private void setAuthentication(String token) throws IOException {
+        if (token == null) {
+            return;
+        }
+        if (!service.validateAccessToken(token)) {
+            return;
+        }
+
+        Claims claims = service.getAccessClaims(token);
+        AuthInfo authInfo = service.mapClaims(claims);
+
+        UserDetailsService userDetailsService = getUserDetailsService(authInfo.getAuthorities());
+        UserDetails userDetails;
+        try {
+            userDetails = userDetailsService.loadUserByUsername(authInfo.getName());
+        } catch (UsernameNotFoundException e) {
+            return;
+        }
+
+        authInfo.setAuthenticated(true);
+        authInfo.setAuthenticatedUser((AuthenticatedUser) userDetails);
+        SecurityContextHolder.getContext().setAuthentication(authInfo);
+
+        updateUserLastActivity(userDetailsService, userDetails);
+    }
+
     private void updateUserLastActivity(UserDetailsService userDetailsService, UserDetails userDetails) {
-        if (userDetailsService instanceof UserDetailsServiceImpl) {
-            ((UserDetailsServiceImpl) userDetailsService).updateLastActive((User)userDetails);
+        if (userDetailsService instanceof CustomUserDetails) {
+            ((CustomUserDetails) userDetailsService).updateLastActive((User)userDetails);
         }
     }
 
