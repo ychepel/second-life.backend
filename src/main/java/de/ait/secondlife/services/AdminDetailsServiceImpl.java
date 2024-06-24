@@ -8,6 +8,7 @@ import de.ait.secondlife.repositories.AdminRepository;
 import de.ait.secondlife.services.interfaces.CustomAdminDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 /**
