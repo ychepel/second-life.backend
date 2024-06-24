@@ -14,7 +14,7 @@ public class StorageCleaner {
     private final ImageService service;
 
     @Scheduled(cron = "0 10 4 * * *")
-    public void sendEmail(){
+    public void clean(){
         service.deleteUnattachedImages();
     }
 }
