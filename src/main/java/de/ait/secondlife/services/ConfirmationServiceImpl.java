@@ -75,6 +75,10 @@ public class ConfirmationServiceImpl implements ConfirmationService {
         return confirmationCode.getCode();
     }
 
+    /**
+     * Deletes all expired confirmation codes from the repository.
+     * This method is transactional to ensure atomicity of the delete operation.
+     */
     @Override
     @Transactional
     public void deleteAllExpired() {
