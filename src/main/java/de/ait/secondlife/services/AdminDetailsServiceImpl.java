@@ -55,11 +55,23 @@ public class AdminDetailsServiceImpl implements CustomAdminDetails {
         return admin;
     }
 
+    /**
+     * Finds an admin by their ID and returns an AuthenticatedUser instance.
+     *
+     * @param adminId the ID of the admin to find
+     * @return AuthenticatedUser representing the found admin
+     * @throws AdminNotFoundException if no admin with the specified ID is found
+     */
     @Override
     public AuthenticatedUser findById(Long adminId) {
         return adminRepository.findById(adminId).orElseThrow(()-> new AdminNotFoundException(adminId));
     }
 
+    /**
+     * Retrieves the default admin.
+     *
+     * @return Admin representing the default admin
+     */
     @Override
     public Admin getDefaultAdmin() {
         return adminRepository.findAll().get(0);
