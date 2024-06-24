@@ -5,6 +5,7 @@ import de.ait.secondlife.domain.entity.User;
 import de.ait.secondlife.exception_handling.exceptions.ConfirmationEmailCodeExpiredException;
 import de.ait.secondlife.repositories.ConfirmationCodeRepository;
 import de.ait.secondlife.services.interfaces.ConfirmationService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -72,5 +73,11 @@ public class ConfirmationServiceImpl implements ConfirmationService {
             throw new ConfirmationEmailCodeExpiredException(confirmationCode.getId(), userId);
         }
         return confirmationCode.getCode();
+    }
+
+    @Override
+    @Transactional
+    public void deleteAllExpired() {
+        repository.deleteAllByExpiredLessThan(LocalDateTime.now());
     }
 }

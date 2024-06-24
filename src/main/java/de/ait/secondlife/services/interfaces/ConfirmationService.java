@@ -7,4 +7,6 @@ public interface ConfirmationService {
     String generateConfirmationCode(User user);
 
     String getConfirmationCodeByUserId(Long userId);
+
+    void deleteAllExpired();
 }
