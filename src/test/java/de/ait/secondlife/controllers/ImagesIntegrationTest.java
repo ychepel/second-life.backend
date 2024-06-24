@@ -179,7 +179,7 @@ public class ImagesIntegrationTest implements ImageConstants {
                 .andExpect(jsonPath("$.values[*]").isArray())
                 .andExpect(jsonPath("$.values[*][*]").isArray())
                 .andExpect(jsonPath("$.values[*][*]").value(everyItem(startsWith("http"))))
-                .andExpect(jsonPath("$.values[*]['64x64']").exists());
+                .andExpect(jsonPath("$.values[*]['320x320']").exists());
     }
 
     private Cookie getCookieByEntityType(String entityType) {
