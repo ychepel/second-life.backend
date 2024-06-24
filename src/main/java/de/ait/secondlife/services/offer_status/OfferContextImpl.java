@@ -20,7 +20,7 @@ public class OfferContextImpl implements OfferContext {
     private BidService bidService;
     private final EmailService emailService;
     private final UserService userService;
-    private final AdminService adminService;
+    private final CustomAdminDetails adminDetails;
 
     private Offer offer;
 

@@ -10,8 +10,8 @@ import de.ait.secondlife.security.Role;
 import de.ait.secondlife.security.dto.AuthDto;
 import de.ait.secondlife.security.dto.TokenResponseDto;
 import de.ait.secondlife.security.filters.TokenFilter;
-import de.ait.secondlife.services.UserDetailsServiceImpl;
-import de.ait.secondlife.services.interfaces.AdminService;
+import de.ait.secondlife.services.interfaces.CustomAdminDetails;
+import de.ait.secondlife.services.interfaces.CustomUserDetails;
 import de.ait.secondlife.services.interfaces.UserService;
 import io.jsonwebtoken.Claims;
 import jakarta.security.auth.message.AuthException;
@@ -37,11 +37,11 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AuthService {
 
-    private final AdminService adminService;
+    private final CustomAdminDetails adminDetailsService;
     private final TokenService tokenService;
     private final TokenFilter tokenFilter;
     private final BCryptPasswordEncoder encoder;
-    private final UserDetailsServiceImpl userDetailsService;
+    private final CustomUserDetails userDetailsService;
 
     private UserService userService;
 
@@ -130,7 +130,7 @@ public class AuthService {
 
     public AuthenticatedUser getAuthenticatedUser(Role role, Long userId) throws AuthException {
         if (role == Role.ROLE_ADMIN) {
-            return adminService.findById(userId);
+            return adminDetailsService.findById(userId);
         }
         if (role == Role.ROLE_USER) {
             return userService.findById(userId);
@@ -142,7 +142,7 @@ public class AuthService {
     private AuthenticatedUser getAuthenticatedUser(Role role, String userEmail) throws LoginException {
         if (role == Role.ROLE_ADMIN) {
             try {
-                return (AuthenticatedUser) adminService.loadUserByUsername(userEmail);
+                return (AuthenticatedUser) adminDetailsService.loadUserByUsername(userEmail);
             } catch (UsernameNotFoundException e) {
                 throw new AccountNotFoundException("Admin not found");
             }
