@@ -44,6 +44,10 @@ public class ImageController {
                     mediaType = "application/json",
                     schema = @Schema(implementation = ResponseMessageDto.class)
             )),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = ResponseMessageDto.class)
+            )),
             @ApiResponse(responseCode = "404", description = "Resource not found", content = @Content(
                     mediaType = "application/json",
                     schema = @Schema(implementation = ResponseMessageDto.class)
@@ -55,7 +59,6 @@ public class ImageController {
 
         String entityType = EntityTypeWithImages.get(request.getEntityType().toLowerCase()).getType();
         Long entityId = request.getEntityId();
-
         return ResponseEntity.ok(imageService.saveNewImage(entityType, entityId, request));
     }
 
@@ -72,6 +75,10 @@ public class ImageController {
                     mediaType = "application/json",
                     schema = @Schema(implementation = ResponseMessageDto.class)
             )),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = ResponseMessageDto.class)
+            )),
             @ApiResponse(responseCode = "404", description = "Resource not found", content = @Content(
                     mediaType = "application/json",
                     schema = @Schema(implementation = ResponseMessageDto.class)
@@ -82,9 +89,7 @@ public class ImageController {
                     schema = @Schema(implementation = ImageRequestDto.class))
             @RequestBody ImageRequestDto dto
     ) {
-//        utilities.checkCredentials(dto.getBaseName());
         imageService.deleteImage(dto.getBaseName());
-
         return ResponseEntity.ok(new ResponseMessageDto("Image deleted successfully"));
     }
 }

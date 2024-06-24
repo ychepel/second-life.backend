@@ -24,6 +24,8 @@ import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -77,6 +79,10 @@ public class BidServiceImpl implements BidService {
         }
         List<BidResponseDto> bids = offer.getBids()
                 .stream()
+                .collect(Collectors.groupingBy(Bid::getUser, Collectors.maxBy(Comparator.comparing(Bid::getId))))
+                .values()
+                .stream()
+                .flatMap(Optional::stream)
                 .sorted(Comparator.comparing(Bid::getId).reversed())
                 .map(mappingService::toDto)
                 .toList();
