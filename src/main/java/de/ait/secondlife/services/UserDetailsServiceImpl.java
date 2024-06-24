@@ -3,10 +3,9 @@ package de.ait.secondlife.services;
 import de.ait.secondlife.domain.entity.User;
 import de.ait.secondlife.exception_handling.exceptions.not_found_exception.UserNotFoundException;
 import de.ait.secondlife.repositories.UserRepository;
+import de.ait.secondlife.services.interfaces.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -38,7 +37,7 @@ import java.time.LocalDateTime;
  */
 @RequiredArgsConstructor
 @Service
-public class UserDetailsServiceImpl implements UserDetailsService {
+public class UserDetailsServiceImpl implements CustomUserDetails {
 
     private final UserRepository userRepository;
 
@@ -50,10 +49,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
      * @throws UsernameNotFoundException if no user with the specified username is found
      */
     @Override
-    public UserDetails loadUserByUsername(String username) throws UserNotFoundException {
+    public UserDetails loadUserByUsername(String username) {
         User user = userRepository.findByEmail(username);
         if (user == null) {
-            throw new UsernameNotFoundException("User not found");
+            throw new UserNotFoundException(username);
         }
         return user;
     }
