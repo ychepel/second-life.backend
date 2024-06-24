@@ -54,7 +54,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author: Second Life Team
  */
 @Component
-public class UserPermissionsUtilities  {
+public class UserPermissionsUtilities {
     @Lazy
     @Autowired
     private OfferService offerService;

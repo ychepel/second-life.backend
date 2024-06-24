@@ -38,8 +38,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -80,8 +80,8 @@ import java.util.stream.Collectors;
  * Author: Second Life Team
  * </p>
  *
- * @author: Second Life Team
  * @version 1.0
+ * @author: Second Life Team
  */
 @Service
 @RequiredArgsConstructor
@@ -297,6 +297,10 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
         s3Client.deleteObject(bucketName, oldDoPath);
     }
 
+    /**
+     * Deletes unattached images that are older than a specified date.
+     * This method is transactional to ensure atomicity of the delete operation.
+     */
     @Override
     @Transactional
     public void deleteUnattachedImages() {

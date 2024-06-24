@@ -19,6 +19,22 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
+/**
+ * Service implementation for sending emails.(Version 1.0)
+ * This service manages the creation and sending of notification emails to users.
+ *
+ * <p>
+ * This service interacts with the JavaMailSender, NotificationRepository,
+ * AuthService, and EmailTemplateServiceFactory.
+ * </p>
+ *
+ * <p>
+ * Author: Second Life Team
+ * </p>
+ *
+ * @version 1.0
+ * @author: Second Life Team
+ */
 @Service
 @Slf4j
 public class EmailServiceImpl implements EmailService {
@@ -54,6 +70,12 @@ public class EmailServiceImpl implements EmailService {
         mailConfig.setTemplateLoader(new ClassTemplateLoader(EmailServiceImpl.class, TEMPLATES_PATH));
     }
 
+    /**
+     * Creates a notification for the authenticated user.
+     *
+     * @param authenticatedUser the authenticated user for whom the notification is created.
+     * @param notificationType  the type of notification to create.
+     */
     @Override
     public void createNotification(AuthenticatedUser authenticatedUser, NotificationType notificationType) {
         Notification newNotification = Notification.builder()
@@ -66,6 +88,13 @@ public class EmailServiceImpl implements EmailService {
         notificationRepository.save(newNotification);
     }
 
+    /**
+     * Creates a notification for the authenticated user with a context ID.
+     *
+     * @param authenticatedUser the authenticated user for whom the notification is created.
+     * @param notificationType  the type of notification to create.
+     * @param contextId         the context ID associated with the notification.
+     */
     @Override
     public void createNotification(AuthenticatedUser authenticatedUser, NotificationType notificationType, Long contextId) {
         Notification newNotification = Notification.builder()
@@ -79,6 +108,10 @@ public class EmailServiceImpl implements EmailService {
         notificationRepository.save(newNotification);
     }
 
+    /**
+     * Sends pending emails by retrieving unsent notifications from the repository.
+     * It attempts to send each notification email and updates the sent status accordingly.
+     */
     @Override
     public void sendPendingEmails() {
         Notification pendingEmail = notificationRepository.findFirstBySentAtIsNull();
@@ -94,11 +127,16 @@ public class EmailServiceImpl implements EmailService {
                 notificationRepository.save(pendingEmail);
                 return;
             }
-
             pendingEmail = notificationRepository.findFirstBySentAtIsNull();
         }
     }
 
+    /**
+     * Sends an email using the provided notification details.
+     *
+     * @param notification the notification containing email details.
+     * @throws Exception if there is an error while sending the email.
+     */
     private void sendEmail(Notification notification) throws Exception {
         MimeMessage message = sender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, "UTF-8");
@@ -123,6 +161,11 @@ public class EmailServiceImpl implements EmailService {
         sender.send(message);
     }
 
+    /**
+     * Retrieves the sender email address formatted with the application name.
+     *
+     * @return the formatted sender email address.
+     */
     private String getSender() {
         return String.format("%s <%s>", applicationName, senderEmail);
     }

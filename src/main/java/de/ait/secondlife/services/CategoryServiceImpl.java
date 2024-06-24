@@ -1,8 +1,8 @@
 package de.ait.secondlife.services;
 
 import de.ait.secondlife.constants.EntityTypeWithImages;
-import de.ait.secondlife.domain.dto.CategoryDto;
 import de.ait.secondlife.domain.dto.CategoryCreationDto;
+import de.ait.secondlife.domain.dto.CategoryDto;
 import de.ait.secondlife.domain.dto.CategoryUpdateDto;
 import de.ait.secondlife.domain.entity.Category;
 import de.ait.secondlife.exception_handling.exceptions.DuplicateCategoryException;
@@ -21,6 +21,35 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * Service implementation for managing categories.(Version 1.0)
+ * This service provides methods for retrieving, saving, updating, and hiding categories,
+ * along with various validations and utilities related to categories.
+ *
+ * <p>
+ * This service interacts with the CategoryRepository, NewCategoryMappingService, UserPermissionsUtilities,
+ * and ImageService.
+ * </p>
+ *
+ * <p>
+ * Exceptions that may be thrown by this class include:
+ * <ul>
+ *     <li>{@link IllegalArgumentException} - if the category ID is invalid</li>
+ *     <li>{@link CategoryNotFoundException} - if a category is not found</li>
+ *     <li>{@link DuplicateCategoryException} - if a category with the same name already exists</li>
+ *     <li>{@link RuntimeException} - if there is an issue saving the category to the database</li>
+ *     <li>{@link CategoryIsNotEmptyException} - if attempting to hide a non-empty category</li>
+ *     <li>{@link IdIsNullException} - if the provided ID is null</li>
+ * </ul>
+ * </p>
+ *
+ * <p>
+ * Author: Second Life Team
+ * </p>
+ *
+ * @version 1.0
+ * @author: Second Life Team
+ */
 @Service
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
@@ -34,6 +63,14 @@ public class CategoryServiceImpl implements CategoryService {
     @Autowired
     private ImageService imageService;
 
+    /**
+     * Retrieves a category by its ID.
+     *
+     * @param id the ID of the category to be retrieved.
+     * @return the CategoryDto object.
+     * @throws IllegalArgumentException  if the category ID is invalid.
+     * @throws CategoryNotFoundException if the category is not found.
+     */
     @Override
     public CategoryDto getById(Long id) {
 
@@ -46,6 +83,11 @@ public class CategoryServiceImpl implements CategoryService {
         return mappingService.toDto(category);
     }
 
+    /**
+     * Retrieves all active categories.
+     *
+     * @return a list of CategoryDto objects.
+     */
     @Override
     public List<CategoryDto> getAll() {
         return repository.findAll()
@@ -55,6 +97,11 @@ public class CategoryServiceImpl implements CategoryService {
                 .toList();
     }
 
+    /**
+     * Retrieves all categories, including hidden ones.
+     *
+     * @return a list of CategoryDto objects.
+     */
     @Override
     public List<CategoryDto> getAllPlusHidden() {
         return repository.findAll()
@@ -63,6 +110,14 @@ public class CategoryServiceImpl implements CategoryService {
                 .toList();
     }
 
+    /**
+     * Saves a new category based on the provided CategoryCreationDto.
+     *
+     * @param categoryDto the data transfer object containing category creation details.
+     * @return the saved CategoryDto object.
+     * @throws DuplicateCategoryException if a category with the same name already exists.
+     * @throws RuntimeException           if there is an issue saving the category to the database.
+     */
     @Override
     public CategoryDto save(CategoryCreationDto categoryDto) {
 
@@ -88,6 +143,15 @@ public class CategoryServiceImpl implements CategoryService {
         return mappingService.toDto(entity);
     }
 
+    /**
+     * Updates an existing category based on the provided ID and CategoryUpdateDto.
+     *
+     * @param id  the ID of the category to be updated.
+     * @param dto the data transfer object containing category update details.
+     * @return the updated CategoryDto object.
+     * @throws CategoryNotFoundException if the category is not found.
+     * @throws RuntimeException          if there is an issue saving the category to the database.
+     */
     @Override
     public CategoryDto update(Long id, CategoryUpdateDto dto) {
 
@@ -108,6 +172,14 @@ public class CategoryServiceImpl implements CategoryService {
         }
     }
 
+    /**
+     * Activates an existing category by setting its active status to true.
+     *
+     * @param categoryId the ID of the category to be activated.
+     * @return the updated CategoryDto object.
+     * @throws CategoryNotFoundException if the category is not found.
+     * @throws RuntimeException          if there is an issue saving the category to the database.
+     */
     @Override
     public CategoryDto setActive(Long categoryId) {
 
@@ -122,6 +194,15 @@ public class CategoryServiceImpl implements CategoryService {
         }
     }
 
+    /**
+     * Hides an existing category by setting its active status to false.
+     *
+     * @param categoryId the ID of the category to be hidden.
+     * @return the updated CategoryDto object.
+     * @throws CategoryNotFoundException   if the category is not found.
+     * @throws CategoryIsNotEmptyException if the category has associated offers.
+     * @throws RuntimeException            if there is an issue saving the category to the database.
+     */
     @Override
     public CategoryDto hide(Long categoryId) {
         Category existingCategory = repository.findById(categoryId).orElseThrow(() -> new CategoryNotFoundException(categoryId));
@@ -137,6 +218,14 @@ public class CategoryServiceImpl implements CategoryService {
         }
     }
 
+    /**
+     * Retrieves a category entity by its ID.
+     *
+     * @param id the ID of the category to be retrieved.
+     * @return the Category entity.
+     * @throws IdIsNullException         if the provided ID is null.
+     * @throws CategoryNotFoundException if the category is not found.
+     */
     @Override
     public Category getCategoryById(Long id) {
         if (id == null) throw new IdIsNullException();
@@ -144,7 +233,13 @@ public class CategoryServiceImpl implements CategoryService {
                 .orElseThrow(() -> new CategoryNotFoundException(id));
     }
 
-
+    /**
+     * Checks if a category entity exists by its ID and is active.
+     *
+     * @param id the ID of the category to be checked.
+     * @return true if the category exists and is active, false otherwise.
+     * @throws IdIsNullException if the provided ID is null.
+     */
     @Override
     public boolean checkEntityExistsById(Long id) {
         if (id == null) throw new IdIsNullException();

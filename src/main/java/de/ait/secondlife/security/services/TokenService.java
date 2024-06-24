@@ -16,6 +16,19 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 
+/**
+ * Service for managing JWT tokens.
+ * Provides methods for generating, validating, and extracting claims from access and refresh tokens.
+ *
+ * <p>
+ * This class uses HMAC SHA keys for signing and verifying JWT tokens. The keys are provided through configuration properties.
+ * </p>
+ *
+ * <p>
+ * Author: Second Life Team
+ * </p>
+ * @version 1.0
+ */
 @Service
 public class TokenService {
 
@@ -28,11 +41,23 @@ public class TokenService {
     private final SecretKey accessKey;
     private final SecretKey refreshKey;
 
+    /**
+     * Constructs a TokenService with the specified access and refresh keys.
+     *
+     * @param accessKey  the access key for signing access tokens.
+     * @param refreshKey the refresh key for signing refresh tokens.
+     */
     public TokenService(@Value("${key.access}") String accessKey, @Value("${key.refresh}") String refreshKey) {
         this.accessKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(accessKey));
         this.refreshKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(refreshKey));
     }
 
+    /**
+     * Generates an access token for the specified user.
+     *
+     * @param user the authenticated user.
+     * @return the generated access token.
+     */
     public String generateAccessToken(AuthenticatedUser user) {
         LocalDateTime currentTime = LocalDateTime.now();
         Instant expirationInstant = currentTime
@@ -50,6 +75,12 @@ public class TokenService {
                 .compact();
     }
 
+    /**
+     * Generates a refresh token for the specified user.
+     *
+     * @param user the authenticated user.
+     * @return the generated refresh token.
+     */
     public String generateRefreshToken(AuthenticatedUser user) {
         LocalDateTime currentTime = LocalDateTime.now();
         Instant expirationInstant = currentTime
@@ -65,14 +96,33 @@ public class TokenService {
                 .compact();
     }
 
+    /**
+     * Validates the specified access token.
+     *
+     * @param accessToken the access token to validate.
+     * @return true if the token is valid, false otherwise.
+     */
     public boolean validateAccessToken(String accessToken) {
         return validateToken(accessToken, accessKey);
     }
 
+    /**
+     * Validates the specified refresh token.
+     *
+     * @param refreshToken the refresh token to validate.
+     * @return true if the token is valid, false otherwise.
+     */
     public boolean validateRefreshToken(String refreshToken) {
         return validateToken(refreshToken, refreshKey);
     }
 
+    /**
+     * Validates the specified token with the given key.
+     *
+     * @param token the token to validate.
+     * @param key   the key to use for validation.
+     * @return true if the token is valid, false otherwise.
+     */
     private boolean validateToken(String token, SecretKey key) {
         try {
             Jwts.parser()
@@ -85,14 +135,33 @@ public class TokenService {
         }
     }
 
+    /**
+     * Retrieves claims from the specified access token.
+     *
+     * @param accessToken the access token.
+     * @return the claims contained in the token.
+     */
     public Claims getAccessClaims(String accessToken) {
         return getClaims(accessToken, accessKey);
     }
 
+    /**
+     * Retrieves claims from the specified refresh token.
+     *
+     * @param refreshToken the refresh token.
+     * @return the claims contained in the token.
+     */
     public Claims getRefreshClaims(String refreshToken) {
         return getClaims(refreshToken, refreshKey);
     }
 
+    /**
+     * Retrieves claims from the specified token with the given key.
+     *
+     * @param token the token.
+     * @param key   the key to use for retrieving claims.
+     * @return the claims contained in the token.
+     */
     private Claims getClaims(String token, SecretKey key) {
         return Jwts.parser()
                 .verifyWith(key)
@@ -101,6 +170,12 @@ public class TokenService {
                 .getPayload();
     }
 
+    /**
+     * Maps the claims to an AuthInfo object.
+     *
+     * @param claims the claims to map.
+     * @return the AuthInfo object containing the mapped information.
+     */
     public AuthInfo mapClaims(Claims claims) {
         String userEmail = claims.getSubject();
         List<String> roleList = (List<String>) claims.get(USER_ROLE_VARIABLE_NAME);

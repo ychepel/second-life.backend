@@ -8,14 +8,44 @@ import de.ait.secondlife.repositories.AdminRepository;
 import de.ait.secondlife.services.interfaces.CustomAdminDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service implementation for loading Admin details based on username.(Version 1.0)
+ * This service is used by Spring Security to authenticate and authorize Admin users.
+ *
+ * <p>
+ * This service interacts with the AdminRepository to retrieve Admin details from the database.
+ * </p>
+ *
+ * <p>
+ * Exceptions that may be thrown by this class include:
+ * <ul>
+ *     <li>{@link UsernameNotFoundException} - if the user with the given username is not found</li>
+ * </ul>
+ * </p>
+ *
+ * <p>
+ * Author: Second Life Team
+ * </p>
+ *
+ * @version 1.0
+ * @author: Second Life Team
+ */
 @RequiredArgsConstructor
 @Service
 public class AdminDetailsServiceImpl implements CustomAdminDetails {
 
     private final AdminRepository adminRepository;
 
+    /**
+     * Loads the user details for the admin with the specified username.
+     *
+     * @param username the username of the admin to be loaded.
+     * @return the UserDetails object containing the admin's details.
+     * @throws UsernameNotFoundException if the admin with the specified username is not found.
+     */
     @Override
     public UserDetails loadUserByUsername(String username) {
         Admin admin = adminRepository.findByEmail(username);
@@ -25,11 +55,23 @@ public class AdminDetailsServiceImpl implements CustomAdminDetails {
         return admin;
     }
 
+    /**
+     * Finds an admin by their ID and returns an AuthenticatedUser instance.
+     *
+     * @param adminId the ID of the admin to find
+     * @return AuthenticatedUser representing the found admin
+     * @throws AdminNotFoundException if no admin with the specified ID is found
+     */
     @Override
     public AuthenticatedUser findById(Long adminId) {
         return adminRepository.findById(adminId).orElseThrow(()-> new AdminNotFoundException(adminId));
     }
 
+    /**
+     * Retrieves the default admin.
+     *
+     * @return Admin representing the default admin
+     */
     @Override
     public Admin getDefaultAdmin() {
         return adminRepository.findAll().get(0);
