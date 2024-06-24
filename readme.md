@@ -16,5 +16,5 @@ This repository contains the backend API for the final project at AIT School, de
 - **JUnit**
 
 ## Additional Resources
-- **Web application**: [https://second-life.space](#)
-- **API Documentation (Swagger UI)**: [https://second-life-app-y2el9.ondigitalocean.app/api/swagger-ui/index.html](#)
+- **Web application**: [https://second-life.space](https://second-life.space)
+- **API Documentation (Swagger UI)**: [https://second-life-app-y2el9.ondigitalocean.app/api/swagger-ui/index.html](https://second-life-app-y2el9.ondigitalocean.app/api/swagger-ui/index.html)

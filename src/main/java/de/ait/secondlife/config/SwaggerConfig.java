@@ -7,7 +7,8 @@ import io.swagger.v3.oas.annotations.info.Info;
 @OpenAPIDefinition(
         info = @Info(
                 title = "Second Life",
-                description = "API for final project in AIT school. Group - cohort 38",
+                description = "API for final project in AIT school. Group - cohort 38<br><br>" +
+                        "GitHub repository: <a href='https://github.com/ychepel/second-life.backend' target='_blank'>https://github.com/ychepel/second-life.backend</a>",
                 version = "1.0.0",
                 contact = @Contact(
                         name = "Second Life",
