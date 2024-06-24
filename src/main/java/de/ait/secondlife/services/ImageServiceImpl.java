@@ -39,6 +39,7 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -187,6 +188,20 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
     @Override
     public Set<ImageEntity> findAllImagesByBaseName(String baseName) {
         return repository.findAllByBaseName(baseName);
+    }
+
+    @Override
+    @Transactional
+    public void deleteUnattachedImages() {
+        LocalDateTime obsoleteDate = LocalDateTime.now().minusDays(1);
+        List<ImageEntity> imagesForDelete = repository.findAllByEntityIdIsNullAndCreatedAtLessThan(obsoleteDate);
+        Set<String> baseNames = new HashSet<>();
+        imagesForDelete.forEach(image -> {
+            String fileName = image.getFullPath().substring(basePath.length());
+            s3Client.deleteObject(bucketName, fileName);
+            baseNames.add(image.getBaseName());
+        });
+        repository.deleteAllByBaseNameIn(baseNames);
     }
 
     private void relocateImageFile(String oldPath, String newPath) {

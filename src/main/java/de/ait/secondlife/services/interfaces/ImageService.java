@@ -19,4 +19,5 @@ public interface ImageService {
 
     Set<ImageEntity>  findAllImagesByBaseName(String baseName);
 
+    void deleteUnattachedImages();
 }
