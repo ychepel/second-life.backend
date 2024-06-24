@@ -27,6 +27,32 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Service implementation for managing bids on offers.
+ * This service provides methods for saving bids, retrieving bids by offer ID,
+ * and various checks and validations related to bids and offers.
+ *
+ * <p>
+ * This service interacts with the BidRepository, BidMappingService, OfferService,
+ * and uses an EntityManager for transaction management.
+ * </p>
+ *
+ * <p>
+ * Exceptions that may be thrown by this class include:
+ * <ul>
+ *     <li>{@link CredentialException} - if there is an issue with user credentials</li>
+ *     <li>{@link UserIsNotAuthorizedException} - if the user is not authorized to view bids</li>
+ *     <li>{@link BidCreationException} - if there is an issue with creating a bid</li>
+ * </ul>
+ * </p>
+ *
+ * <p>
+ * Author: Second Life Team
+ * </p>
+ *
+ * @version 1.0
+ * @author: Second Life Team
+ */
 @Service
 @RequiredArgsConstructor
 public class BidServiceImpl implements BidService {
@@ -36,11 +62,23 @@ public class BidServiceImpl implements BidService {
     private final OfferService offerService;
     private final EntityManager entityManager;
 
+    /**
+     * Retrieves a bid by its ID.
+     *
+     * @param id the ID of the bid to be retrieved.
+     * @return the Bid object if found, or null if not found.
+     */
     @Override
     public Bid getById(Long id) {
         return bidRepository.findById(id).orElse(null);
     }
 
+    /**
+     * Saves a new bid based on the provided BidCreationDto.
+     *
+     * @param dto the data transfer object containing bid creation details.
+     * @throws CredentialException if there is an issue with user credentials.
+     */
     @Transactional
     @Override
     public void save(BidCreationDto dto) throws CredentialException {
@@ -70,6 +108,14 @@ public class BidServiceImpl implements BidService {
         }
     }
 
+    /**
+     * Finds all bids for a specific offer by its ID and returns them as a BidsResponseDto.
+     *
+     * @param id the ID of the offer.
+     * @return the BidsResponseDto containing the list of bids.
+     * @throws CredentialException          if there is an issue with user credentials.
+     * @throws UserIsNotAuthorizedException if the user is not authorized to view the list of bids.
+     */
     @Override
     public BidsResponseDto findAllByOfferId(Long id) throws CredentialException {
         Offer offer = offerService.findById(id);
@@ -91,6 +137,13 @@ public class BidServiceImpl implements BidService {
         return response;
     }
 
+    /**
+     * Checks if the provided bid value is a winning bid for the specified offer.
+     *
+     * @param offer       the Offer object.
+     * @param newBidValue the new bid value.
+     * @return true if the bid is a winning bid, false otherwise.
+     */
     private boolean isWinningBid(Offer offer, BigDecimal newBidValue) {
         if (offer.getIsFree()) {
             return false;
@@ -103,6 +156,13 @@ public class BidServiceImpl implements BidService {
         return newBidValue.compareTo(offerWinBid) == 0;
     }
 
+    /**
+     * Checks if the user is authenticated and authorized to place a bid on the specified offer.
+     *
+     * @param offer the Offer object.
+     * @param user  the User object.
+     * @throws BidCreationException if the user is the offer owner or has already placed a bid on a free offer.
+     */
     private void checkAuthentication(Offer offer, User user) {
         if (Objects.equals(offer.getUser().getId(), user.getId())) {
             throw new BidCreationException("Bid cannot be created by offer owner");
@@ -118,18 +178,37 @@ public class BidServiceImpl implements BidService {
         }
     }
 
+    /**
+     * Checks the status of the offer to ensure it is in the AUCTION_STARTED state.
+     *
+     * @param offer the Offer object.
+     * @throws BidCreationException if the offer is not in the AUCTION_STARTED state.
+     */
     private void checkOfferStatus(Offer offer) {
         if (offer.getOfferStatus() != OfferStatus.AUCTION_STARTED) {
             throw new BidCreationException("Bid cannot be created for offer not in status AUCTION_STARTED");
         }
     }
 
+    /**
+     * Validates a bid for a free auction to ensure the bid value is zero.
+     *
+     * @param newBidValue the new bid value.
+     * @throws BidCreationException if the bid value is greater than zero.
+     */
     private void checkFreeAuction(BigDecimal newBidValue) {
         if (newBidValue.compareTo(BigDecimal.ZERO) > 0) {
             throw new BidCreationException("Bid with value greater than 0 cannot be created for the free offer");
         }
     }
 
+    /**
+     * Validates a bid for a non-free auction based on the current maximum bid and starting price.
+     *
+     * @param offer       the Offer object.
+     * @param newBidValue the new bid value.
+     * @throws BidCreationException if the bid value is invalid according to the auction rules.
+     */
     private void checkNotFreeAuction(Offer offer, BigDecimal newBidValue) {
         BigDecimal existingMaxBidValue = offer.getMaxBidValue();
         if (existingMaxBidValue == null) {

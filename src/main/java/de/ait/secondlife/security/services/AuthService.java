@@ -58,6 +58,7 @@ import java.util.Map;
  * <p>
  * Author: Second Life Team
  * </p>
+ * @author: Second Life Team
  * @version 1.0
  */
 @Service
