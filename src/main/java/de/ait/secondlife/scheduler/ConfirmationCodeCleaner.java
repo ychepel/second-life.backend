@@ -14,7 +14,7 @@ public class ConfirmationCodeCleaner {
     private final ConfirmationService service;
 
     @Scheduled(cron = "0 5 4 * * *")
-    public void sendEmail(){
+    public void clean(){
         service.deleteAllExpired();
     }
 }
