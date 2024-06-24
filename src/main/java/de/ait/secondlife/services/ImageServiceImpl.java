@@ -39,6 +39,7 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -294,6 +295,20 @@ public class ImageServiceImpl implements ImageService, ImageConstants {
         ).withCannedAccessControlList(CannedAccessControlList.PublicReadWrite);
         s3Client.copyObject(copyObjRequest);
         s3Client.deleteObject(bucketName, oldDoPath);
+    }
+
+    @Override
+    @Transactional
+    public void deleteUnattachedImages() {
+        LocalDateTime obsoleteDate = LocalDateTime.now().minusDays(1);
+        List<ImageEntity> imagesForDelete = repository.findAllByEntityIdIsNullAndCreatedAtLessThan(obsoleteDate);
+        Set<String> baseNames = new HashSet<>();
+        imagesForDelete.forEach(image -> {
+            String fileName = image.getFullPath().substring(basePath.length());
+            s3Client.deleteObject(bucketName, fileName);
+            baseNames.add(image.getBaseName());
+        });
+        repository.deleteAllByBaseNameIn(baseNames);
     }
 
     /**
