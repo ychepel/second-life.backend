@@ -1,6 +1,9 @@
 package de.ait.secondlife.security.controllers;
 
 import com.jayway.jsonpath.JsonPath;
+import de.ait.secondlife.domain.entity.User;
+import de.ait.secondlife.repositories.UserRepository;
+import de.ait.secondlife.services.interfaces.UserService;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -30,6 +33,9 @@ class AuthIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private UserRepository userRepository;
+
     @BeforeEach
     public void createUser() throws Exception {
         mockMvc.perform(post("/v1/users/register")
@@ -42,6 +48,9 @@ class AuthIntegrationTest {
                                   "password": "qwerty!123"
                                 }"""))
                 .andExpect(status().isCreated());
+        User user = userRepository.findByEmail("test.user@test.com");
+        user.setActive(true);
+        userRepository.save(user);
     }
 
     @Test
@@ -69,7 +78,7 @@ class AuthIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "email": "admin@email.com",
+                                  "email": "admin@second-life.space",
                                   "password": "Security!234"
                                 }"""))
                 .andExpect(status().isOk())
