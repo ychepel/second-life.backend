@@ -90,7 +90,7 @@ class CategoriesIntegrationTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                 {
-                                  "email": "admin@email.com",
+                                  "email": "admin@second-life.space",
                                   "password": "Security!234"
                                 }"""))
                     .andExpect(status().isOk())

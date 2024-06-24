@@ -51,6 +51,9 @@ class OfferStatusIntegrationTest {
     private BidRepository bidRepository;
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
     private RejectionReasonRepository rejectionReasonRepository;
 
     private Long user1Id;
@@ -80,6 +83,10 @@ class OfferStatusIntegrationTest {
         JsonNode jsonNode = objectMapper.readTree(jsonResponse);
         this.user1Id = jsonNode.get("id").asLong();
 
+        User user1 = userRepository.findByEmail("test.user1@test.com");
+        user1.setActive(true);
+        userRepository.save(user1);
+
         MvcResult loginResult1 = mockMvc.perform(post("/v1/auth/user/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -108,6 +115,10 @@ class OfferStatusIntegrationTest {
         jsonNode = objectMapper.readTree(jsonResponse);
         this.user2Id = jsonNode.get("id").asLong();
 
+        User user2 = userRepository.findByEmail("test.user2@test.com");
+        user2.setActive(true);
+        userRepository.save(user2);
+
         MvcResult loginResult2 = mockMvc.perform(post("/v1/auth/user/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -124,7 +135,7 @@ class OfferStatusIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                     {
-                                      "email": "admin@email.com",
+                                      "email": "admin@second-life.space",
                                       "password": "Security!234"
                                     }"""))
                 .andExpect(status().isOk())
